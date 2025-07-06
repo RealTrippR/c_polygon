@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="c_polygon.h" />
+    <ClInclude Include="Tests\fuzzer.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="Tests\ISAAC\isaac64.h">
+      <Filter>Tests\Isaac</Filter>
+    </ClInclude>
+    <ClInclude Include="Tests\ISAAC\standard.h">
+      <Filter>Tests\Isaac</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="c_polygon.c" />
+    <ClCompile Include="Tests\test.c">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\fuzzer.c">
+      <Filter>Tests</Filter>
+    </ClCompile>
+    <ClCompile Include="Tests\ISAAC\isaac64.c">
+      <Filter>Tests\Isaac</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{1d98ccb1-edb1-4bee-b4e0-3fa19d513e87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Isaac">
+      <UniqueIdentifier>{a58ce8d1-4897-412c-89ed-d0ec9bd9db4a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
