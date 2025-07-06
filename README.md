@@ -1,2 +1,2 @@
 # C Polygon
-## A C-based polygon parser
+## A simple C-based polygon parser
