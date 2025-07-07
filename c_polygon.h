@@ -199,7 +199,7 @@ typedef void (*PlyDeallocT)(void*);
 
 /// Returns the system endianness as a PLY_FORMAT
 /// @return enum PlyFormat - returns either PLY_FORMAT_BIG_ENDIAN or PLY_FORMAT_LITTLE_ENDIAN
-PLY_H_FUNCTION_PREFIX enum PlyFormat PlyGetSystemEndianness();
+PLY_H_FUNCTION_PREFIX enum PlyFormat PlyGetSystemEndianness(void);
 
 /// PlyScaleBytesToD64() - Converts variable length data to a Double
 /// @param void* data - Start of data

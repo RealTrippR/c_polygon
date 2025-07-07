@@ -40,14 +40,14 @@ void getDataFromPropertyOfElementAsList(double* dstBuffer, const size_t dstBuffe
 
     for (U64 i = 0; i < min(count,dstBufferSize/sizeof(double)); ++i)
     {
-        U8* f = ((U8*)e->data) + offset;
+        U8* f2 = ((U8*)e->data) + offset;
         const U64 sze = PlyGetSizeofScalarType(prop->scalarType);
         if (offset + sze> e->dataSize) {
             if (success)
                 *success = 0;
             return;
         }
-        dstBuffer[i] = PlyScaleBytesToD64(f, prop->scalarType);
+        dstBuffer[i] = PlyScaleBytesToD64(f2, prop->scalarType);
 
         offset += sze;
     }
