@@ -74,7 +74,7 @@ int main(void)
     t = clock();
 
 	struct PlyScene scene;
-	enum PlyResult lres = PlyLoadFromDisk("Tests/res/cube.ply", &scene);
+	enum PlyResult lres = PlyLoadFromDisk("tests/res/cube.ply", &scene);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
@@ -110,7 +110,7 @@ int main(void)
             printf("\t\tData Size: %I64u\n", element->dataSize);;
             printf("\tProperty Count:%I32u\n", element->propertyCount);
 
-            printRawDataOfElement(element);
+            //printRawDataOfElement(element);
 
             for (U64 pId = 0; pId < element->propertyCount; ++pId)
             {

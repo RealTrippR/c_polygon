@@ -1,16 +1,16 @@
 
 /*
-Copyright © 2025 Tripp Robins
+Copyright ï¿½ 2025 Tripp Robins
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
-software and associated documentation files (the “Software”), to deal in the Software
+software and associated documentation files (the ï¿½Softwareï¿½), to deal in the Software
 without restriction, including without limitation the rights to use, copy, modify, merge,
 publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE SOFTWARE IS PROVIDED ï¿½AS ISï¿½, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -98,7 +98,7 @@ static inline bool streql(const char* str1, const char* str2)
 /// @brief Tests equality between two C strings within range n. It differs from strncmp in 
 /// the fact that it stops once immediately after a mismatch is detected, 
 /// thus it is more efficient for comparison of direct equality.
-inline bool strneql(const char* str1, const char* str2, size_t n)
+static inline bool strneql(const char* str1, const char* str2, size_t n)
 {
 #ifdef TRIPP_STREQL_SIMD_NOT_SUPPORTED
     size_t i = 0;
@@ -262,7 +262,7 @@ static union PlyScalarUnion PlyStrToScalar(const char* str, const enum PlyScalar
     }
 }
 
-enum PlyFormat PlyGetSystemEndianness()
+enum PlyFormat PlyGetSystemEndianness(void)
 {
     unsigned int x = 1;
     char* ptr = (char*)&x;
@@ -697,11 +697,11 @@ const char* getNextNonSpace(const char* srchBegin, const char* srchEnd)
 static enum PlyResult parseProperty(struct PlyElement* owningElement, const char* propRangeFirst, const char* propRangeLast)
 {
     // data type
-    enum PlyPropertyDataType dtype = PLY_DATA_TYPE_SCALAR;
+    enum PlyDataType dtype = PLY_DATA_TYPE_SCALAR;
     // scalar type
-    enum PlyPropertyScalarType stype = PLY_SCALAR_TYPE_UNDEFINED;
+    enum PlyDataType stype = PLY_SCALAR_TYPE_UNDEFINED;
     // list count type
-    enum PlyPropertyScalarType ltype = PLY_SCALAR_TYPE_UNDEFINED;
+    enum PlyDataType ltype = PLY_SCALAR_TYPE_UNDEFINED;
 
     const char* next = NULL;
     next = getNextNonSpace(propRangeFirst, propRangeLast);
@@ -1366,24 +1366,32 @@ enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* sc
 
 enum PlyResult PlyLoadFromDisk(const char* fileName, struct PlyScene* scene)
 {
-
 	enum PlyResult resCode = PLY_SUCCESS;
 	FILE* fptr = NULL;
 	fopen_s(&fptr, fileName, "rb");
 	if (fptr == NULL) {
+        memset(scene, 0, sizeof(*scene));
 		resCode = PLY_FILE_READ_ERROR;
 		return resCode;
 	}
 
-	fseek(fptr, 0, SEEK_END);
-	const U64 fsze = ftell(fptr);
+    // get file size
+    fseek(fptr, 0, SEEK_END);
+    const U64 fsze = _ftelli64(fptr);
     rewind(fptr);
 
-	U8* fileData = plyRealloc(NULL,fsze+1);
+    U8* fileData = NULL;
 
-	if (fileData==NULL) {
-		goto bail;
-	}
+    if (fsze < 0)
+        goto bail;
+
+
+    fileData = plyRealloc(NULL, fsze + 1);
+
+    if (fileData == NULL) {
+        resCode == PLY_FAILED_ALLOC_ERROR;
+        goto bail;
+    }
 
 
 	fread_s(fileData, fsze, fsze, 1, fptr);
@@ -1401,6 +1409,54 @@ bail:
 	return resCode;
 }
 
+enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, struct PlyScene* scene)
+{
+    enum PlyResult resCode = PLY_SUCCESS;
+    FILE* fptr = NULL;
+    _wfopen_s(&fptr, fileName, L"rb");
+    if (fptr == NULL) {
+        memset(scene, 0, sizeof(*scene));
+        resCode = PLY_FILE_READ_ERROR;
+        return resCode;
+    }
+
+    // get file size
+    fseek(fptr, 0, SEEK_END);
+    const U64 fsze = _ftelli64(fptr);
+    rewind(fptr);
+
+    U8* fileData = NULL;
+
+    if (fsze < 0)
+        goto bail;
+    
+
+    fileData = plyRealloc(NULL, fsze + 1);
+
+    if (fileData == NULL) {
+        resCode == PLY_FAILED_ALLOC_ERROR;
+        goto bail;
+    }
+
+    fread_s(fileData, fsze, fsze, 1, fptr);
+    if (fptr)
+        fclose(fptr);
+
+    fileData[fsze] = '\0';
+    resCode = PlyLoadFromMemory(fileData, fsze, scene);
+
+bail:
+    if (fileData) {
+        plyDealloc(fileData);
+    }
+
+    return resCode;
+}
+
+
+
+
+
 void PlyDestroyScene(struct PlyScene* scene)
 {
     if (scene->elements) {
@@ -1410,7 +1466,6 @@ void PlyDestroyScene(struct PlyScene* scene)
             if (ele->properties)
             {
                 plyDealloc(ele->properties);
-
             }
             if (ele->data)
             {

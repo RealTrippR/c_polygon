@@ -1,15 +1,15 @@
 /*
-Copyright © 2025 Tripp Robins
+Copyright ï¿½ 2025 Tripp Robins
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
-software and associated documentation files (the “Software”), to deal in the Software
+software and associated documentation files (the ï¿½Softwareï¿½), to deal in the Software
 without restriction, including without limitation the rights to use, copy, modify, merge,
 publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE SOFTWARE IS PROVIDED ï¿½AS ISï¿½, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -24,8 +24,22 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define C_PLY_MAX_LINE_LENGTH (200000lu)
 #define PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH (127u)
 
-static_assert(C_PLY_MAX_LINE_LENGTH >= 2, "C_PLY_MAX_LINE_LENGTH must be 2 or greater");
-static_assert(PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH >= 2, "PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH must be 2 or greater");
+#ifdef __cplusplus
+#define PLY_H_FUNCTION_PREFIX extern "C"
+#else
+#define PLY_H_FUNCTION_PREFIX
+#endif // __cplusplus
+
+#ifdef _MSC_VER
+#define PLY_STATIC_ASSERT static_assert
+#else
+	#define PLY_STATIC_ASSERT _Static_assert
+#endif
+
+
+
+PLY_STATIC_ASSERT(C_PLY_MAX_LINE_LENGTH >= 2, "C_PLY_MAX_LINE_LENGTH must be 2 or greater");
+PLY_STATIC_ASSERT(PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH >= 2, "PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH must be 2 or greater");
 
 typedef uint8_t		U8;
 typedef uint16_t	U16;
@@ -38,25 +52,25 @@ typedef int16_t		I16;
 typedef int32_t		I32;
 typedef int64_t		I64;
 
- U8 strtou8(const char* str, U8* strLenOut);
+PLY_H_FUNCTION_PREFIX U8 strtou8(const char* str, U8* strLenOut);
 
- U16 strtou16(const char* str, U8* strLenOut);
+PLY_H_FUNCTION_PREFIX U16 strtou16(const char* str, U8* strLenOut);
 
- U32 strtou32(const char* str, U8* strLenOut);
+PLY_H_FUNCTION_PREFIX U32 strtou32(const char* str, U8* strLenOut);
 
- U64 strtou64(const char* str, U8* strLenOut);
+PLY_H_FUNCTION_PREFIX U64 strtou64(const char* str, U8* strLenOut);
 
- I8 strtoi8(const char* str, U8* strLenOut);
+PLY_H_FUNCTION_PREFIX I8 strtoi8(const char* str, U8* strLenOut);
 
- I16 strtoi16(const char* str, U8* strLenOut);
+PLY_H_FUNCTION_PREFIX I16 strtoi16(const char* str, U8* strLenOut);
 
- I32 strtoi32(const char* str, U8* strLenOut);
+PLY_H_FUNCTION_PREFIX I32 strtoi32(const char* str, U8* strLenOut);
 
- I64 strtoi64(const char* str, U8* strLenOut);
+PLY_H_FUNCTION_PREFIX I64 strtoi64(const char* str, U8* strLenOut);
 
- float strtof32(const char* str, U8* strLenOut);
+PLY_H_FUNCTION_PREFIX float strtof32(const char* str, U8* strLenOut);
 
- double strtod64(const char* str, U8* strLenOut);
+PLY_H_FUNCTION_PREFIX double strtod64(const char* str, U8* strLenOut);
 
 enum PlyResult
 {
@@ -185,64 +199,70 @@ typedef void (*PlyDeallocT)(void*);
 
 /// Returns the system endianness as a PLY_FORMAT
 /// @return enum PlyFormat - returns either PLY_FORMAT_BIG_ENDIAN or PLY_FORMAT_LITTLE_ENDIAN
-enum PlyFormat PlyGetSystemEndianness();
+PLY_H_FUNCTION_PREFIX enum PlyFormat PlyGetSystemEndianness();
 
 /// PlyScaleBytesToD64() - Converts variable length data to a Double
 /// @param void* data - Start of data
 /// @param enum PlyScalarType t - Scalar type used to infer size of data to convert
 /// @return double - Data as a double
-double PlyScaleBytesToD64(void* data, const enum PlyScalarType t);
+PLY_H_FUNCTION_PREFIX double PlyScaleBytesToD64(void* data, const enum PlyScalarType t);
 
 /// Returns the sizeof a Scalar type in bytes
 /// @param enum PlyScalarType type - Scalar type to get the size of
 /// @return U8 - Size of scalar type (1 . . . 8)
-U8 PlyGetSizeofScalarType(const enum PlyScalarType type);
+PLY_H_FUNCTION_PREFIX U8 PlyGetSizeofScalarType(const enum PlyScalarType type);
 
 /// Converts a str to a scalar type
 /// @param const char* str - c string to read from
 /// @param const U64 strLen - the max length to read
 /// @return PlyScalarType - upon failure PLY_SCALAR_TYPE_UNDEFINED will be returned.
-enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen);
+PLY_H_FUNCTION_PREFIX enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen);
 
-inline void PlyScalarUnionCpyIntoLocation(void* dst, const union PlyScalarUnion* u, const enum PlyScalarType t)
+static inline void PlyScalarUnionCpyIntoLocation(void* dst, const union PlyScalarUnion* u, const enum PlyScalarType t)
 {
 	const U64 copylen = PlyGetSizeofScalarType(t);
 	memcpy(dst, (void*)u, copylen);
 }
 
-void PlySetCustomReallocator(PlyReallocT);
+PLY_H_FUNCTION_PREFIX void PlySetCustomReallocator(PlyReallocT);
 
-void PlySetCustomRecallocator(PlyReCallocT);
+PLY_H_FUNCTION_PREFIX void PlySetCustomRecallocator(PlyReCallocT);
 
-void PlySetCustomDeallocator(PlyDeallocT);
+PLY_H_FUNCTION_PREFIX void PlySetCustomDeallocator(PlyDeallocT);
 
 
 
 // adds a PlyProperty to an element. The property will be copied, thus transferring ownership
-enum PlyResult PlyElementAddProperty(struct PlyElement* element, struct PlyProperty* property);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyElementAddProperty(struct PlyElement* element, struct PlyProperty* property);
 
 // adds a PlyObjectInfo to an element. The property will be copied, thus transferring ownership
-enum PlyResult PlySceneAddObjectInfo(struct PlyScene* scene, struct PlyObjectInfo* objInfo);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlySceneAddObjectInfo(struct PlyScene* scene, struct PlyObjectInfo* objInfo);
 
 // adds a PlyElement to a scene. The element will be copied, thus transferring ownership
-enum PlyResult  PlySceneAddElement(struct PlyScene* scene, struct PlyElement* element);
+PLY_H_FUNCTION_PREFIX enum PlyResult  PlySceneAddElement(struct PlyScene* scene, struct PlyElement* element);
 
 
 /// Loads a PlyScene from memory.
 /// @param const U8* mem - the beginning of the memory to read.
 /// @param const U8* mem - the length of the memory to read. (memEnd - memBegin + 1)
 /// @param struct PlyScene* scene - scene to write to 
-enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* scene);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* scene);
 
 /// Loads a PlyScene from a given filename.
 /// @param const char* fileName - filename to read
 /// @param struct PlyScene* scene - scene to write to 
-enum PlyResult PlyLoadFromDisk(const char* fileName, struct PlyScene* scene);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDisk(const char* fileName, struct PlyScene* scene);
+
+
+/// Loads a PlyScene from a given wide filename.
+/// @param const wchar_t* fileName - filename to read, as a wide string
+/// @param struct PlyScene* scene - scene to write to 
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, struct PlyScene* scene);
 
 
 /// Destroys the scene and all associated memory
 /// @param struct PlyScene* scene - scene to destroy
-void PlyDestroyScene(struct PlyScene* scene);
+PLY_H_FUNCTION_PREFIX void PlyDestroyScene(struct PlyScene* scene);
 
 
 
@@ -251,7 +271,7 @@ void PlyDestroyScene(struct PlyScene* scene);
 
 
 
-inline const char* dbgPlyDataTypeToString(enum PlyDataType t)
+static inline const char* dbgPlyDataTypeToString(enum PlyDataType t)
 
 {
 	if (t == PLY_DATA_TYPE_LIST)
@@ -266,7 +286,7 @@ inline const char* dbgPlyDataTypeToString(enum PlyDataType t)
 	return "undefined";
 }
 
-inline const char* dbgPlyScalarTypeToString(enum PlyScalarType t)
+static inline const char* dbgPlyScalarTypeToString(enum PlyScalarType t)
 {
 
 	if (t == PLY_SCALAR_TYPE_CHAR)
@@ -304,7 +324,7 @@ inline const char* dbgPlyScalarTypeToString(enum PlyScalarType t)
 	return "undefined";
 
 }
-inline const char* dbgPlyResultToString(enum PlyResult res)
+static inline const char* dbgPlyResultToString(enum PlyResult res)
 {
 	if (res == PLY_SUCCESS) {
 		return "PLY_SUCCESS";
