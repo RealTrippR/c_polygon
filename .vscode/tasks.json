@@ -7,6 +7,8 @@
             "args": [
                 "-fdiagnostics-color=always",
                 "-g",
+                "-std=c99",
+                //"-Wall",
                 "${file}",
                 "${workspaceFolder}/c_polygon.c",
                 "-o",

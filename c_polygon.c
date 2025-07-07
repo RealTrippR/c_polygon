@@ -30,7 +30,8 @@ namespace cply
 #ifndef TR_STR_EQL_H
 #define TR_STR_EQL_H
 
-
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+#define min(a,b) (((a) < (b)) ? (a) : (b))
 
 #if defined(_MSC_VER)
 #if defined(_M_X64) || (_M_IX86_FP >= 2)
