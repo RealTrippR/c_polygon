@@ -9,6 +9,7 @@
 #define min(a,b) (((a) < (b)) ? (a) : (b))
 
 
+
 double getDataFromPropertyOfElement(const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx, U8* success)
 {
     const U64 offset = e->dataLineBegins[dataLineIdx] + prop->dataLineOffset;
@@ -29,7 +30,7 @@ void getDataFromPropertyOfElementAsList(double* dstBuffer, const size_t dstBuffe
     const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx, U8* success)
 {
     U64 offset = e->dataLineBegins[dataLineIdx] + prop->dataLineOffset;
-    if (offset >= e->dataSize) {
+    if (offset >= e->dataSize) { // check for out of bounds read
         if (success)
             *success = 0;
         return;
@@ -45,7 +46,7 @@ void getDataFromPropertyOfElementAsList(double* dstBuffer, const size_t dstBuffe
     {
         U8* f2 = ((U8*)e->data) + offset;
         const U64 sze = PlyGetSizeofScalarType(prop->scalarType);
-        if (offset + sze> e->dataSize) {
+        if (offset + sze> e->dataSize) { // check for out of bounds read
             if (success)
                 *success = 0;
             return;

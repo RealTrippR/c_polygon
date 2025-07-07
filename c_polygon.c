@@ -167,6 +167,18 @@ static bool checkForElementNameCollision(const struct PlyScene* scene, const cha
     return false;
 }
 
+static bool checkForPropertyNameCollision(const struct PlyElement* element, const char* name)
+{
+    for (U32 ei = 0; ei < element->propertyCount; ++ei)
+    {
+        if (streql(element->properties[ei].name, name) == true)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 static void* plyReallocDefault(void* oldBlock, U64 s) 
 {
     if (s == 0) {
@@ -985,6 +997,7 @@ static enum PlyResult parseProperty(struct PlyElement* owningElement, const char
         return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
     }
 
+ 
 
     struct PlyProperty property = {0};
     property.dataType = dtype;
@@ -995,6 +1008,9 @@ static enum PlyResult parseProperty(struct PlyElement* owningElement, const char
     property.name[nameLen] = '\0';
     // this will be calculated later
     
+    if (checkForPropertyNameCollision(owningElement, property.name) == true)
+        return PLY_MALFORMED_HEADER_ERROR;
+
     const enum PlyResult r = PlyElementAddProperty(owningElement, &property);
     
     return r;
