@@ -23,6 +23,10 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <assert.h>
 #include <errno.h>
 
+#ifdef __cplusplus
+namespace cply
+#endif // __cplusplus
+
 #ifndef TR_STR_EQL_H
 #define TR_STR_EQL_H
 
@@ -1862,3 +1866,13 @@ double strtod64(const char* str, U8* strLenOut)
 
     return num;
 }
+
+
+
+
+
+
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

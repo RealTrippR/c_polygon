@@ -41,6 +41,10 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 PLY_STATIC_ASSERT(C_PLY_MAX_LINE_LENGTH >= 2, "C_PLY_MAX_LINE_LENGTH must be 2 or greater");
 PLY_STATIC_ASSERT(PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH >= 2, "PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH must be 2 or greater");
 
+#ifdef __cplusplus
+namespace cply {
+#endif // __cplusplus
+
 typedef uint8_t		U8;
 typedef uint16_t	U16;
 typedef uint32_t	U32;
@@ -368,6 +372,8 @@ static inline const char* dbgPlyResultToString(enum PlyResult res)
 }
 
 
-
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif // !C_POLYGON_H
