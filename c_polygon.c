@@ -20,7 +20,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-
+#include <assert.h>
+#include <errno.h>
 
 #ifndef TR_STR_EQL_H
 #define TR_STR_EQL_H
@@ -259,7 +260,87 @@ static union PlyScalarUnion PlyStrToScalar(const char* str, const enum PlyScalar
     default:
         return d;
     }
+}
+
+enum PlyFormat PlyGetSystemEndianness()
+{
+    unsigned int x = 1;
+    char* ptr = (char*)&x;
+    if (ptr[0] == 1) {
+        return PLY_FORMAT_BINARY_LITTLE_ENDIAN;
+    }
+    else {
+        return PLY_FORMAT_BINARY_BIG_ENDIAN;
+    }
+}
+
+double PlyScaleBytesToD64(void* data, const enum PlyScalarType t)
+{
+    U8* f = data;
+    double d = 0;
+
+    switch (t) {
+    case PLY_SCALAR_TYPE_UNDEFINED:
+        assert("C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
+        d = 0;
+        break;
+    case PLY_SCALAR_TYPE_FLOAT: {
+        float temp = 0x0;;
+        memcpy(&temp, f, sizeof(float));
+        d = (double)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_DOUBLE: {
+        double temp = 0x0;
+        memcpy(&temp, f, sizeof(double));
+        d = temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_CHAR: {
+        int8_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int8_t));
+        d = (double)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_UCHAR: {
+        uint8_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint8_t));
+        d = (double)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_SHORT: {
+        int16_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int16_t));
+        d = (double)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_USHORT: {
+        uint16_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint16_t));
+        d = (double)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_INT: {
+        int32_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int32_t));
+        d = (double)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_UINT: {
+        uint32_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint32_t));
+        d = (double)temp;
+        break;
+    }
+    default:
+        assert(0x0 && "C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
+        d = 0.0;
+        break;
+    }
+
+
     return d;
+
 }
 
 U8 PlyGetSizeofScalarType(const enum PlyScalarType type)
@@ -367,6 +448,34 @@ enum PlyResult  PlyElementAddProperty(struct PlyElement* element, struct PlyProp
     return PLY_SUCCESS;
 }
 
+// adds a PlyObjectInfo to an element. The property will be copied, thus transferring ownership
+enum PlyResult PlySceneAddObjectInfo(struct PlyScene* scene, struct PlyObjectInfo* objInfo)
+{
+#define OBJ_INFOS scene->objectInfos
+#define OBJ_INFO_COUNT scene->objectInfoCount
+    if (OBJ_INFO_COUNT == UINT32_MAX - 1) {
+        return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+    }
+    const U32 newObjInfoCount = OBJ_INFO_COUNT + 1;
+    struct PlyObjectInfo* tmp = (struct PlyObjectInfo*)plyReCalloc(
+        OBJ_INFOS,
+        OBJ_INFO_COUNT, 
+        newObjInfoCount, 
+        sizeof(struct PlyObjectInfo));
+
+    if (!tmp) {
+        return PLY_FAILED_ALLOC_ERROR;
+    }
+    else {
+        OBJ_INFOS = tmp;
+        OBJ_INFOS[OBJ_INFO_COUNT] = *objInfo;
+        OBJ_INFO_COUNT = newObjInfoCount;
+    }
+    return PLY_SUCCESS;
+#undef OBJ_INFO_COUNT
+#undef OBJ_INFOS
+}
+
 
 // adds a PlyElement to a scene. The element will be copied, thus transferring ownership
 enum PlyResult PlySceneAddElement(struct PlyScene* scene, struct PlyElement* element)
@@ -428,7 +537,7 @@ static void parseLine(const char* lineIn, U64 lineInSize, char* dst, const U32 d
 
     for (U64 i = 0; i < lineInSize-1; ++i)
     {
-        if (isblank(lineIn[i])) {
+        if (isblank((unsigned char)lineIn[i])) {
             continue;
         }
         else {
@@ -683,6 +792,80 @@ static enum PlyResult parseProperty(struct PlyElement* owningElement, const char
 }
 
 
+static enum PlyResult parseObjectInfo(struct PlyScene* scene, const char* objBegin, const char* objEnd)
+{
+    // get name begin
+    const char* NameBegin = NULL;
+    for (const char* ch = objBegin; ch <= objEnd; ++ch) {
+        if (isspace(*ch) == 0) 
+        {
+            NameBegin = ch;
+            break;
+        }
+    }
+    if (!NameBegin)
+        return PLY_MALFORMED_HEADER_ERROR;
+    
+
+    // get name end
+    const char* NameEnd = NULL;
+    for (const char* ch = NameBegin; ch <= objEnd; ++ch) {
+        if (isspace(*ch) != 0) {
+            NameEnd = ch-1;
+            break; 
+        }
+    }
+    if (!NameEnd)
+        return PLY_MALFORMED_HEADER_ERROR;
+    
+    // get val begin
+    const char* ValBegin=NULL;
+    for (const char* ch = NameEnd+1; ch <= objEnd; ++ch) {
+        if (isspace(*ch) == 0)
+        {
+            ValBegin = ch;
+            break;
+        }
+    }
+    if (!ValBegin)
+        return PLY_MALFORMED_HEADER_ERROR;
+
+    // get val end
+    const char* ValEnd = NULL;
+    for (const char* ch = ValBegin; ch <= objEnd; ++ch) {
+        if (ch == objEnd) // if ValBegin is at the end of the obj data src
+        {
+            ValEnd = ValBegin;
+            break;
+        }
+        if (isspace(*ch) != 0) {
+
+            ValEnd = ch-1;
+            break;
+        }
+    }
+    if (!ValEnd)
+        return PLY_MALFORMED_HEADER_ERROR;
+
+
+    struct PlyObjectInfo objInfo = { 0 };
+    memset(objInfo.name, 0, sizeof(objInfo.name));
+    const U64 nameCpySize = NameEnd - NameBegin + 1;
+    memcpy_s(objInfo.name, sizeof(objInfo.name) - 1, NameBegin, nameCpySize);
+
+
+
+    U8 strlen=0u;
+    double val = strtod64(ValBegin, &strlen);
+    if (strlen == 0) {
+        return PLY_MALFORMED_HEADER_ERROR;
+    }
+
+    objInfo.value = val;
+
+    enum PlyResult r = PlySceneAddObjectInfo(scene, &objInfo);
+    return r;
+}
 
 static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* readingHeader, struct PlyElement** curElement, struct PlyScene* scene)
 {
@@ -695,7 +878,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
     const char* lineLast = line + lineLen - 1;
 
     if (lineLast == NULL || !readingHeader) {
-        return PLY_GENERIC_ERROR;
+        return PLY_MALFORMED_HEADER_ERROR;
     }
 
     const char* c = "ply";
@@ -758,7 +941,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
         getVersion:
             // no format was found
             if (scene->format == PLY_FORMAT_UNDEFINED) {
-                return PLY_FORMAT_UNDEFINED;
+                return PLY_MALFORMED_HEADER_ERROR;
             }
 
             if (formatEnd != NULL) {
@@ -770,7 +953,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
                     }
                 }
                 if (vbegin == NULL) {
-                    return PLY_MALFORMED_FILE_ERROR;
+                    return PLY_MALFORMED_HEADER_ERROR;
                 }
                 // get version number (currently only v 1.0 is supported)
                 scene->versionNumber = strtof(vbegin, NULL);
@@ -808,7 +991,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
                 }
             }
             if (elementNameBegin == NULL) {
-                return PLY_MALFORMED_FILE_ERROR;
+                return PLY_MALFORMED_HEADER_ERROR;
             }
 
          
@@ -842,7 +1025,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
                     continue;
                 }
                 if (*ch < '0' || *ch > '9') {
-                    return PLY_MALFORMED_FILE_ERROR;
+                    return PLY_MALFORMED_HEADER_ERROR;
                 }
                 else {
                     dataCountBegin = ch;
@@ -851,7 +1034,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
             }
 
             if (dataCountBegin == NULL) {
-                return PLY_MALFORMED_FILE_ERROR;
+                return PLY_MALFORMED_HEADER_ERROR;
             }
 
             const U32 dataCount = strtoul(dataCountBegin, NULL, 0u);
@@ -861,12 +1044,12 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
             struct PlyElement element = { 0 };
             
 
-            memcpy_s(element.name, sizeof(element.name-1), elementNameBegin, elementNameLen);
+            memcpy_s(element.name, sizeof(element.name)-1, elementNameBegin, elementNameLen);
             element.name[elementNameLen] = '\0';
             element.dataLineCount = dataCount;
 
             if (checkForElementNameCollision(scene, element.name) == true)
-                return PLY_MALFORMED_FILE_ERROR;
+                return PLY_MALFORMED_HEADER_ERROR;
 
             if (PlySceneAddElement(scene, &element)!=PLY_SUCCESS)
             {
@@ -882,13 +1065,25 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
         // check for proerty declaration
         if (strneql(line, c, min(strlen(c), lineLen)) == true)
         {
+            if (*curElement == NULL)
+            {
+                return PLY_MALFORMED_HEADER_ERROR;
+            }
             enum PlyResult r = parseProperty(*curElement, line+strlen(c), lineLast);
+            return r;
+        }
+
+        c = "obj_info";
+        if (strneql(line, c, min(strlen(c), lineLen)) == true)
+        {
+            enum PlyResult r = parseObjectInfo(scene, line + strlen(c), lineLast);
             return r;
         }
     }
 
 
-    return PLY_MALFORMED_FILE_ERROR;
+    // there is nothing to read, skip this line.
+    return PLY_SUCCESS;
 }
 
 enum PlyResult readData(struct PlyScene* scene, const U8* dataBegin, const U8* dataLast)
@@ -908,23 +1103,6 @@ enum PlyResult readData(struct PlyScene* scene, const U8* dataBegin, const U8* d
         if (!element->dataLineBegins) {
             return PLY_FAILED_ALLOC_ERROR;
         }
-        /*
-        element->dataLineWidth = 0u;
-        // calculate element data line width
-        U32 ploffset = 0u;
-        for (U64 pi = 0; pi < element->propertyCount; ++pi)
-        {
-            const U32 sze = PlyGetSizeofScalarType(element->properties[pi].scalarType);
-            if ((U32)sze + (U32)element->dataLineWidth < element->dataLineWidth)
-            { // prevent overflow
-                return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
-            }
-            element->properties[pi].dataLineOffset = ploffset;
-            ploffset += sze;
-            element->dataLineWidth += sze;
-        }
-        */
-
 
         for (U64 di = 0; di < element->dataLineCount; ++di)
         {
@@ -938,6 +1116,8 @@ enum PlyResult readData(struct PlyScene* scene, const U8* dataBegin, const U8* d
                 const U64 lineBegin = 0u;
                 element->dataLineBegins[di] = lineBegin;
             }
+
+            U32 countedProperties = 0u;
             for (U64 pi = 0; pi < element->propertyCount; ++pi)
             {
                 struct PlyProperty* property = element->properties + pi;
@@ -947,10 +1127,12 @@ enum PlyResult readData(struct PlyScene* scene, const U8* dataBegin, const U8* d
                     {
                         if (isspace(*ch) == 0)
                         {
+                            countedProperties++;
+
                             U8 scalarStrLen;
                             union PlyScalarUnion dataU = PlyStrToScalar(ch, property->scalarType, &scalarStrLen);
                             if (scalarStrLen == 0u) {
-                                return PLY_MALFORMED_FILE_ERROR;
+                                return PLY_DATA_TYPE_MISMATCH_ERROR;
                             }
                             else {
                                 ch += scalarStrLen;
@@ -969,6 +1151,12 @@ enum PlyResult readData(struct PlyScene* scene, const U8* dataBegin, const U8* d
                                 return PLY_FAILED_ALLOC_ERROR;
                             
                             element->properties[pi].dataLineOffset = ploffset;
+
+                            // prevent overflow
+                            if (ploffset > (U32)ploffset + sze) {
+                                return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+                            }
+
                             ploffset += sze;
                             element->data = tmp;
                             element->dataSize = newLen;
@@ -982,14 +1170,17 @@ enum PlyResult readData(struct PlyScene* scene, const U8* dataBegin, const U8* d
                 {
                     // get list data count
                     U64 listCount = 0u;
+ 
                     for (; ch < line + lineLen; ++ch)
                     {
                         if (isspace(*ch) == 0)
                         {
+                            countedProperties++;
+
                             U8 listCountStrLen;
                             union PlyScalarUnion listCountU = PlyStrToScalar(ch, property->listCountType, &listCountStrLen);
                             if (listCountStrLen == 0u) {
-                                return PLY_MALFORMED_FILE_ERROR;
+                                return PLY_DATA_TYPE_MISMATCH_ERROR;
                             }
                             else {
                                 ch += listCountStrLen;
@@ -1004,13 +1195,26 @@ enum PlyResult readData(struct PlyScene* scene, const U8* dataBegin, const U8* d
 
                             element->data = tmp;
                             element->dataSize = newLen;
+                            element->properties[pi].dataLineOffset = ploffset;
+
                             PlyScalarUnionCpyIntoLocation((U8*)element->data + element->dataSize - sze, &listCountU, property->listCountType);
+
+                            listCount = (U64)PlyScaleBytesToD64(&listCountU, property->listCountType);
+                            
+
+                            // prevent overflow
+                            if (ploffset > (U32)(ploffset + sze + PlyGetSizeofScalarType(property->scalarType) * listCount)) {
+                                return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+                            }
+                            ploffset += (U32)(sze + PlyGetSizeofScalarType(property->scalarType)*listCount);
 
                             break; // found the list size
                         }
                     }
 
-                    ch = line;
+
+                    U64 readPropCount=0u;
+
                     // get list items
                     for (; ch < line + lineLen; ++ch)
                     {
@@ -1019,11 +1223,12 @@ enum PlyResult readData(struct PlyScene* scene, const U8* dataBegin, const U8* d
                             U8 scalarStrLen;
                             union PlyScalarUnion dataU = PlyStrToScalar(ch, property->scalarType, &scalarStrLen);
                             if (scalarStrLen == 0u) {
-                                return PLY_MALFORMED_FILE_ERROR;
+                                return PLY_DATA_TYPE_MISMATCH_ERROR;
                             }
                             else {
                                 ch += scalarStrLen;
                             }
+                            
                             U8 sze = PlyGetSizeofScalarType(property->scalarType);
 
                             const U64 newLen = element->dataSize + sze;
@@ -1031,21 +1236,40 @@ enum PlyResult readData(struct PlyScene* scene, const U8* dataBegin, const U8* d
                             if (!tmp)
                                 return PLY_FAILED_ALLOC_ERROR;
 
+                           
                             element->data = tmp;
                             element->dataSize = newLen;
                             PlyScalarUnionCpyIntoLocation(
                                 (U8*)element->data + element->dataSize - sze, &dataU, property->scalarType);
 
+                            if (readPropCount+1 == listCount)
+                            {
+                                readPropCount++;
+                                break; // all elements have been read
+                            }
+                            readPropCount++;
+
                             // DO NOT BREAK LOOP, KEEP READING UNTIL LINE END
                         }
                     }
+
+                    if (readPropCount<listCount)
+
+                    { // mismatch between actual list count and expected list coount
+                        return PLY_LIST_COUNT_MISMATCH_ERROR;
+                    }
                 }
             }
+            ploffset = 0u;
 
+            if (countedProperties != element->propertyCount)
+            {
+                return PLY_MALFORMED_DATA_ERROR;
+            }
 
             line = getNextLine(&lineLen, dataBegin, dataSize, line, lineLen);
             if (di != element->dataLineCount-1 && !line) {
-                return PLY_MALFORMED_FILE_ERROR;
+                return PLY_MALFORMED_DATA_ERROR;
             }
         }
     }
@@ -1069,13 +1293,12 @@ enum PlyResult readData(struct PlyScene* scene, const U8* dataBegin, const U8* d
 
 enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* scene)
 {
-    scene->elementCount = 0x0;
-    scene->elements = NULL;
+    if (memSize == 0)
+    {
+        return PLY_SUCCESS; // there is nothing to read
+    }
 
-	if (memSize == 0)
-	{
-		return PLY_SUCCESS;
-	}
+    memset(scene, 0, sizeof(*scene));
 
     const char* srcline = (const char*)mem;
     U64 srclineSize = lineLen_s(srcline, (const char*)mem, memSize);
@@ -1096,12 +1319,14 @@ enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* sc
         if (lineLen > 0)
         {
             if (!headerFinished) {
+                static bool lastReadingHeader = false;
+                lastReadingHeader = readingHeader;
                 // parse header
                 const enum PlyResult exRes = readHeaderLine(line, lineLen, &readingHeader, &curElement, scene);
 
                 if (exRes == PLY_SUCCESS)
                 {
-                    if (!readingHeader) {
+                    if (!readingHeader && lastReadingHeader==true) {
                         headerFinished = true;
                     }
                 }
@@ -1129,6 +1354,11 @@ enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* sc
         if (srcline == NULL) {
             break;
         }
+    }
+
+    // the header never ended
+    if (headerFinished==false) {
+        return PLY_MALFORMED_HEADER_ERROR;
     }
 
     return PLY_SUCCESS;
@@ -1179,21 +1409,27 @@ void PlyDestroyScene(struct PlyScene* scene)
             struct PlyElement* ele = scene->elements + i;
             if (ele->properties)
             {
-                free(ele->properties);
+                plyDealloc(ele->properties);
 
             }
             if (ele->data)
             {
-                free(ele->data);
+                plyDealloc(ele->data);
             }
             if (ele->dataLineBegins)
             {
-                free(ele->dataLineBegins);
+                plyDealloc(ele->dataLineBegins);
             }
         }
         plyDealloc(scene->elements);
         scene->elementCount = 0u;
         scene->elements = NULL;
+    }
+
+    if (scene->objectInfos) {
+        free(scene->objectInfos);
+        scene->objectInfoCount = 0u;
+        scene->objectInfos = NULL;
     }
 }
 
@@ -1208,17 +1444,33 @@ void PlyDestroyScene(struct PlyScene* scene)
 
 U8 strtou8(const char* str, U8* strLenOut)
 {
+    if (*strLenOut) // 0-init
+        *strLenOut = 0;
     U8 num = 0;
     const U8 max_digits = 3;
-    for (I8 i = 0; i < max_digits; ++i)
+    for (I8 i = 0; i <= max_digits; ++i)
     {
-        if (str[i] < '0' || str[i] > '9') {
-            break;
+        if (i == max_digits) {
+            if (!(str[i] == '\0' || str[i] == '\r' || str[i] == '\n') && !isspace(str[i])) {
+                *strLenOut = 0x0;
+                return 0x0;
+            }
         }
         else {
-            num = num * 10 + (str[i] - 48);
-            if (strLenOut)
-                (*strLenOut)++;
+
+            if (str[i] < '0' || str[i] > '9') {
+                break;
+            }
+            else {
+                if (num > (UINT8_MAX - (str[i] - '0')) / 10) {
+                    if (strLenOut)
+                        *strLenOut = 0;
+                    return 0;
+                }
+                num = num * 10 + (str[i] - 48);
+                if (strLenOut)
+                    (*strLenOut)++;
+            }
         }
     }
     return num;
@@ -1226,17 +1478,32 @@ U8 strtou8(const char* str, U8* strLenOut)
 
 U16 strtou16(const char* str, U8* strLenOut)
 {
+    if (*strLenOut) // 0-init
+        *strLenOut = 0;
     U16 num = 0;
     const U8 max_digits = 5;
-    for (I8 i = 0; i < max_digits; ++i)
+    for (I8 i = 0; i <= max_digits; ++i)
     {
-        if (str[i] < '0' || str[i] > '9') {
-            break;
+        if (i == max_digits) {
+            if (!(str[i] == '\0' || str[i] == '\r' || str[i] == '\n') && !isspace(str[i])) {
+                *strLenOut = 0x0;
+                return 0x0;
+            }
         }
         else {
-            num = num * 10 + (str[i] - 48);
-            if (strLenOut)
-                (*strLenOut)++;
+            if (str[i] < '0' || str[i] > '9') {
+                break;
+            }
+            else {
+                if (num > (UINT16_MAX - (str[i] - '0')) / 10) {
+                    if (strLenOut)
+                        *strLenOut = 0;
+                    return 0;
+                }
+                num = num * 10 + (str[i] - 48);
+                if (strLenOut)
+                    (*strLenOut)++;
+            }
         }
     }
     return num;
@@ -1244,17 +1511,32 @@ U16 strtou16(const char* str, U8* strLenOut)
 
 U32 strtou32(const char* str, U8* strLenOut)
 {
+    if (*strLenOut) // 0-init
+        *strLenOut = 0;
     U32 num = 0;
     const U8 max_digits = 10;
-    for (I8 i = 0; i < max_digits; ++i)
+    for (I8 i = 0; i <= max_digits; ++i)
     {
-        if (str[i] < '0' || str[i] > '9') {
-            break;
+        if (i == max_digits) {
+            if (!(str[i] == '\0' || str[i] == '\r' || str[i] == '\n') && !isspace(str[i])) {
+                *strLenOut = 0x0;
+                return 0x0;
+            }
         }
         else {
-            num = num * 10 + (str[i] - 48);
-            if (strLenOut)
-                (*strLenOut)++;
+            if (str[i] < '0' || str[i] > '9') {
+                break;
+            }
+            else {
+                if (num > (UINT32_MAX - (str[i] - '0')) / 10) {
+                    if (strLenOut)
+                        *strLenOut = 0;
+                    return 0;
+                }
+                num = num * 10 + (str[i] - 48);
+                if (strLenOut)
+                    (*strLenOut)++;
+            }
         }
     }
     return num;
@@ -1262,17 +1544,32 @@ U32 strtou32(const char* str, U8* strLenOut)
 
 U64 strtou64(const char* str, U8* strLenOut)
 {
+    if (*strLenOut) // 0-init
+        *strLenOut = 0;
     U32 num = 0;
     const U8 max_digits = 20;
-    for (I8 i = 0; i < max_digits; ++i)
+    for (I8 i = 0; i <= max_digits; ++i)
     {
-        if (str[i] < '0' || str[i] > '9') {
-            break;
+        if (i == max_digits) {
+            if (!(str[i] == '\0' || str[i] == '\r' || str[i] == '\n') && !isspace(str[i])) {
+                *strLenOut = 0x0;
+                return 0x0;
+            }
         }
         else {
-            num = num * 10 + (str[i] - 48);
-            if (strLenOut)
-                (*strLenOut)++;
+            if (num > (UINT64_MAX - (str[i]-'0')) / 10) {
+                if (strLenOut)
+                    *strLenOut = 0;
+                return 0;
+            }
+            if (str[i] < '0' || str[i] > '9') {
+                break;
+            }
+            else {
+                num = num * 10 + (str[i] - 48);
+                if (strLenOut)
+                    (*strLenOut)++;
+            }
         }
     }
     return num;
@@ -1281,6 +1578,8 @@ U64 strtou64(const char* str, U8* strLenOut)
 
 I8 strtoi8(const char* str, U8* strLenOut)
 {
+    if (*strLenOut) // 0-init
+        *strLenOut = 0;
     I8 num = 0;
     char negative = 0u;
     if (*str == '-') {
@@ -1288,15 +1587,37 @@ I8 strtoi8(const char* str, U8* strLenOut)
         str++;
     }
     const U8 max_digits = 3;
-    for (I8 i = 0; i < max_digits; ++i)
+    for (I8 i = 0; i <= max_digits; ++i)
     {
-        if (str[i] < '0' || str[i] > '9') {
-            break;
+        if (i == max_digits) {
+            if (!(str[i] == '\0' || str[i] == '\r' || str[i] == '\n') && !isspace(str[i])) {
+                *strLenOut = 0x0;
+                return 0x0;
+            }
         }
         else {
-            num = num * 10 + (str[i] - 48);
-            if (strLenOut)
-                (*strLenOut)++;
+            if (str[i] < '0' || str[i] > '9') {
+                break;
+            }
+            else {
+                if (negative == 0) {
+                    if (num > (INT8_MAX - (str[i] - '0')) / 10) {
+                        if (strLenOut)
+                            *strLenOut = 0;
+                        return 0;
+                    }
+                }
+                else {
+                    if (num > (I8)(abs(INT8_MIN) - (str[i] - '0')) / 10) {
+                        if (strLenOut)
+                            *strLenOut = 0;
+                        return 0;
+                    }
+                }
+                num = num * 10 + (str[i] - 48);
+                if (strLenOut)
+                    (*strLenOut)++;
+            }
         }
     }
     if (negative)
@@ -1306,6 +1627,8 @@ I8 strtoi8(const char* str, U8* strLenOut)
 
 I16 strtoi16(const char* str, U8* strLenOut)
 {
+    if (*strLenOut) // 0-init
+        *strLenOut = 0;
     I16 num = 0;
     char negative = 0u;
     if (*str == '-') {
@@ -1313,15 +1636,37 @@ I16 strtoi16(const char* str, U8* strLenOut)
         str++;
     }
     const U8 max_digits = 5;
-    for (I8 i = 0; i < max_digits; ++i)
+    for (I8 i = 0; i <= max_digits; ++i)
     {
-        if (str[i] < '0' || str[i] > '9') {
-            break;
+        if (i == max_digits) {
+            if (!(str[i] == '\0' || str[i] == '\r' || str[i] == '\n') && !isspace(str[i])) {
+                *strLenOut = 0x0;
+                return 0x0;
+            }
         }
         else {
-            num = num * 10 + (str[i] - 48);
-            if (strLenOut)
-                (*strLenOut)++;
+            if (str[i] < '0' || str[i] > '9') {
+                break;
+            }
+            else {
+                if (negative == 0) {
+                    if (num > (INT16_MAX - (str[i] - '0')) / 10) {
+                        if (strLenOut)
+                            *strLenOut = 0;
+                        return 0;
+                    }
+                }
+                else {
+                    if (num > (I16)(abs(INT16_MIN) - (str[i] - '0')) / 10) {
+                        if (strLenOut)
+                            *strLenOut = 0;
+                        return 0;
+                    }
+                }
+                num = num * 10 + (str[i] - 48);
+                if (strLenOut)
+                    (*strLenOut)++;
+            }
         }
     }
     if (negative)
@@ -1331,6 +1676,8 @@ I16 strtoi16(const char* str, U8* strLenOut)
 
 I32 strtoi32(const char* str, U8* strLenOut)
 {
+    if (*strLenOut) // 0-init
+        *strLenOut = 0;
     I32 num = 0;
     char negative = 0u;
     if (*str == '-') {
@@ -1338,15 +1685,37 @@ I32 strtoi32(const char* str, U8* strLenOut)
         str++;
     }
     const U8 max_digits = 5;
-    for (I8 i = 0; i < max_digits; ++i)
+    for (I8 i = 0; i <= max_digits; ++i)
     {
-        if (str[i] < '0' || str[i] > '9') {
-            break;
+        if (i == max_digits) {
+            if (!(str[i] == '\0' || str[i] == '\r' || str[i] == '\n') && !isspace(str[i])) {
+                *strLenOut = 0x0;
+                return 0x0;
+            }
         }
         else {
-            num = num * 10 + (str[i] - 48);
-            if (strLenOut)
-                (*strLenOut)++;
+            if (str[i] < '0' || str[i] > '9') {
+                break;
+            }
+            else {
+                if (negative == 0) {
+                    if (num > (INT32_MAX - (str[i] - '0')) / 10) {
+                        if (strLenOut)
+                            *strLenOut = 0;
+                        return 0;
+                    }
+                }
+                else {
+                    if (num > (I32)(abs(INT32_MIN) - (str[i] - '0')) / 10) {
+                        if (strLenOut)
+                            *strLenOut = 0;
+                        return 0;
+                    }
+                }
+                num = num * 10 + (str[i] - 48);
+                if (strLenOut)
+                    (*strLenOut)++;
+            }
         }
     }
     if (negative)
@@ -1356,6 +1725,8 @@ I32 strtoi32(const char* str, U8* strLenOut)
 
 I64 strtoi64(const char* str, U8* strLenOut)
 {
+    if (*strLenOut) // 0-init
+        *strLenOut = 0;
     I64 num = 0;
     char negative = 0u;
     if (*str == '-') {
@@ -1363,15 +1734,37 @@ I64 strtoi64(const char* str, U8* strLenOut)
         str++;
     }
     const U8 max_digits = 5;
-    for (I8 i = 0; i < max_digits; ++i)
+    for (I8 i = 0; i <= max_digits; ++i)
     {
-        if (str[i] < '0' || str[i] > '9') {
-            break;
+        if (i == max_digits) {
+            if (!(str[i] == '\0' || str[i] == '\r' || str[i] == '\n') && !isspace(str[i])) {
+                *strLenOut = 0x0;
+                return 0x0;
+            }
         }
         else {
-            num = num * 10 + (str[i] - 48);
-            if (strLenOut)
-                (*strLenOut)++;
+            if (str[i] < '0' || str[i] > '9') {
+                break;
+            }
+            else {
+                if (negative == 0) {
+                    if (num > (INT64_MAX - (str[i] - '0')) / 10) {
+                        if (strLenOut)
+                            *strLenOut = 0;
+                        return 0;
+                    }
+                }
+                else {
+                    if (num > (I64)(llabs(INT64_MIN) - (str[i] - '0')) / 10) {
+                        if (strLenOut)
+                            *strLenOut = 0;
+                        return 0;
+                    }
+                }
+                num = num * 10 + (str[i] - 48);
+                if (strLenOut)
+                    (*strLenOut)++;
+            }
         }
     }
     if (negative)
@@ -1384,7 +1777,13 @@ float strtof32(const char* str, U8* strLenOut)
 {
     const char* start = str;
     char* end;
+    errno = 0;
     float num = strtof(str, &end);
+    if (errno == ERANGE) {
+        if (strLenOut)
+            *strLenOut = 0x0;
+        return 0;
+    }
     if (strLenOut)
         *strLenOut = (U8)(end - start);
 
@@ -1395,9 +1794,16 @@ double strtod64(const char* str, U8* strLenOut)
 {
     const char* start = str;
     char* end;
+    errno = 0;
     double num = strtod(str, &end);
+    if (errno == ERANGE) {
+        if (strLenOut)
+            *strLenOut = 0x0;
+        return 0;
+    }
     if (strLenOut)
         *strLenOut = (U8)(end - start);
+   
 
     return num;
 }

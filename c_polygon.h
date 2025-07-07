@@ -23,6 +23,10 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #define C_PLY_MAX_LINE_LENGTH (200000lu)
 #define PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH (127u)
+
+static_assert(C_PLY_MAX_LINE_LENGTH >= 2, "C_PLY_MAX_LINE_LENGTH must be 2 or greater");
+static_assert(PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH >= 2, "PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH must be 2 or greater");
+
 typedef uint8_t		U8;
 typedef uint16_t	U16;
 typedef uint32_t	U32;
@@ -60,7 +64,11 @@ enum PlyResult
 	PLY_SUCCESS,
 	PLY_FAILED_ALLOC_ERROR,
 	PLY_EXCEEDS_BOUND_LIMITS_ERROR,
+	PLY_MALFORMED_DATA_ERROR,
 	PLY_MALFORMED_FILE_ERROR,
+	PLY_DATA_TYPE_MISMATCH_ERROR,
+	PLY_LIST_COUNT_MISMATCH_ERROR,
+	PLY_MALFORMED_HEADER_ERROR,
 	PLY_FILE_WRITE_ERROR,
 	PLY_FILE_READ_ERROR,
 	PLY_UNSUPPORTED_VERSION_ERROR
@@ -131,10 +139,18 @@ struct PlyElement
 	U64* dataLineBegins;
 };
 
+struct PlyObjectInfo
+{
+	char name[PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH + 1];
+	double value;
+};
+
 struct PlyScene
 {
 	struct PlyElement* elements;
+	struct PlyObjectInfo* objectInfos;
 	U32 elementCount;
+	U32 objectInfoCount;
 	enum PlyFormat format;
 	float versionNumber;
 };
@@ -167,7 +183,11 @@ typedef void (*PlyDeallocT)(void*);
 
 // -+- FUNCTION DECLARATIONS -+- //
 
-U8 PlyGetSizeofScalarType(const enum PlyScalarType);
+enum PlyFormat PlyGetSystemEndianness();
+
+double PlyScaleBytesToD64(void* data, const enum PlyScalarType t);
+
+U8 PlyGetSizeofScalarType(const enum PlyScalarType type);
 
 enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen);
 
@@ -184,9 +204,12 @@ void PlySetCustomRecallocator(PlyReCallocT);
 void PlySetCustomDeallocator(PlyDeallocT);
 
 
+
 // adds a PlyProperty to an element. The property will be copied, thus transferring ownership
 enum PlyResult PlyElementAddProperty(struct PlyElement* element, struct PlyProperty* property);
 
+// adds a PlyObjectInfo to an element. The property will be copied, thus transferring ownership
+enum PlyResult PlySceneAddObjectInfo(struct PlyScene* scene, struct PlyObjectInfo* objInfo);
 
 // adds a PlyElement to a scene. The element will be copied, thus transferring ownership
 enum PlyResult  PlySceneAddElement(struct PlyScene* scene, struct PlyElement* element);
@@ -262,6 +285,20 @@ inline const char* dbgPlyResultToString(enum PlyResult res)
 {
 	if (res == PLY_SUCCESS) {
 		return "PLY_SUCCESS";
+	}
+	if (res == PLY_MALFORMED_DATA_ERROR)
+	{
+		return "PLY_MALFORMED_DATA_ERROR";
+	}
+	if (res == PLY_DATA_TYPE_MISMATCH_ERROR) {
+		return "PLY_DATA_TYPE_MISMATCH_ERROR";
+	}
+	if (res == PLY_LIST_COUNT_MISMATCH_ERROR) {
+		return "PLY_LIST_COUNT_MISMATCH_ERROR";
+	}
+	if (res == PLY_MALFORMED_HEADER_ERROR)
+	{
+		return "PLY_MALFORMED_HEADER_ERROR";
 	}
 	if (res == PLY_EXCEEDS_BOUND_LIMITS_ERROR) {
 		return "PLY_EXCEEDS_BOUND_LIMITS_ERROR";
