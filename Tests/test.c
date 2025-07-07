@@ -40,6 +40,10 @@ void getDataFromPropertyOfElementAsList(double* dstBuffer, const size_t dstBuffe
     if (elementCountOut!=NULL) {
         *elementCountOut = count;
     }
+    if (!dstBuffer) {
+        return;
+    }
+
     offset += PlyGetSizeofScalarType(prop->listCountType);
 
     for (U64 i = 0; i < min(count,dstBufferSize/sizeof(double)); ++i)
@@ -83,7 +87,7 @@ int main(void)
     // - Large Geometric Models Archive at Georgia Tech: https://sites.cc.gatech.edu/projects/large_models/
     // - The Stanford 3D Scanning Repository: https://graphics.stanford.edu/data/3Dscanrep/
 
-	enum PlyResult lres = PlyLoadFromDisk("tests/res/cube.ply", &scene);
+	enum PlyResult lres = PlyLoadFromDisk("res/xyzrgb_dragon.ply", &scene);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
@@ -91,6 +95,9 @@ int main(void)
 	{
 		printf("res: %s\n", dbgPlyResultToString(lres));
 		PlyDestroyScene(&scene);
+
+        printf("Press any key to exit.\n");
+        getchar();
 		return EXIT_FAILURE;
 	}
 
@@ -115,7 +122,7 @@ int main(void)
             struct PlyElement* element = scene.elements + eId;
             printf("-- Element #%llu \"%s\" --\n", eId, element->name);
             printf("\t\tData Line Count %I32u\n", element->dataLineCount);
-            printf("\t\tData Size: %I64u\n", element->dataSize);;
+            printf("\t\tData Size: %llu\n", element->dataSize);;
             printf("\tProperty Count:%I32u\n\n", element->propertyCount);
 
             //printRawDataOfElement(element);
@@ -184,5 +191,7 @@ int main(void)
 
 	PlyDestroyScene(&scene);
 
+    printf("Press any key to exit.\n");
+        getchar();
 	return EXIT_SUCCESS;
 }

@@ -5,10 +5,11 @@
             "label": "C/C++: gcc.exe build active file",
             "command": "C:\\msys64\\ucrt64\\bin\\gcc.exe",
             "args": [
-                "-fdiagnostics-color=always",
-                "-g",
+                //"-g", // -g enables debugging
                 "-std=c99",
-                //"-Wall",
+                "-O3",
+                "-flto",
+                "-Wall",
                 "${file}",
                 "${workspaceFolder}/c_polygon.c",
                 "-o",

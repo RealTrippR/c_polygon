@@ -278,7 +278,7 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDisk(const char* fileName, struc
 
 
 /// Loads a PlyScene from a given wide filename.
-/// @param const wchar_t* fileName - filename to read, as a wide string
+/// @param const wchar_t* fileName - filename to read, as a wide (UTF-16) string
 /// @param struct PlyScene* scene - scene to write to 
 PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, struct PlyScene* scene);
 

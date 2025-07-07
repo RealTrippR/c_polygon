@@ -1132,7 +1132,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
             // just beyond the end of format (last char + 1)
             const char* formatEnd = NULL;
             // look for ascii keyword
-            for (U64 i = strlen("ascii"); i < lineLen; ++i) {
+            for (U64 i = strlen("format"); i < lineLen; ++i) {
                 if (strneql(line + i, "ascii", min(strlen("ascii"), lineLen - i)) == true)
                 {
                     scene->format = PLY_FORMAT_ASCII;
@@ -1143,7 +1143,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
 
 
             // look for binary_big_endian  keyword
-            for (U64 i = strlen("binary_big_endian"); i < lineLen; ++i) {
+            for (U64 i = strlen("format"); i < lineLen; ++i) {
                 if (strneql(line + i, "binary_big_endian", min(strlen("binary_big_endian"), lineLen - i)) == true)
                 {
                     scene->format = PLY_FORMAT_BINARY_BIG_ENDIAN;
@@ -1154,7 +1154,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
 
 
             // look for binary_little_endian keyword
-            for (U64 i = strlen("binary_little_endian"); i < lineLen; ++i) {
+            for (U64 i = strlen("format"); i < lineLen; ++i) {
                 if (strneql(line + i, "binary_little_endian", min(strlen("binary_little_endian"), lineLen - i)) == true)
                 {
                     scene->format = PLY_FORMAT_BINARY_LITTLE_ENDIAN;
