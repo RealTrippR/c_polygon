@@ -183,12 +183,25 @@ typedef void (*PlyDeallocT)(void*);
 
 // -+- FUNCTION DECLARATIONS -+- //
 
+/// Returns the system endianness as a PLY_FORMAT
+/// @return enum PlyFormat - returns either PLY_FORMAT_BIG_ENDIAN or PLY_FORMAT_LITTLE_ENDIAN
 enum PlyFormat PlyGetSystemEndianness();
 
+/// PlyScaleBytesToD64() - Converts variable length data to a Double
+/// @param void* data - Start of data
+/// @param enum PlyScalarType t - Scalar type used to infer size of data to convert
+/// @return double - Data as a double
 double PlyScaleBytesToD64(void* data, const enum PlyScalarType t);
 
+/// Returns the sizeof a Scalar type in bytes
+/// @param enum PlyScalarType type - Scalar type to get the size of
+/// @return U8 - Size of scalar type (1 . . . 8)
 U8 PlyGetSizeofScalarType(const enum PlyScalarType type);
 
+/// Converts a str to a scalar type
+/// @param const char* str - c string to read from
+/// @param const U64 strLen - the max length to read
+/// @return PlyScalarType - upon failure PLY_SCALAR_TYPE_UNDEFINED will be returned.
 enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen);
 
 inline void PlyScalarUnionCpyIntoLocation(void* dst, const union PlyScalarUnion* u, const enum PlyScalarType t)
@@ -215,10 +228,20 @@ enum PlyResult PlySceneAddObjectInfo(struct PlyScene* scene, struct PlyObjectInf
 enum PlyResult  PlySceneAddElement(struct PlyScene* scene, struct PlyElement* element);
 
 
+/// Loads a PlyScene from memory.
+/// @param const U8* mem - the beginning of the memory to read.
+/// @param const U8* mem - the length of the memory to read. (memEnd - memBegin + 1)
+/// @param struct PlyScene* scene - scene to write to 
 enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* scene);
 
+/// Loads a PlyScene from a given filename.
+/// @param const char* fileName - filename to read
+/// @param struct PlyScene* scene - scene to write to 
 enum PlyResult PlyLoadFromDisk(const char* fileName, struct PlyScene* scene);
 
+
+/// Destroys the scene and all associated memory
+/// @param struct PlyScene* scene - scene to destroy
 void PlyDestroyScene(struct PlyScene* scene);
 
 

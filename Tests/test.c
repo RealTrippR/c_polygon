@@ -6,24 +6,30 @@
 #include <time.h>
 
 
-double getDataFromPropertyOfElement(const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx)
+double getDataFromPropertyOfElement(const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx, U8* success)
 {
     const U64 offset = e->dataLineBegins[dataLineIdx] + prop->dataLineOffset;
 	if (offset >= e->dataSize || dataLineIdx >= e->dataLineCount) {
-		assert(0&&"Out of bounds access");
+        if (success) 
+            *success = 0;
+        return 0;
 	}
 
     U8* f = ((U8*)e->data) + offset;
+    if (success) 
+        *success = 1;
     return PlyScaleBytesToD64(f, prop->scalarType);
 }
 
 
 void getDataFromPropertyOfElementAsList(double* dstBuffer, const size_t dstBufferSize, size_t* elementCountOut,
-    const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx)
+    const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx, U8* success)
 {
     U64 offset = e->dataLineBegins[dataLineIdx] + prop->dataLineOffset;
     if (offset >= e->dataSize) {
-        assert("Out of bounds access");
+        if (success)
+            *success = 0;
+        return;
     }
     U8* f = ((U8*)e->data) + offset;
     U64 count = (U64)PlyScaleBytesToD64(f, prop->listCountType);
@@ -35,12 +41,18 @@ void getDataFromPropertyOfElementAsList(double* dstBuffer, const size_t dstBuffe
     for (U64 i = 0; i < min(count,dstBufferSize/sizeof(double)); ++i)
     {
         U8* f = ((U8*)e->data) + offset;
-        offset += PlyGetSizeofScalarType(prop->scalarType);
-        if (offset >= e->dataSize) {
-            assert("Out of bounds access");
+        const U64 sze = PlyGetSizeofScalarType(prop->scalarType);
+        if (offset + sze> e->dataSize) {
+            if (success)
+                *success = 0;
+            return;
         }
         dstBuffer[i] = PlyScaleBytesToD64(f, prop->scalarType);
+
+        offset += sze;
     }
+    if (success)
+        *success = 1;
 }
 
 
@@ -66,10 +78,6 @@ int main(void)
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
-
-    const char* s = "-126";
-    U8 len;
-    I16 i = strtoi8(s, &len);
 	if (lres != PLY_SUCCESS)
 	{
 		printf("res: %s\n", dbgPlyResultToString(lres));
@@ -102,6 +110,8 @@ int main(void)
             printf("\t\tData Size: %I64u\n", element->dataSize);;
             printf("\tProperty Count:%I32u\n", element->propertyCount);
 
+            printRawDataOfElement(element);
+
             for (U64 pId = 0; pId < element->propertyCount; ++pId)
             {
                 printf("\t-- Property %llu --\n", pId);
@@ -110,11 +120,13 @@ int main(void)
                 printf("\t\tScalar Type: %s\n", dbgPlyScalarTypeToString(property->scalarType));
                 printf("\t\tData Type: %s\n", dbgPlyDataTypeToString(property->dataType));
                 printf("\t\tList Count Type: %s\n", dbgPlyScalarTypeToString(property->listCountType));
-                printf("\t\tData Line Offset: %lu\n", property->dataLineOffset);
+                printf("\t\tData Line Offset: %u\n", property->dataLineOffset);
             }
 
 
             if (PRINT_ELEMENT_DATA) {
+                U8 success = 0;
+
                 printf("\tElement data (upscaled to double 64):\n");
                 for (U64 lno = 0; lno < element->dataLineCount; ++lno)
                 {
@@ -125,7 +137,10 @@ int main(void)
                         if (property->dataType == PLY_DATA_TYPE_LIST) {
                             double d[512];
                             U64 dcount;
-                            getDataFromPropertyOfElementAsList(d, sizeof(d), &dcount, element, property, lno);
+                            getDataFromPropertyOfElementAsList(d, sizeof(d), &dcount, element, property, lno, &success);
+                            if (!success) {
+                                assert(00&&"Bad data read.");
+                            }
                             printf("<%llu>{", dcount);
                             for (U64 a = 0; a < dcount; ++a)
                             {
@@ -144,7 +159,10 @@ int main(void)
                             }
                         }
                         else {
-                            double d = getDataFromPropertyOfElement(element, property, lno);
+                            double d = getDataFromPropertyOfElement(element, property, lno, &success);
+                            if (!success) {
+                                assert(00&&"Bad data read.");
+                            }
                             printf("%0.2f ", d);
                         }
                     }
