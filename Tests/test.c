@@ -126,7 +126,7 @@ int main(void)
                             double d[512];
                             U64 dcount;
                             getDataFromPropertyOfElementAsList(d, sizeof(d), &dcount, element, property, lno);
-                            printf("{");
+                            printf("<%llu>{", dcount);
                             for (U64 a = 0; a < dcount; ++a)
                             {
                                 if (a + 1 != dcount) {
