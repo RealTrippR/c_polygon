@@ -4,6 +4,7 @@
 * text=auto
 # Github incorrectly assumes that some of the files in this repo are written in C++
 *.cpp linguist-detectable=false 
+*.c++ linguist-detectable=false 
 
 ###############################################################################
 # Set default behavior for command prompt diff.
