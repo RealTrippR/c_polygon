@@ -1,16 +1,15 @@
-
 /*
-Copyright � 2025 Tripp Robins
+Copyright (C) 2025 Tripp Robins
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this
-software and associated documentation files (the �Software�), to deal in the Software
+software and associated documentation files (the "Software"), to deal in the Software
 without restriction, including without limitation the rights to use, copy, modify, merge,
 publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
 to whom the Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED �AS IS�, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
 THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -277,6 +276,211 @@ enum PlyFormat PlyGetSystemEndianness(void)
     else {
         return PLY_FORMAT_BINARY_BIG_ENDIAN;
     }
+}
+
+
+uint32_t PlyScaleBytesToU32(void* data, const enum PlyScalarType t)
+{
+    U8* f = data;
+    uint32_t d = 0;
+
+    switch (t) {
+    case PLY_SCALAR_TYPE_UNDEFINED:
+        assert("C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
+        d = 0;
+        break;
+    case PLY_SCALAR_TYPE_FLOAT: {
+        float temp = 0x0;;
+        memcpy(&temp, f, sizeof(float));
+        d = (uint32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_DOUBLE: {
+        double temp = 0x0;
+        memcpy(&temp, f, sizeof(double));
+        d = temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_CHAR: {
+        int8_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int8_t));
+        d = (uint32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_UCHAR: {
+        uint8_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint8_t));
+        d = (uint32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_SHORT: {
+        int16_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int16_t));
+        d = (uint32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_USHORT: {
+        uint16_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint16_t));
+        d = (uint32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_INT: {
+        int32_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int32_t));
+        d = (uint32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_UINT: {
+        uint32_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint32_t));
+        d = (uint32_t)temp;
+        break;
+    }
+    default:
+        assert(0x0 && "C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
+        d = 0.0;
+        break;
+    }
+
+
+    return d;
+}
+
+int32_t PlyScaleBytesToI32(void* data, const enum PlyScalarType t)
+{
+    U8* f = data;
+    int32_t d = 0;
+
+    switch (t) {
+    case PLY_SCALAR_TYPE_UNDEFINED:
+        assert("C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
+        d = 0;
+        break;
+    case PLY_SCALAR_TYPE_FLOAT: {
+        float temp = 0x0;;
+        memcpy(&temp, f, sizeof(float));
+        d = (int32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_DOUBLE: {
+        double temp = 0x0;
+        memcpy(&temp, f, sizeof(double));
+        d = temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_CHAR: {
+        int8_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int8_t));
+        d = (int32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_UCHAR: {
+        uint8_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint8_t));
+        d = (int32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_SHORT: {
+        int16_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int16_t));
+        d = (int32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_USHORT: {
+        uint16_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint16_t));
+        d = (int32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_INT: {
+        int32_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int32_t));
+        d = (int32_t)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_UINT: {
+        uint32_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint32_t));
+        d = (int32_t)temp;
+        break;
+    }
+    default:
+        assert(0x0 && "C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
+        d = 0.0;
+        break;
+    }
+
+
+    return d;
+}
+
+float PlyScaleBytesToF32(void* data, const enum PlyScalarType t)
+{
+    U8* f = data;
+    float d = 0;
+
+    switch (t) {
+    case PLY_SCALAR_TYPE_UNDEFINED:
+        assert("C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
+        d = 0;
+        break;
+    case PLY_SCALAR_TYPE_FLOAT: {
+        float temp = 0x0;;
+        memcpy(&temp, f, sizeof(float));
+        d = (float)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_DOUBLE: {
+        double temp = 0x0;
+        memcpy(&temp, f, sizeof(double));
+        d = temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_CHAR: {
+        int8_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int8_t));
+        d = (float)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_UCHAR: {
+        uint8_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint8_t));
+        d = (float)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_SHORT: {
+        int16_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int16_t));
+        d = (float)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_USHORT: {
+        uint16_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint16_t));
+        d = (float)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_INT: {
+        int32_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int32_t));
+        d = (float)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_UINT: {
+        uint32_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint32_t));
+        d = (float)temp;
+        break;
+    }
+    default:
+        assert(0x0 && "C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
+        d = 0.0;
+        break;
+    }
+
+
+    return d;
 }
 
 double PlyScaleBytesToD64(void* data, const enum PlyScalarType t)

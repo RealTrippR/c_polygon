@@ -77,6 +77,11 @@ int main(void)
     t = clock();
 
 	struct PlyScene scene;
+
+    // I would recommend checking out these links for test .PLY files:
+    // - Large Geometric Models Archive at Georgia Tech: https://sites.cc.gatech.edu/projects/large_models/
+    // - The Stanford 3D Scanning Repository: https://graphics.stanford.edu/data/3Dscanrep/
+
 	enum PlyResult lres = PlyLoadFromDisk("tests/res/cube.ply", &scene);
 
     t = clock() - t;
@@ -92,7 +97,7 @@ int main(void)
 	printf(".ply file parsing successful. Duration, sec: %f\n", parseDurationS);
 
     #define PRINT_SCENE_HEADER 1
-    #define PRINT_ELEMENT_DATA 1
+    #define PRINT_ELEMENT_DATA 0
 
     if (PRINT_SCENE_HEADER) {
         for (U64 eId = 0; eId < scene.elementCount; ++eId)
@@ -107,23 +112,22 @@ int main(void)
 
 
             struct PlyElement* element = scene.elements + eId;
-            printf("-- Element %llu --\n", eId);
-            printf("\tName: %s\n", element->name);
+            printf("-- Element #%llu \"%s\" --\n", eId, element->name);
             printf("\t\tData Line Count %I32u\n", element->dataLineCount);
             printf("\t\tData Size: %I64u\n", element->dataSize);;
-            printf("\tProperty Count:%I32u\n", element->propertyCount);
+            printf("\tProperty Count:%I32u\n\n", element->propertyCount);
 
             //printRawDataOfElement(element);
 
             for (U64 pId = 0; pId < element->propertyCount; ++pId)
             {
-                printf("\t-- Property %llu --\n", pId);
+                printf("\t-- Property #%llu \"%s\" --\n", pId, element->properties[pId].name);
 
                 struct PlyProperty* property = element->properties + pId;
                 printf("\t\tScalar Type: %s\n", dbgPlyScalarTypeToString(property->scalarType));
                 printf("\t\tData Type: %s\n", dbgPlyDataTypeToString(property->dataType));
                 printf("\t\tList Count Type: %s\n", dbgPlyScalarTypeToString(property->listCountType));
-                printf("\t\tData Line Offset: %u\n", property->dataLineOffset);
+                printf("\t\tData Line Offset: %u\n\n", property->dataLineOffset);
             }
 
 
