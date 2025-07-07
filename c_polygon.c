@@ -1602,7 +1602,7 @@ enum PlyResult PlyLoadFromDisk(const char* fileName, struct PlyScene* scene)
 
     // get file size
     _fseeki64(fptr, 0, SEEK_END);
-    const U64 fsze = _ftelli64(fptr);
+    const long long fsze = _ftelli64(fptr);
     rewind(fptr);
 
     U8* fileData = NULL;
@@ -1614,7 +1614,7 @@ enum PlyResult PlyLoadFromDisk(const char* fileName, struct PlyScene* scene)
     fileData = plyRealloc(NULL, fsze + 1);
 
     if (fileData == NULL) {
-        resCode == PLY_FAILED_ALLOC_ERROR;
+        resCode = PLY_FAILED_ALLOC_ERROR;
         goto bail;
     }
 
@@ -1647,7 +1647,7 @@ enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, struct PlyScene* scene)
 
     // get file size
     _fseeki64(fptr, 0, SEEK_END);
-    const U64 fsze = _ftelli64(fptr);
+    const long long fsze = _ftelli64(fptr);
     rewind(fptr);
 
     U8* fileData = NULL;
@@ -1659,7 +1659,7 @@ enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, struct PlyScene* scene)
     fileData = plyRealloc(NULL, fsze + 1);
 
     if (fileData == NULL) {
-        resCode == PLY_FAILED_ALLOC_ERROR;
+        resCode = PLY_FAILED_ALLOC_ERROR;
         goto bail;
     }
 
@@ -2084,6 +2084,7 @@ double strtod64(const char* str, U8* strLenOut)
     if (strLenOut)
         *strLenOut = (U8)(end - start);
    
+
 
     return num;
 }
