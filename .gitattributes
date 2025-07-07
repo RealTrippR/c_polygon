@@ -2,6 +2,7 @@
 # Set default behavior to automatically normalize line endings.
 ###############################################################################
 * text=auto
+*Makefile linguist-detectable=false # Github incorrectly assumes that some of the files in this repo are written in C++
 
 ###############################################################################
 # Set default behavior for command prompt diff.
