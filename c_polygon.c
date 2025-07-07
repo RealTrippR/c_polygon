@@ -1376,7 +1376,7 @@ enum PlyResult PlyLoadFromDisk(const char* fileName, struct PlyScene* scene)
 	}
 
     // get file size
-    fseek(fptr, 0, SEEK_END);
+    _fseeki64(fptr, 0, SEEK_END);
     const U64 fsze = _ftelli64(fptr);
     rewind(fptr);
 
@@ -1421,7 +1421,7 @@ enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, struct PlyScene* scene)
     }
 
     // get file size
-    fseek(fptr, 0, SEEK_END);
+    _fseeki64(fptr, 0, SEEK_END);
     const U64 fsze = _ftelli64(fptr);
     rewind(fptr);
 
