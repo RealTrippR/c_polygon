@@ -40,10 +40,10 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -70,6 +70,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -107,7 +108,7 @@
       <TreatSpecificWarningsAsErrors>4047; 4715; 4716; 4098; 4777</TreatSpecificWarningsAsErrors>
       <AdditionalOptions>/Wall %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>false</TreatWarningAsError>
-      <DisableSpecificWarnings>4820</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4820; 5045;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -123,6 +124,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <TreatSpecificWarningsAsErrors>4047; 4715; 4716</TreatSpecificWarningsAsErrors>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,13 +140,24 @@
     <ClInclude Include="Tests\ISAAC\standard.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="c_polygon.c" />
+    <ClCompile Include="c_polygon.c">
+      <StructMemberAlignment Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</StructMemberAlignment>
+    </ClCompile>
     <ClCompile Include="Tests\fuzzer.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Tests\ISAAC\isaac64.c" />
     <ClCompile Include="Tests\test.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Tests\res\._cube.ply" />
+    <None Include="Tests\res\bun000.ply" />
+    <None Include="Tests\res\bun_zipper.ply" />
+    <None Include="Tests\res\cube.ply" />
+    <None Include="Tests\res\cube_bin.ply" />
+    <None Include="Tests\res\rand.ply" />
+    <None Include="Tests\res\xyzrgb_dragon.ply" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -31,5 +31,31 @@
     <Filter Include="Tests\Isaac">
       <UniqueIdentifier>{a58ce8d1-4897-412c-89ed-d0ec9bd9db4a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests\res">
+      <UniqueIdentifier>{c418aa55-0f8a-4438-b7b0-7b1c6f46ee51}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Tests\res\xyzrgb_dragon.ply">
+      <Filter>Tests\res</Filter>
+    </None>
+    <None Include="Tests\res\._cube.ply">
+      <Filter>Tests\res</Filter>
+    </None>
+    <None Include="Tests\res\bun_zipper.ply">
+      <Filter>Tests\res</Filter>
+    </None>
+    <None Include="Tests\res\bun000.ply">
+      <Filter>Tests\res</Filter>
+    </None>
+    <None Include="Tests\res\cube.ply">
+      <Filter>Tests\res</Filter>
+    </None>
+    <None Include="Tests\res\rand.ply">
+      <Filter>Tests\res</Filter>
+    </None>
+    <None Include="Tests\res\cube_bin.ply">
+      <Filter>Tests\res</Filter>
+    </None>
   </ItemGroup>
 </Project>
