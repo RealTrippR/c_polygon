@@ -5,6 +5,7 @@
         "stdint.h": "c",
         "stdio.h": "c",
         "stdlib.h": "c",
-        "c_polygon.h": "c"
+        "c_polygon.h": "c",
+        "c_polygon.inl": "c"
     }
 }

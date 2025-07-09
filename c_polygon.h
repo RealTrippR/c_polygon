@@ -27,7 +27,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #define PLY_LOAD_ALL_ELEMENTS 0u
 
 /*In C89, the version will not be defined, or it will be equal to 0.*/
-#if defined(__STDC_VERSION__) || (__STDC_VERSION__ != 0)
+#if defined(_MSC_VER) || defined(__STDC_VERSION__) || (__STDC_VERSION__ != 0)
 #define PLY_INLINE inline
 #else
 #define PLY_INLINE
@@ -245,8 +245,11 @@ typedef void (*PlyDeallocT)(void*);
 /// @return enum PlyFormat - returns either PLY_FORMAT_BIG_ENDIAN or PLY_FORMAT_LITTLE_ENDIAN */
 PLY_H_FUNCTION_PREFIX enum PlyFormat PlyGetSystemEndianness(void);
 
-
-void PLY_INLINE PlySwapBytes(U8* mem, const enum PlyScalarType t);
+/*
+/// Swaps bytes in place to invert endianness
+/// @param U8* mem - data to swap
+/// @param PlyScalarType t - type of data to swap (PlyGetSizeofScalarType(t) bytes will be swapped) */
+static PLY_INLINE void PlySwapBytes(U8* mem, const enum PlyScalarType t);
 
 /*
 /// PlyScaleBytesToU32() - Converts variable length data to an unsigned int
@@ -341,138 +344,8 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, s
 PLY_H_FUNCTION_PREFIX void PlyDestroyScene(struct PlyScene* scene);
 
 
+#include "c_polygon.inl"
 
-
-
-
-
-
-/*
-/// Swaps bytes in place to invert endianness
-/// @param U8* mem - data to swap 
-/// @param PlyScalarType t - type of data to swap (PlyGetSizeofScalarType(t) bytes will be swapped) */
-void PLY_INLINE PlySwapBytes(U8* mem, const enum PlyScalarType t)
-{
-	switch (t)
-	{
-	case PLY_SCALAR_TYPE_USHORT:
-		*mem= PLY_BYTESWAP16(*mem);
-		break;
-	case PLY_SCALAR_TYPE_SHORT:
-		*mem = PLY_BYTESWAP16(*mem);
-		break;
-	case PLY_SCALAR_TYPE_UINT:
-		*mem = PLY_BYTESWAP32(*mem);
-		break;
-	case PLY_SCALAR_TYPE_INT:
-		*mem = PLY_BYTESWAP32(*mem);
-		break;
-	case PLY_SCALAR_TYPE_FLOAT:
-		*mem = PLY_BYTESWAP32(*mem);
-		break;
-	case PLY_SCALAR_TYPE_DOUBLE:
-		*mem = PLY_BYTESWAP64(*mem);
-		break;
-	}
-}
-
-
-
-static PLY_INLINE const char* dbgPlyDataTypeToString(enum PlyDataType t)
-
-{
-	if (t == PLY_DATA_TYPE_LIST)
-	{
-		return "list";
-	}
-	if (t == PLY_DATA_TYPE_SCALAR)
-	{
-		return "scalar";
-	}
-
-	return "undefined";
-}
-
-static PLY_INLINE const char* dbgPlyScalarTypeToString(enum PlyScalarType t)
-{
-
-	if (t == PLY_SCALAR_TYPE_CHAR)
-	{
-		return "char";
-	}
-	if (t == PLY_SCALAR_TYPE_UCHAR)
-	{
-		return "uchar";
-	}
-	if (t == PLY_SCALAR_TYPE_SHORT)
-	{
-		return "short";
-	}
-	if (t == PLY_SCALAR_TYPE_USHORT)
-	{
-		return "short";
-	}
-	if (t == PLY_SCALAR_TYPE_INT)
-	{
-		return "int";
-	}
-	if (t == PLY_SCALAR_TYPE_UINT)
-	{
-		return "uint";
-	}
-	if (t == PLY_SCALAR_TYPE_FLOAT)
-	{
-		return "float";
-	}
-	if (t == PLY_SCALAR_TYPE_DOUBLE)
-	{
-		return "double";
-	}
-	return "undefined";
-
-}
-static PLY_INLINE const char* dbgPlyResultToString(enum PlyResult res)
-{
-	if (res == PLY_SUCCESS) {
-		return "PLY_SUCCESS";
-	}
-	if (res == PLY_MALFORMED_DATA_ERROR)
-	{
-		return "PLY_MALFORMED_DATA_ERROR";
-	}
-	if (res == PLY_DATA_TYPE_MISMATCH_ERROR) {
-		return "PLY_DATA_TYPE_MISMATCH_ERROR";
-	}
-	if (res == PLY_LIST_COUNT_MISMATCH_ERROR) {
-		return "PLY_LIST_COUNT_MISMATCH_ERROR";
-	}
-	if (res == PLY_MALFORMED_HEADER_ERROR)
-	{
-		return "PLY_MALFORMED_HEADER_ERROR";
-	}
-	if (res == PLY_EXCEEDS_BOUND_LIMITS_ERROR) {
-		return "PLY_EXCEEDS_BOUND_LIMITS_ERROR";
-	}
-	if (res == PLY_UNSUPPORTED_VERSION_ERROR) {
-		return "PLY_UNSUPPORTED_VERSION_ERROR";
-	}
-	if (res == PLY_GENERIC_ERROR) {
-		return "PLY_GENERIC_ERROR";
-	}
-	if (res == PLY_MALFORMED_FILE_ERROR) {
-		return "PLY_MALFORMED_FILE_ERROR";
-	}
-	if (res == PLY_FAILED_ALLOC_ERROR) {
-		return "PLY_FAILED_ALLOC_ERROR";
-	}
-	if (res == PLY_FILE_WRITE_ERROR) {
-		return "PLY_FILE_WRITE_ERROR";
-	}
-	if (res == PLY_FILE_READ_ERROR) {
-		return "PLY_FILE_READ_ERROR";
-	}
-	return "Invalid PlyResult";
-}
 
 #ifdef __cplusplus
 }

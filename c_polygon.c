@@ -151,6 +151,17 @@ static PLY_INLINE bool strneql(const char* str1, const char* str2, size_t n)
 
 #endif
 
+
+
+
+/*for ASNI C compatability*/
+#if (__STDC_VERSION__ == 0)
+#include "c_polygon.inl"
+#endif
+
+
+
+
 static bool PLY_INLINE checkForElementNameCollision(const struct PlyScene* scene, const char* name)
 {
     U32 ei = 0;

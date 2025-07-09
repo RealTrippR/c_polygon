@@ -153,6 +153,7 @@
     <ClCompile Include="Tests\test.c" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="c_polygon.inl" />
     <None Include="Tests\.gitignore" />
     <None Include="Tests\res\._cube.ply" />
     <None Include="Tests\res\bun000.ply" />

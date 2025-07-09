@@ -66,5 +66,6 @@
     <None Include="Tests\res\test_blndr.ply">
       <Filter>Tests\res</Filter>
     </None>
+    <None Include="c_polygon.inl" />
   </ItemGroup>
 </Project>
