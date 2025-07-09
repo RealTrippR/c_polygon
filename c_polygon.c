@@ -1396,26 +1396,6 @@ static PLY_INLINE enum PlyResult allocateDataLinesForElement(struct PlyElement* 
 
 
 
-static PLY_INLINE void* growData(void* oldBlock, U64 newSize, U64* oldCapacity)
-{
-    if (*oldCapacity < newSize)
-        *oldCapacity = newSize;
-
-    // round up to the next power of 2
-    (*oldCapacity)--;
-    (*oldCapacity) |= (*oldCapacity) >> 1;
-    (*oldCapacity) |= (*oldCapacity) >> 2;
-    (*oldCapacity) |= (*oldCapacity) >> 4;
-    (*oldCapacity) |= (*oldCapacity) >> 8;
-    (*oldCapacity) |= (*oldCapacity) >> 16;
-    (*oldCapacity) |= (*oldCapacity) >> 32;
-    (*oldCapacity)++;
-
-
-    return plyRealloc(oldBlock, *oldCapacity);
-}
-
-
 enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const U8* dataLast)
 {
     const U64 dataSize = (dataLast - dataBegin) + 1;
