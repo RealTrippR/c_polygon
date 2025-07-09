@@ -182,7 +182,7 @@ static void* plyReallocDefault(void* oldBlock, U64 s)
     if (s == 0) {
         return NULL;
     }
-    return realloc(oldBlock, s);;
+    return realloc(oldBlock, s);
 }
 
 
@@ -217,8 +217,6 @@ static void* plyReCallocDefault(void* oldBlock, U32 cc, U32 ec, U32 es)
 static void plyDeallocDefault(void* m) {
     free(m);
 }
-
-
 
 
 
@@ -1351,12 +1349,43 @@ static PLY_INLINE enum PlyResult allocateDataLinesForElement(struct PlyElement* 
 }
 
 
+
+static PLY_INLINE void* growData(void* oldBlock, U64 newSize, U64* oldCapacity)
+{
+    if (*oldCapacity < newSize)
+        *oldCapacity = newSize;
+
+    // round up to the next power of 2
+    (*oldCapacity)--;
+    (*oldCapacity) |= (*oldCapacity) >> 1;
+    (*oldCapacity) |= (*oldCapacity) >> 2;
+    (*oldCapacity) |= (*oldCapacity) >> 4;
+    (*oldCapacity) |= (*oldCapacity) >> 8;
+    (*oldCapacity) |= (*oldCapacity) >> 16;
+    (*oldCapacity) |= (*oldCapacity) >> 32;
+    (*oldCapacity)++;
+
+
+    return plyRealloc(oldBlock, *oldCapacity);
+}
+
+
 enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const U8* dataLast)
 {
     const U64 dataSize = (dataLast - dataBegin) + 1;
 
+    enum PlyFormat systemEndianness = PlyGetSystemEndianness();
+
     U64 ei = 0;
     const U8* dataPrev = dataBegin;
+
+    /*this table is used to hold the data size needed to alloc for each element*/
+    const U64* elementAllocSizeTable;
+    elementAllocSizeTable = plyRealloc(NULL, scene->elementCount);
+    
+
+
+    // precompute the total amount of data that will be needed for each element
 
     for (; ei < scene->elementCount; ++ei)
     {
@@ -1365,19 +1394,31 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
             continue; /* empty element (idk if this is permitted by the standard or not) */
         }
 
-        /* create data lines for element and all its properties*/
-        if (allocateDataLinesForElement(element) != PLY_SUCCESS)
-            return PLY_FAILED_ALLOC_ERROR;
+
+        dataBegin = dataPrev; /* reset on every new elemene that is being read to prevent incorrect offset of dataLineBegins */
+
+   
 
         U64 dli = 0;
         for (; dli < element->dataLineCount; ++dli)
         {
-            const U64 eledlibgn = dataPrev - dataBegin;
-            element->dataLineBegins[dli] = eledlibgn;
+
+            /* create data lines for element and all its properties*/
+            if (allocateDataLinesForElement(element) != PLY_SUCCESS)
+                return PLY_FAILED_ALLOC_ERROR;
+
+            if (dataPrev >= dataLast) {
+                return PLY_MALFORMED_DATA_ERROR;
+            }
+
+
             U32 countedProperties = 0u;
 
-            U64 pi = 0;
-            for (; pi < element->propertyCount; ++pi)
+            const U8* dataLineBegin = dataPrev;
+            element->dataLineBegins[dli] = dataPrev - dataBegin;
+
+            U64 pi;
+            for (pi = 0; pi < element->propertyCount; ++pi)
             {
                 ++countedProperties;
                 if (countedProperties > element->propertyCount) {
@@ -1386,10 +1427,157 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
 
                 struct PlyProperty* property = element->properties + pi;
 
-                const U8 scalarSize = PlyGetSizeofScalarType(property->scalarType);
+                if (property->dataType == PLY_DATA_TYPE_SCALAR)
+                {
+                    const U8 scalarSize = PlyGetSizeofScalarType(property->scalarType);
+                    const U64 newSize = element->dataSize + scalarSize;
+
+                    /* prevent overflow */
+                    if (newSize < element->dataSize) {
+                        return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+                    }
+
+                    /*advance data pointer by sizeof(property.scalarType)*/
+                    dataPrev += scalarSize;
+
+                    /* prevent buffer overrun */
+                    if (dataPrev > dataLast) {
+                        return PLY_MALFORMED_DATA_ERROR;
+                    }
+
+                    element->dataSize = newSize;
+                }
+                else
+                {
+                    U64 listCount = 0u;
+                    {
+                        /* get list data count */
+                        const U8 listcountTypeSize = PlyGetSizeofScalarType(property->listCountType);
+
+                        const U64 newLen = element->dataSize + listcountTypeSize;
+
+                        /* prevent overflow */
+                        if (newLen < element->dataSize) {
+                            return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+                        }
+
+                        U8 sze = PlyGetSizeofScalarType(property->scalarType);
+
+                        /*advance data pointer by sizeof(property.scalarType)*/
+                        dataPrev += listcountTypeSize;
+
+                        /* prevent buffer overrun */
+                        if (dataPrev > dataLast)
+                            return PLY_MALFORMED_DATA_ERROR;
+                        
+
+                        /*copy list count from data into list count var */
+                        listCount = PlyScaleBytesToD64(dataPrev - listcountTypeSize, listcountTypeSize);
+
+                        element->dataSize = newLen;
+                    }
+
+                    /* copy list elements into data*/
+                    U64 readPropCount;
+                    for (readPropCount = 0u; readPropCount < listCount; ++readPropCount)
+                    {
+                        /* get list data count */
+                        const U8 scalarSize = PlyGetSizeofScalarType(property->scalarType);
+
+                        const U64 newLen = element->dataSize + scalarSize;
+
+                        /* prevent overflow */
+                        if (newLen < element->dataSize) {
+                            return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+                        }
+
+                        /*advance data pointer by sizeof(property.scalarType)*/
+                        dataPrev += scalarSize;
+
+                        /* prevent buffer overrun */
+                        if (dataPrev > dataLast)
+                            return PLY_MALFORMED_DATA_ERROR;
+
+                        element->dataSize = newLen;
+                    }
+
+                    if (readPropCount != listCount) {
+                        return PLY_MALFORMED_DATA_ERROR;
+                    }
+                }
+            }
+
+            element->data = plyReallocDefault(NULL, element->dataSize);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    for (; ei < scene->elementCount; ++ei)
+    {
+        struct PlyElement* element = scene->elements + ei;
+        if (element->dataLineCount == 0) {
+            continue; /* empty element (idk if this is permitted by the standard or not) */
+        }
+
+      
+        dataBegin = dataPrev; /* reset on every new elemene that is being read to prevent incorrect offset of dataLineBegins */
+
+      
+        U64 dli = 0;
+        for (; dli < element->dataLineCount; ++dli)
+        {
+           
+            if (dataPrev >= dataLast) {
+                return PLY_MALFORMED_DATA_ERROR;
+            }
+
+
+            U32 countedProperties = 0u;
+
+            const U8* dataLineBegin = dataPrev;
+            element->dataLineBegins[dli] = dataPrev - dataBegin;
+
+            U64 pi;
+            for (pi = 0; pi < element->propertyCount; ++pi)
+            {
+                ++countedProperties;
+                if (countedProperties > element->propertyCount) {
+                    return PLY_MALFORMED_DATA_ERROR;
+                }
+
+                struct PlyProperty* property = element->properties + pi;
 
                 if (property->dataType == PLY_DATA_TYPE_SCALAR)
                 {
+                    const U8 scalarSize = PlyGetSizeofScalarType(property->scalarType);
+
                     const U64 newLen = element->dataSize + scalarSize;
 
                     /* prevent overflow */
@@ -1397,13 +1585,14 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
                         return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
                     }
                    
-                    void* tmp = plyRealloc(element->data, newLen);
+                    void* tmp = growData(element->data, newLen, &curElementDataCapacity);
                     if (!tmp)
                         return PLY_FAILED_ALLOC_ERROR;
 
 
                     /* set property data line offset */
-                    property->dataLineOffsets[dli] = dataPrev - dataBegin;
+                    const U64 datalineOffset = dataPrev - dataLineBegin;
+                    property->dataLineOffsets[dli] = datalineOffset;
                     
                     /*advance data pointer by sizeof(property.scalarType)*/
                     dataPrev += scalarSize;
@@ -1413,7 +1602,6 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
                         return PLY_MALFORMED_DATA_ERROR;
                     }
 
-                    //int i = PlyGetSystemEndianness();
                     element->data = tmp;
                     memcpy(
                         (U8*)(element->data)+element->dataSize, /*copy into data*/
@@ -1421,17 +1609,109 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
                         scalarSize
                     ); 
 
+                    if (systemEndianness != scene->format)
+                        PlySwapBytes(dataPrev - scalarSize, property->scalarType);
+
                     element->dataSize = newLen;
 
-
-
-
                 }
-                else if (property->dataType == PLY_DATA_TYPE_LIST)
+                else
                 {
-                    /* get list data count */
                     U64 listCount = 0u;
-                    const U8 listcountTypeSize = PlyGetSizeofScalarType(property->listCountType);
+                    {
+                        /* get list data count */
+                        const U8 listcountTypeSize = PlyGetSizeofScalarType(property->listCountType);
+
+                        const U64 newLen = element->dataSize + listcountTypeSize;
+
+                        /* prevent overflow */
+                        if (newLen < element->dataSize) {
+                            return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+                        }
+
+
+                        U8 sze = PlyGetSizeofScalarType(property->scalarType);
+
+                        void* tmp = growData(element->data, newLen, &curElementDataCapacity);
+                        if (!tmp)
+                            return PLY_FAILED_ALLOC_ERROR;
+
+
+                        /* set property data line offset */
+                        const U64 datalineOffset = dataPrev - dataLineBegin;
+                        property->dataLineOffsets[dli] = datalineOffset;
+
+                        /*advance data pointer by sizeof(property.scalarType)*/
+                        dataPrev += listcountTypeSize;
+
+                        /* prevent buffer overrun */
+                        if (dataPrev > dataLast) {
+                            return PLY_MALFORMED_DATA_ERROR;
+                        }
+
+                        /* copy list count into data */
+                        element->data = tmp;
+                        memcpy(
+                            (U8*)(element->data) + element->dataSize, /*copy into data*/
+                            dataPrev - listcountTypeSize, /*from mem*/
+                            listcountTypeSize
+                        );
+
+                        /*copy list count from data into list count var */
+                        listCount = PlyScaleBytesToD64(dataPrev - listcountTypeSize, listcountTypeSize);
+
+                        if (systemEndianness != scene->format)
+                            PlySwapBytes(dataPrev - listcountTypeSize, property->listCountType);
+
+                        element->dataSize = newLen;
+                    }
+
+                    /* copy list elements into data*/
+                    U64 readPropCount;
+                    for (readPropCount=0u; readPropCount < listCount; ++readPropCount)
+                    {
+                        /* get list data count */
+                        const U8 scalarSize = PlyGetSizeofScalarType(property->scalarType);
+
+                        const U64 newLen = element->dataSize + scalarSize;
+
+                        /* prevent overflow */
+                        if (newLen < element->dataSize) {
+                            return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+                        }
+
+                        /* expand element data */
+                        void* tmp = plyRealloc(element->data, newLen);
+                        if (!tmp)
+                            return PLY_FAILED_ALLOC_ERROR;
+
+
+
+                        /*advance data pointer by sizeof(property.scalarType)*/
+                        dataPrev += scalarSize;
+
+                        /* prevent buffer overrun */
+                        if (dataPrev > dataLast) {
+                            return PLY_MALFORMED_DATA_ERROR;
+                        }
+
+                        /* copy list count into data */
+                        element->data = tmp;
+                        memcpy(
+                            (U8*)(element->data) + element->dataSize, /*copy into data*/
+                            dataPrev - scalarSize, /*from mem*/
+                            scalarSize
+                        );
+
+                        if (systemEndianness != scene->format)
+                            PlySwapBytes(dataPrev - scalarSize, property->scalarType);
+
+                        element->dataSize = newLen;
+                    }
+
+                    if (readPropCount != listCount) {
+                        return PLY_MALFORMED_DATA_ERROR;
+                    }
                 }
             }
         }
@@ -1530,7 +1810,7 @@ enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const 
                         }
                     }
                 }
-                else if (property->dataType == PLY_DATA_TYPE_LIST)
+                else
                 {  
                     /* get list data count */
                     U64 listCount = 0u;
@@ -1731,7 +2011,7 @@ enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* sc
             srcline = srcline + srclineSize + strlen("\n");
 
             enum PlyResult exRes = PLY_GENERIC_ERROR;
-            exRes = readDataBinary(scene, (const U8*)srcline, (const U8*)(mem + memSize) - 1);
+            exRes = readDataBinary(scene, (const U8*)srcline, (const U8*)(mem + memSize));
             if (exRes == PLY_SUCCESS) {
                 return PLY_SUCCESS;
             } else {

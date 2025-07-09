@@ -18,6 +18,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #ifndef C_POLYGON_H
 #define C_POLYGON_H
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -48,6 +49,26 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 PLY_STATIC_ASSERT(C_PLY_MAX_LINE_LENGTH >= 2, "C_PLY_MAX_LINE_LENGTH must be 2 or greater");
 PLY_STATIC_ASSERT(PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH >= 2, "PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH must be 2 or greater");
+
+#ifdef _MSC_VER
+#define PLY_BYTESWAP16(x) _byteswap_ushort(x)
+#define PLY_BYTESWAP32(x) _byteswap_ulong(x)
+#define PLY_BYTESWAP64(x) _byteswap_uint64(x)
+#elif defined(__GNUC__)
+#define PLY_BYTESWAP16(x) __builtin_bswap16(x)
+#define PLY_BYTESWAP32(x) __builtin_bswap32(x)
+#define PLY_BYTESWAP64(x) __builtin_bswap64(x)
+#else /*probably glibc or some other obscure compiler*/
+#include <byteswap.h>
+#define PLY_BYTESWAP16(x) bswap_16(x)
+#define PLY_BYTESWAP32(x) bswap_32(x)
+#define PLY_BYTESWAP64(x) bswap_64(x)
+#endif // !_MSC_VER
+
+
+
+
+
 
 #ifdef __cplusplus
 namespace cply {
@@ -215,6 +236,8 @@ typedef void (*PlyDeallocT)(void*);
 PLY_H_FUNCTION_PREFIX enum PlyFormat PlyGetSystemEndianness(void);
 
 
+void inline PlySwapBytes(U8* mem, const enum PlyScalarType t);
+
 /*
 /// PlyScaleBytesToU32() - Converts variable length data to an unsigned int
 /// @param void* data - Start of data
@@ -308,6 +331,34 @@ PLY_H_FUNCTION_PREFIX void PlyDestroyScene(struct PlyScene* scene);
 
 
 
+
+
+
+
+void inline PlySwapBytes(U8* mem, const enum PlyScalarType t)
+{
+	switch (t)
+	{
+	case PLY_SCALAR_TYPE_USHORT:
+		*mem= PLY_BYTESWAP16(*mem);
+		break;
+	case PLY_SCALAR_TYPE_SHORT:
+		*mem = PLY_BYTESWAP16(*mem);
+		break;
+	case PLY_SCALAR_TYPE_UINT:
+		*mem = PLY_BYTESWAP32(*mem);
+		break;
+	case PLY_SCALAR_TYPE_INT:
+		*mem = PLY_BYTESWAP32(*mem);
+		break;
+	case PLY_SCALAR_TYPE_FLOAT:
+		*mem = PLY_BYTESWAP32(*mem);
+		break;
+	case PLY_SCALAR_TYPE_DOUBLE:
+		*mem = PLY_BYTESWAP64(*mem);
+		break;
+	}
+}
 
 
 

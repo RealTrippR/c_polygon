@@ -1,3 +1,20 @@
+/*
+Copyright (C) 2025 Tripp Robins
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this
+software and associated documentation files (the "Software"), to deal in the Software
+without restriction, including without limitation the rights to use, copy, modify, merge,
+publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons
+to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #include "../c_polygon.h"
 #include <stdio.h>
 #include <crtdbg.h>
@@ -12,7 +29,9 @@
 
 double getDataFromPropertyOfElement(const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx, U8* success)
 {
-    const U64 offset = e->dataLineBegins[dataLineIdx] + prop->dataLineOffsets[dataLineIdx];
+    const U64 lineBegin = e->dataLineBegins[dataLineIdx];
+    const U32 dataOffset = prop->dataLineOffsets[dataLineIdx];
+    const U64 offset = lineBegin + dataOffset;
 	if (offset >= e->dataSize || dataLineIdx >= e->dataLineCount) {
         if (success) 
             *success = 0;
@@ -80,6 +99,8 @@ void printRawDataOfElement(struct PlyElement* ele)
 int main(void)
 {
 restart_test:
+
+    printf("%s", "C-Polygon, a lightweight .ply (Stanford polygon) file parser written in C89. Copyright (C) 2025 Tripp Robins, under an MIT License.\n\n\n");
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     clock_t t;
@@ -93,7 +114,7 @@ restart_test:
     * - The Stanford 3D Scanning Repository: https://graphics.stanford.edu/data/3Dscanrep/
     */
 
-    enum PlyResult lres = PlyLoadFromDisk("res/cube_bin.ply", &scene);
+    enum PlyResult lres = PlyLoadFromDisk("res/xyzrgb_dragon.ply", &scene);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
@@ -115,7 +136,7 @@ restart_test:
 	printf(".ply file parsing successful. Duration, sec: %f\n", parseDurationS);
 
     #define PRINT_SCENE_HEADER 1
-    #define PRINT_ELEMENT_DATA 1
+    #define PRINT_ELEMENT_DATA 0
 
     if (PRINT_SCENE_HEADER) {
         U64 eId = 0;
@@ -136,6 +157,8 @@ restart_test:
             printf("\t\tData Line Count %I32u\n", element->dataLineCount);
             printf("\t\tData Size: %llu\n", element->dataSize);;
             printf("\tProperty Count:%I32u\n\n", element->propertyCount);
+
+            printRawDataOfElement(element);
 
             U64 pId = 0;
             for (; pId < element->propertyCount; ++pId)

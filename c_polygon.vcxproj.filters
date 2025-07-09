@@ -63,5 +63,8 @@
     <None Include="Tests\.gitignore">
       <Filter>Tests</Filter>
     </None>
+    <None Include="Tests\res\test_blndr.ply">
+      <Filter>Tests\res</Filter>
+    </None>
   </ItemGroup>
 </Project>
