@@ -1320,7 +1320,8 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
             
             if (loadInfo->elementsCount != PLY_LOAD_ALL_ELEMENTS) {
                 bool told = false;
-                for (U64 i = 0; i < loadInfo->elementsCount; ++i) {
+                U64 i = 0;
+                for (; i < loadInfo->elementsCount; ++i) {
                     if (streql(elementNameBegin, loadInfo->elements[i])) {
                         told = true;
                         break;

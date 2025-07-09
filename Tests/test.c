@@ -181,8 +181,6 @@ restart_test:
             if (PRINT_ELEMENT_DATA) {
                 U8 success = 0;
                 
-                //printRawDataOfElement(element);
-
                 printf("\tElement data (upscaled to double 64):\n");
                 U64 lno = 0;
                 for (; lno < element->dataLineCount; ++lno)
