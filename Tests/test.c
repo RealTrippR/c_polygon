@@ -21,6 +21,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <stdlib.h>
 #include <assert.h>
 #include <time.h>
+#include <stdbool.h>
 
 #define max(a,b) (((a) > (b)) ? (a) : (b))
 #define min(a,b) (((a) < (b)) ? (a) : (b))
@@ -118,9 +119,10 @@ restart_test:
     {
         .elements = { PLY_LOAD_ALL_ELEMENTS },
         .elementsCount = PLY_LOAD_ALL_ELEMENTS,
+        .saveComments = true
     };
 
-    enum PlyResult lres = PlyLoadFromDisk("res/cube.ply", &scene, &loadInfo);
+    enum PlyResult lres = PlyLoadFromDisk("res/cube_blndr.ply", &scene, &loadInfo);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;

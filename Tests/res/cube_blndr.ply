@@ -6,7 +6,10 @@ property float x
 property float y
 property float z
 element face 6
+comment this file has been modified for testing
+property list uchar uint vv
 property list uchar uint vertex_indices
+property float x
 end_header
 -1 -1 -1
 -1 -1 1
@@ -16,9 +19,9 @@ end_header
 1 -1 1
 1 1 -1
 1 1 1
-4 0 1 3 2
-4 2 3 7 6
-4 6 7 5 4
-4 4 5 1 0
-4 2 6 4 0
-4 7 3 1 5
+1 0 4 0 1 3 2 1
+2 0 3 4 2 3 7 6 2
+1 0 4 6 7 5 4 3 
+1 0 4 4 5 1 0 4
+2 1 0 4 2 6 4 0 5
+1 0 4 7 3 1 5 6

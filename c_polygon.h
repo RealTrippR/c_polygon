@@ -196,17 +196,20 @@ struct PlyLoadInfo
 {
 	const char** elements; /*don't forget to set elementsCount*/
 	uint32_t elementsCount;
+	char saveComments;
 };
 
 struct PlyScene
 {
+	void* sharedElementData;
 	struct PlyElement* elements;
 	struct PlyObjectInfo* objectInfos;
+	unsigned char** comments;
+	U32 commentCount;
 	U32 elementCount;
 	U32 objectInfoCount;
 	enum PlyFormat format;
 	float versionNumber;
-	void* sharedElementData;
 };
 
 /*PlyReallocT:

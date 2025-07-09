@@ -761,41 +761,31 @@ static void parseLine(const char* lineIn, U64 lineInSize, char* dst, const U32 d
             continue;
         }
         else {
-            bool lineIsComment = strneql(lineIn + i, "comment", min(lineInSize-i-1, strlen("comment")));
-            if (lineIsComment)
+           
+            memcpy_s(dst + i, dstSize, lineIn + i, lineInSize);
+            *strlenOut = lineLen_s(lineIn, lineIn, lineInSize+1);
+            /* remove any trailing spaces */
+
+            const U64 len = *strlenOut;
+            U64 j=0;
+            for (; j < len; ++j)
             {
-                *strlenOut = 0x0;
-                if (dst) {
-                    dst[0] = 0;
-                }
-                return;
-            }
-            else {
-                memcpy_s(dst + i, dstSize, lineIn + i, lineInSize);
-                *strlenOut = lineLen_s(lineIn, lineIn, lineInSize+1);
-                /* remove any trailing spaces */
-
-                const U64 len = *strlenOut;
-                U64 j=0;
-                for (; j < len; ++j)
-                {
-                    char c = lineIn[len-j-1];
-                    if (isblank(c)) {
-                        if (*strlenOut > 0) {
-                            (*strlenOut)--;
-                        }
-                    }
-                    else {
-                        break;
+                char c = lineIn[len-j-1];
+                if (isblank(c)) {
+                    if (*strlenOut > 0) {
+                        (*strlenOut)--;
                     }
                 }
-
-
-                if (dst) {
-                    dst[*strlenOut] = '\0';
+                else {
+                    break;
                 }
-                return;
             }
+
+
+            if (dst) {
+                dst[*strlenOut] = '\0';
+            }
+            return;
         }
     }
 }
@@ -1131,7 +1121,51 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
         return PLY_SUCCESS;
     }
 
+
+
+
     if (*readingHeader) { 
+        if (loadInfo && loadInfo->saveComments) 
+        {
+            c = "comment";
+            if (strneql(line, c, min(strlen(c), lineLen)) == true)
+            {
+                const char* commentBegin = line + strlen(c);
+
+                for (;
+                    commentBegin < line + lineLen && isspace(*commentBegin);
+                    ++commentBegin) {
+                }
+
+
+
+
+                const U64 commentLen = (line + lineLen) - commentBegin;
+
+
+                U32 newCommentCount = scene->commentCount + 1;
+                if (newCommentCount < scene->commentCount) /*prevent overflow*/
+                    return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+                scene->comments = plyReCalloc(scene->comments, scene->commentCount, newCommentCount, sizeof(char*));
+
+                char* tmp = (char*)plyRealloc(NULL, commentLen + 1);
+                if (!tmp)
+                    return PLY_FAILED_ALLOC_ERROR;
+
+
+
+                scene->comments[scene->commentCount] = tmp;
+
+                memcpy(scene->comments[scene->commentCount], commentBegin, commentLen);
+
+                scene->comments[scene->commentCount][commentLen] = '\0';
+
+                scene->commentCount = newCommentCount;
+
+                return PLY_SUCCESS;
+            }
+        }
+
         /*look for format keyword*/
         c = "format ";
         if (strneql(line, c, min(strlen(c), lineLen)) == true)
@@ -2224,6 +2258,14 @@ void PlyDestroyScene(struct PlyScene* scene)
         for (; i < scene->elementCount; ++i)
         {
             struct PlyElement* ele = scene->elements + i;
+            U64 pi;
+            for (pi = 0; pi < ele->propertyCount; ++pi)
+            {
+                if (ele->properties[pi].dataLineOffsets)
+                    free(ele->properties[pi].dataLineOffsets);
+            }
+
+
             if (ele->properties)
             {
                 plyDealloc(ele->properties);
@@ -2246,6 +2288,17 @@ void PlyDestroyScene(struct PlyScene* scene)
         free(scene->objectInfos);
         scene->objectInfoCount = 0u;
         scene->objectInfos = NULL;
+    }
+
+    if (scene->comments) {
+        U64 ci;
+        for (ci = 0; ci < scene->commentCount; ++ci)
+        {
+            free(scene->comments[ci]);
+        }
+        free(scene->comments);
+        scene->comments = NULL;
+        scene->commentCount = 0u;
     }
 }
 
@@ -2637,10 +2690,6 @@ double strtod64(const char* str, U8* strLenOut)
 
     return num;
 }
-
-
-
-
 
 
 
