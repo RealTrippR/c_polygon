@@ -114,7 +114,6 @@ restart_test:
     * - Large Geometric Models Archive at Georgia Tech: https://sites.cc.gatech.edu/projects/large_models/
     * - The Stanford 3D Scanning Repository: https://graphics.stanford.edu/data/3Dscanrep/
     */
-
     struct PlyLoadInfo loadInfo =
     {
         .elements = { PLY_LOAD_ALL_ELEMENTS },
