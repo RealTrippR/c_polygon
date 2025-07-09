@@ -28,22 +28,22 @@ static void PLY_INLINE PlySwapBytes(U8* mem, const enum PlyScalarType t)
 	switch (t)
 	{
 	case PLY_SCALAR_TYPE_USHORT:
-		*mem = PLY_BYTESWAP16(*mem);
+		*(U16*)mem = PLY_BYTESWAP16(*mem);
 		break;
 	case PLY_SCALAR_TYPE_SHORT:
-		*mem = PLY_BYTESWAP16(*mem);
+		*(U16*)mem = PLY_BYTESWAP16(*mem);
 		break;
 	case PLY_SCALAR_TYPE_UINT:
-		*mem = PLY_BYTESWAP32(*mem);
+		*(U32*)mem = PLY_BYTESWAP32(*mem);
 		break;
 	case PLY_SCALAR_TYPE_INT:
-		*mem = PLY_BYTESWAP32(*mem);
+		*(U32*)mem = PLY_BYTESWAP32(*mem);
 		break;
 	case PLY_SCALAR_TYPE_FLOAT:
-		*mem = PLY_BYTESWAP32(*mem);
+		*(U32*)mem = PLY_BYTESWAP32(*mem);
 		break;
 	case PLY_SCALAR_TYPE_DOUBLE:
-		*mem = PLY_BYTESWAP64(*mem);
+		*(U64*)mem = PLY_BYTESWAP64(*mem);
 		break;
 	}
 }

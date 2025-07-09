@@ -101,7 +101,7 @@ int main(void)
 {
 restart_test:
 
-    printf("%s", "C-Polygon, a lightweight .ply (Stanford polygon) file parser written in C89. Copyright (C) 2025 Tripp Robins, under an MIT License.\n\n\n");
+    printf("%s", "C-Polygon, a lightweight .ply (Stanford polygon) file parser written in C89. Copyright (C) 2025 Tripp R., under an MIT License.\n\n\n");
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     clock_t t;
@@ -113,6 +113,9 @@ restart_test:
     * I would recommend these links for obtaining test .ply files:
     * - Large Geometric Models Archive at Georgia Tech: https://sites.cc.gatech.edu/projects/large_models/
     * - The Stanford 3D Scanning Repository: https://graphics.stanford.edu/data/3Dscanrep/
+    * If you want to integrate c_polygon into your software,
+    * please take a refer to this paper for more about the .ply standard:
+    * https://gamma.cs.unc.edu/POWERPLANT/papers/ply.pdf
     */
     struct PlyLoadInfo loadInfo =
     {
@@ -121,7 +124,7 @@ restart_test:
         .saveComments = true
     };
 
-    enum PlyResult lres = PlyLoadFromDisk("res/cube_blndr.ply", &scene, &loadInfo);
+    enum PlyResult lres = PlyLoadFromDisk("res/xyzrgb_dragon.ply", &scene, &loadInfo);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
@@ -143,7 +146,7 @@ restart_test:
 	printf(".ply file parsing successful. Duration, sec: %f\n", parseDurationS);
 
     #define PRINT_SCENE_HEADER 1
-    #define PRINT_ELEMENT_DATA 1
+    #define PRINT_ELEMENT_DATA 0
 
     if (PRINT_SCENE_HEADER) {
         U64 eId = 0;
