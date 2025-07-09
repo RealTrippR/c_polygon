@@ -474,7 +474,6 @@ static PLY_INLINE const char* dbgPlyResultToString(enum PlyResult res)
 	return "Invalid PlyResult";
 }
 
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
