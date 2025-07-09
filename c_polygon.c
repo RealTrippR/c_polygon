@@ -1409,7 +1409,7 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
        
     U64 totalAllocSize = 0u;
 
-    // precompute the total amount of data that will be needed for each element
+    /* precompute the total amount of data that will be needed for each element */
     for (; ei < scene->elementCount; ++ei)
     {
         struct PlyElement* element = scene->elements + ei;
@@ -1682,7 +1682,7 @@ enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const 
     U64 totalAllocSize = 0u;
 
     U64 ei;
-    // precompute the total amount of data that will be needed for each element
+    /*precompute the total amount of data that will be needed for each element*/
     for (ei = 0; ei < scene->elementCount; ++ei)
     {
         struct PlyElement* element = scene->elements + ei;
