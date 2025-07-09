@@ -1148,7 +1148,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
                     return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
                 scene->comments = plyReCalloc(scene->comments, scene->commentCount, newCommentCount, sizeof(char*));
 
-                char* tmp = (char*)plyRealloc(NULL, commentLen + 1);
+                unsigned char* tmp = (char*)plyRealloc(NULL, commentLen + 1);
                 if (!tmp)
                     return PLY_FAILED_ALLOC_ERROR;
 
