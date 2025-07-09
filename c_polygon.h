@@ -333,7 +333,7 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDisk(const char* fileName, struc
 /// @param const wchar_t* fileName - filename to read, as a wide (UTF-16) string
 /// @param struct PlyScene* scene - scene to write to
 /// @param struct PlyLoadInfo* loadInfo - optional constraints that can be placed on scene parsing */
-PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, struct PlyScene* scene);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, struct PlyScene* scene, struct PlyLoadInfo* loadInfo);
 
 /*
 /// Destroys the scene and all associated memory
