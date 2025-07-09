@@ -114,7 +114,13 @@ restart_test:
     * - The Stanford 3D Scanning Repository: https://graphics.stanford.edu/data/3Dscanrep/
     */
 
-    enum PlyResult lres = PlyLoadFromDisk("res/cube_bin.ply", &scene);
+    struct PlyLoadInfo loadInfo =
+    {
+        .elements = { PLY_LOAD_ALL_ELEMENTS },
+        .elementsCount = PLY_LOAD_ALL_ELEMENTS,
+    };
+
+    enum PlyResult lres = PlyLoadFromDisk("res/cube.ply", &scene, &loadInfo);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
@@ -155,7 +161,7 @@ restart_test:
             struct PlyElement* element = scene.elements + eId;
             printf("-- Element #%llu \"%s\" --\n", eId, element->name);
             printf("\t\tData Line Count %I32u\n", element->dataLineCount);
-            printf("\t\tData Size: %llu\n", element->dataSize);;
+            printf("\t\tData Size: %llu\n", element->dataSize);
             printf("\tProperty Count:%I32u\n\n", element->propertyCount);
 
 
@@ -174,7 +180,7 @@ restart_test:
             if (PRINT_ELEMENT_DATA) {
                 U8 success = 0;
                 
-                printRawDataOfElement(element);
+                //printRawDataOfElement(element);
 
                 printf("\tElement data (upscaled to double 64):\n");
                 U64 lno = 0;

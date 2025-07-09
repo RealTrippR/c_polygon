@@ -24,7 +24,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 #define C_PLY_MAX_LINE_LENGTH (200000lu)
 #define PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH (127u)
-
+#define PLY_LOAD_ALL_ELEMENTS 0u
 
 /*In C89, the version will not be defined, or it will be equal to 0.*/
 #if defined(__STDC_VERSION__) || (__STDC_VERSION__ != 0)
@@ -192,6 +192,12 @@ struct PlyObjectInfo
 	double value;
 };
 
+struct PlyLoadInfo
+{
+	const char** elements; /*don't forget to set elementsCount*/
+	uint32_t elementsCount;
+};
+
 struct PlyScene
 {
 	struct PlyElement* elements;
@@ -307,20 +313,23 @@ PLY_H_FUNCTION_PREFIX enum PlyResult  PlySceneAddElement(struct PlyScene* scene,
 /// Loads a PlyScene from memory.
 /// @param const U8* mem - the beginning of the memory to read.
 /// @param const U8* mem - the length of the memory to read. (memEnd - memBegin + 1)
-/// @param struct PlyScene* scene - scene to write to */
-PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* scene);
+/// @param struct PlyScene* scene - scene to write to
+/// @param struct PlyLoadInfo* loadInfo - optional constraints that can be placed on scene parsing */
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* scene, struct PlyLoadInfo* loadInfo);
 
 /*
 /// Loads a PlyScene from a given filename.
 /// @param const char* fileName - filename to read
-/// @param struct PlyScene* scene - scene to write to */
-PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDisk(const char* fileName, struct PlyScene* scene);
+/// @param struct PlyScene* scene - scene to write to
+/// @param struct PlyLoadInfo* loadInfo - optional constraints that can be placed on scene parsing */
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDisk(const char* fileName, struct PlyScene* scene, struct PlyLoadInfo* loadInfo);
 
 
 /*
 /// Loads a PlyScene from a given wide filename.
 /// @param const wchar_t* fileName - filename to read, as a wide (UTF-16) string
-/// @param struct PlyScene* scene - scene to write to */
+/// @param struct PlyScene* scene - scene to write to
+/// @param struct PlyLoadInfo* loadInfo - optional constraints that can be placed on scene parsing */
 PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, struct PlyScene* scene);
 
 /*
@@ -335,7 +344,10 @@ PLY_H_FUNCTION_PREFIX void PlyDestroyScene(struct PlyScene* scene);
 
 
 
-
+/*
+/// Swaps bytes in place to invert endianness
+/// @param U8* mem - data to swap 
+/// @param PlyScalarType t - type of data to swap (PlyGetSizeofScalarType(t) bytes will be swapped) */
 void inline PlySwapBytes(U8* mem, const enum PlyScalarType t)
 {
 	switch (t)
