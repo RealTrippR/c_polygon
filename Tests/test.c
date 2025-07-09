@@ -93,7 +93,7 @@ restart_test:
     * - The Stanford 3D Scanning Repository: https://graphics.stanford.edu/data/3Dscanrep/
     */
 
-    enum PlyResult lres = PlyLoadFromDisk("res/cube_blndr.ply", &scene);
+    enum PlyResult lres = PlyLoadFromDisk("res/cube_bin.ply", &scene);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;

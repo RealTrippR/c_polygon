@@ -1329,6 +1329,28 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
     return PLY_SUCCESS;
 }
 
+
+static PLY_INLINE enum PlyResult allocateDataLinesForElement(struct PlyElement* element)
+{
+
+    element->dataLineBegins = plyReCalloc(element->dataLineBegins, 0, element->dataLineCount, sizeof(U64));
+    if (!element->dataLineBegins) {
+        return PLY_FAILED_ALLOC_ERROR;
+    }
+
+    /* create data line offsets for the properties of this element*/
+    U64 pi = 0u;
+    for (; pi < element->propertyCount; ++pi) {
+        struct PlyProperty* property = element->properties + pi;
+        property->dataLineOffsets = plyReCalloc(NULL, 0, element->dataLineCount, sizeof(U32));
+        if (!property->dataLineOffsets) {
+            return PLY_FAILED_ALLOC_ERROR;
+        }
+    }
+    return PLY_SUCCESS;
+}
+
+
 enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const U8* dataLast)
 {
     const U64 dataSize = (dataLast - dataBegin) + 1;
@@ -1340,19 +1362,18 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
     {
         struct PlyElement* element = scene->elements + ei;
         if (element->dataLineCount == 0) {
-            continue; /* empty element(idk if this is permitted by the standard or not) */
+            continue; /* empty element (idk if this is permitted by the standard or not) */
         }
 
-        element->dataLineBegins = plyReCalloc(element->dataLineBegins, 0, element->dataLineCount, sizeof(U64));
-        if (!element->dataLineBegins) {
+        /* create data lines for element and all its properties*/
+        if (allocateDataLinesForElement(element) != PLY_SUCCESS)
             return PLY_FAILED_ALLOC_ERROR;
-        }
-
 
         U64 dli = 0;
         for (; dli < element->dataLineCount; ++dli)
         {
-            element->dataLineBegins[dli] = dataPrev - dataBegin;
+            const U64 eledlibgn = dataPrev - dataBegin;
+            element->dataLineBegins[dli] = eledlibgn;
             U32 countedProperties = 0u;
 
             U64 pi = 0;
@@ -1383,7 +1404,8 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
 
                     /* set property data line offset */
                     property->dataLineOffsets[dli] = dataPrev - dataBegin;
-
+                    
+                    /*advance data pointer by sizeof(property.scalarType)*/
                     dataPrev += scalarSize;
 
                     /* prevent buffer overrun */
@@ -1440,22 +1462,9 @@ enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const 
             continue; /* empty element (idk if this is permitted by the standard or not) */
         }
 
-        element->dataLineBegins = plyReCalloc(element->dataLineBegins, 0, element->dataLineCount, sizeof(U64));
-        if (!element->dataLineBegins) {
+        /* create data lines for element and all its properties*/
+        if (allocateDataLinesForElement(element) != PLY_SUCCESS)
             return PLY_FAILED_ALLOC_ERROR;
-        }
-
-        /* create data line offsets for the properties of this element*/
-        U64 pi = 0u;
-        for (; pi < element->propertyCount; ++pi) {
-            struct PlyProperty* property = element->properties + pi;
-            property->dataLineOffsets = plyReCalloc(NULL, 0, element->dataLineCount, sizeof(U32));
-            if (!property->dataLineOffsets) {
-                return PLY_FAILED_ALLOC_ERROR;
-            }
-        }
-
-
 
         U64 dli = 0;
         for (; dli < element->dataLineCount; ++dli)
@@ -1468,7 +1477,7 @@ enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const 
 
             U32 countedProperties = 0u;
 
-            pi = 0u;
+            U32 pi = 0u;
             for (; pi < element->propertyCount; ++pi)
             {
                 struct PlyProperty* property = element->properties + pi;

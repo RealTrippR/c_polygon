@@ -57,5 +57,11 @@
     <None Include="Tests\res\cube_bin.ply">
       <Filter>Tests\res</Filter>
     </None>
+    <None Include="Tests\res\cube_blndr.ply">
+      <Filter>Tests\res</Filter>
+    </None>
+    <None Include="Tests\.gitignore">
+      <Filter>Tests</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -151,11 +151,13 @@
     <ClCompile Include="Tests\test.c" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Tests\.gitignore" />
     <None Include="Tests\res\._cube.ply" />
     <None Include="Tests\res\bun000.ply" />
     <None Include="Tests\res\bun_zipper.ply" />
     <None Include="Tests\res\cube.ply" />
     <None Include="Tests\res\cube_bin.ply" />
+    <None Include="Tests\res\cube_blndr.ply" />
     <None Include="Tests\res\rand.ply" />
     <None Include="Tests\res\xyzrgb_dragon.ply" />
   </ItemGroup>
