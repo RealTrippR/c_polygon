@@ -246,7 +246,7 @@ typedef void (*PlyDeallocT)(void*);
 PLY_H_FUNCTION_PREFIX enum PlyFormat PlyGetSystemEndianness(void);
 
 
-void inline PlySwapBytes(U8* mem, const enum PlyScalarType t);
+void PLY_INLINE PlySwapBytes(U8* mem, const enum PlyScalarType t);
 
 /*
 /// PlyScaleBytesToU32() - Converts variable length data to an unsigned int
@@ -351,7 +351,7 @@ PLY_H_FUNCTION_PREFIX void PlyDestroyScene(struct PlyScene* scene);
 /// Swaps bytes in place to invert endianness
 /// @param U8* mem - data to swap 
 /// @param PlyScalarType t - type of data to swap (PlyGetSizeofScalarType(t) bytes will be swapped) */
-void inline PlySwapBytes(U8* mem, const enum PlyScalarType t)
+void PLY_INLINE PlySwapBytes(U8* mem, const enum PlyScalarType t)
 {
 	switch (t)
 	{
