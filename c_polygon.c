@@ -1379,14 +1379,13 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
     U64 ei = 0;
     const U8* dataPrev = dataBegin;
 
-    /*this table is used to hold the data size needed to alloc for each element*/
-    const U64* elementAllocSizeTable;
-    elementAllocSizeTable = plyRealloc(NULL, scene->elementCount);
-    
+   
 
+    const U8* sharedDataBuffer;
+    
+    U64 totalAllocSize = 0u;
 
     // precompute the total amount of data that will be needed for each element
-
     for (; ei < scene->elementCount; ++ei)
     {
         struct PlyElement* element = scene->elements + ei;
@@ -1396,16 +1395,16 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
 
 
         dataBegin = dataPrev; /* reset on every new elemene that is being read to prevent incorrect offset of dataLineBegins */
-
    
+
+        /* create data lines for element and all its properties*/
+        if (allocateDataLinesForElement(element) != PLY_SUCCESS)
+            return PLY_FAILED_ALLOC_ERROR;
 
         U64 dli = 0;
         for (; dli < element->dataLineCount; ++dli)
         {
 
-            /* create data lines for element and all its properties*/
-            if (allocateDataLinesForElement(element) != PLY_SUCCESS)
-                return PLY_FAILED_ALLOC_ERROR;
 
             if (dataPrev >= dataLast) {
                 return PLY_MALFORMED_DATA_ERROR;
@@ -1506,40 +1505,25 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
                     }
                 }
             }
-
-            element->data = plyReallocDefault(NULL, element->dataSize);
         }
+        element->data = (void*)totalAllocSize;
+        totalAllocSize += element->dataSize;
     }
 
 
+   
+    scene->sharedElementData = plyRealloc(NULL, totalAllocSize);
+    /* now that data has been allocated, the actual buffer offsets still need to be updated */
+    for (ei = 0; ei < scene->elementCount; ++ei)
+    {
+        scene->elements[ei].data = (U8*)scene->sharedElementData + (U64)(scene->elements[ei].data); /*apply offsets*/
+    }
 
 
+    /*reset data prev*/
+    dataPrev = dataLast-dataSize+1;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    for (; ei < scene->elementCount; ++ei)
+    for (ei = 0; ei < scene->elementCount; ++ei)
     {
         struct PlyElement* element = scene->elements + ei;
         if (element->dataLineCount == 0) {
@@ -1549,17 +1533,12 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
       
         dataBegin = dataPrev; /* reset on every new elemene that is being read to prevent incorrect offset of dataLineBegins */
 
+        U64 curDataOffset = 0;
       
         U64 dli = 0;
         for (; dli < element->dataLineCount; ++dli)
         {
-           
-            if (dataPrev >= dataLast) {
-                return PLY_MALFORMED_DATA_ERROR;
-            }
 
-
-            U32 countedProperties = 0u;
 
             const U8* dataLineBegin = dataPrev;
             element->dataLineBegins[dli] = dataPrev - dataBegin;
@@ -1567,52 +1546,31 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
             U64 pi;
             for (pi = 0; pi < element->propertyCount; ++pi)
             {
-                ++countedProperties;
-                if (countedProperties > element->propertyCount) {
-                    return PLY_MALFORMED_DATA_ERROR;
-                }
-
                 struct PlyProperty* property = element->properties + pi;
 
                 if (property->dataType == PLY_DATA_TYPE_SCALAR)
                 {
                     const U8 scalarSize = PlyGetSizeofScalarType(property->scalarType);
 
-                    const U64 newLen = element->dataSize + scalarSize;
-
-                    /* prevent overflow */
-                    if (newLen < element->dataSize) {
-                        return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
-                    }
-                   
-                    void* tmp = growData(element->data, newLen, &curElementDataCapacity);
-                    if (!tmp)
-                        return PLY_FAILED_ALLOC_ERROR;
-
 
                     /* set property data line offset */
                     const U64 datalineOffset = dataPrev - dataLineBegin;
                     property->dataLineOffsets[dli] = datalineOffset;
                     
-                    /*advance data pointer by sizeof(property.scalarType)*/
-                    dataPrev += scalarSize;
-
-                    /* prevent buffer overrun */
-                    if (dataPrev > dataLast) {
-                        return PLY_MALFORMED_DATA_ERROR;
-                    }
-
-                    element->data = tmp;
+                
+                    const U64 totalOffset = datalineOffset + element->dataLineBegins[dli];
+                    U8* copyTo = (U8*)(element->data) + totalOffset;
                     memcpy(
-                        (U8*)(element->data)+element->dataSize, /*copy into data*/
-                        dataPrev-scalarSize, /*from mem*/
+                        copyTo, /*copy into data*/
+                        dataPrev, /*from mem*/
                         scalarSize
                     ); 
 
                     if (systemEndianness != scene->format)
-                        PlySwapBytes(dataPrev - scalarSize, property->scalarType);
+                        PlySwapBytes(copyTo, property->scalarType);
 
-                    element->dataSize = newLen;
+                    /*advance data pointer by sizeof(property.scalarType)*/
+                    dataPrev += scalarSize;
 
                 }
                 else
@@ -1622,91 +1580,51 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
                         /* get list data count */
                         const U8 listcountTypeSize = PlyGetSizeofScalarType(property->listCountType);
 
-                        const U64 newLen = element->dataSize + listcountTypeSize;
-
-                        /* prevent overflow */
-                        if (newLen < element->dataSize) {
-                            return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
-                        }
-
-
-                        U8 sze = PlyGetSizeofScalarType(property->scalarType);
-
-                        void* tmp = growData(element->data, newLen, &curElementDataCapacity);
-                        if (!tmp)
-                            return PLY_FAILED_ALLOC_ERROR;
-
-
                         /* set property data line offset */
                         const U64 datalineOffset = dataPrev - dataLineBegin;
                         property->dataLineOffsets[dli] = datalineOffset;
 
-                        /*advance data pointer by sizeof(property.scalarType)*/
-                        dataPrev += listcountTypeSize;
-
-                        /* prevent buffer overrun */
-                        if (dataPrev > dataLast) {
-                            return PLY_MALFORMED_DATA_ERROR;
-                        }
-
-                        /* copy list count into data */
-                        element->data = tmp;
+                        const U64 totalOffset = datalineOffset + element->dataLineBegins[dli];
+                        U8* copyTo = (U8*)(element->data) + totalOffset;
                         memcpy(
-                            (U8*)(element->data) + element->dataSize, /*copy into data*/
-                            dataPrev - listcountTypeSize, /*from mem*/
+                            copyTo, /*copy into data*/
+                            dataPrev, /*from mem*/
                             listcountTypeSize
                         );
 
                         /*copy list count from data into list count var */
-                        listCount = PlyScaleBytesToD64(dataPrev - listcountTypeSize, listcountTypeSize);
+                        listCount = PlyScaleBytesToD64(dataPrev, listcountTypeSize);
 
+                   
                         if (systemEndianness != scene->format)
-                            PlySwapBytes(dataPrev - listcountTypeSize, property->listCountType);
+                            PlySwapBytes(copyTo, property->listCountType);
 
-                        element->dataSize = newLen;
+                        /*advance data pointer by sizeof(property.scalarType)*/
+                        dataPrev += listcountTypeSize;
                     }
+
+                    /* get list data count */
+                    const U8 scalarSize = PlyGetSizeofScalarType(property->scalarType);
 
                     /* copy list elements into data*/
                     U64 readPropCount;
                     for (readPropCount=0u; readPropCount < listCount; ++readPropCount)
                     {
-                        /* get list data count */
-                        const U8 scalarSize = PlyGetSizeofScalarType(property->scalarType);
+                        const U64 offsetFromDatalineOffset = dataPrev - dataLineBegin;
 
-                        const U64 newLen = element->dataSize + scalarSize;
-
-                        /* prevent overflow */
-                        if (newLen < element->dataSize) {
-                            return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
-                        }
-
-                        /* expand element data */
-                        void* tmp = plyRealloc(element->data, newLen);
-                        if (!tmp)
-                            return PLY_FAILED_ALLOC_ERROR;
-
-
-
-                        /*advance data pointer by sizeof(property.scalarType)*/
-                        dataPrev += scalarSize;
-
-                        /* prevent buffer overrun */
-                        if (dataPrev > dataLast) {
-                            return PLY_MALFORMED_DATA_ERROR;
-                        }
-
-                        /* copy list count into data */
-                        element->data = tmp;
+                        const U64 totalOffset = offsetFromDatalineOffset + element->dataLineBegins[dli];
+                        U8* copyTo = (U8*)(element->data) + totalOffset;
                         memcpy(
-                            (U8*)(element->data) + element->dataSize, /*copy into data*/
-                            dataPrev - scalarSize, /*from mem*/
+                            copyTo, /*copy into data*/
+                            dataPrev, /*from mem*/
                             scalarSize
                         );
 
                         if (systemEndianness != scene->format)
-                            PlySwapBytes(dataPrev - scalarSize, property->scalarType);
+                            PlySwapBytes(copyTo, property->scalarType);
 
-                        element->dataSize = newLen;
+                        /*advance data pointer by sizeof(property.scalarType)*/
+                        dataPrev += scalarSize;
                     }
 
                     if (readPropCount != listCount) {
@@ -2138,10 +2056,6 @@ void PlyDestroyScene(struct PlyScene* scene)
             {
                 plyDealloc(ele->properties);
             }
-            if (ele->data)
-            {
-                plyDealloc(ele->data);
-            }
             if (ele->dataLineBegins)
             {
                 plyDealloc(ele->dataLineBegins);
@@ -2152,6 +2066,10 @@ void PlyDestroyScene(struct PlyScene* scene)
         scene->elements = NULL;
     }
 
+    if (scene->sharedElementData) {
+        free(scene->sharedElementData);
+        scene->sharedElementData = NULL;
+    }
     if (scene->objectInfos) {
         free(scene->objectInfos);
         scene->objectInfoCount = 0u;

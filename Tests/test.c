@@ -114,7 +114,7 @@ restart_test:
     * - The Stanford 3D Scanning Repository: https://graphics.stanford.edu/data/3Dscanrep/
     */
 
-    enum PlyResult lres = PlyLoadFromDisk("res/xyzrgb_dragon.ply", &scene);
+    enum PlyResult lres = PlyLoadFromDisk("res/cube_bin.ply", &scene);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
@@ -136,7 +136,7 @@ restart_test:
 	printf(".ply file parsing successful. Duration, sec: %f\n", parseDurationS);
 
     #define PRINT_SCENE_HEADER 1
-    #define PRINT_ELEMENT_DATA 0
+    #define PRINT_ELEMENT_DATA 1
 
     if (PRINT_SCENE_HEADER) {
         U64 eId = 0;
@@ -158,7 +158,6 @@ restart_test:
             printf("\t\tData Size: %llu\n", element->dataSize);;
             printf("\tProperty Count:%I32u\n\n", element->propertyCount);
 
-            printRawDataOfElement(element);
 
             U64 pId = 0;
             for (; pId < element->propertyCount; ++pId)
@@ -174,6 +173,8 @@ restart_test:
 
             if (PRINT_ELEMENT_DATA) {
                 U8 success = 0;
+                
+                printRawDataOfElement(element);
 
                 printf("\tElement data (upscaled to double 64):\n");
                 U64 lno = 0;

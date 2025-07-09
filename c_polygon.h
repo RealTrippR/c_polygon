@@ -200,6 +200,7 @@ struct PlyScene
 	U32 objectInfoCount;
 	enum PlyFormat format;
 	float versionNumber;
+	void* sharedElementData;
 };
 
 /*PlyReallocT:
