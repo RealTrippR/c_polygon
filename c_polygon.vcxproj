@@ -105,7 +105,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <TreatSpecificWarningsAsErrors>4047; 4715; 4716; 4098; 4777</TreatSpecificWarningsAsErrors>
+      <TreatSpecificWarningsAsErrors>4047; 4715; 4716; 4098; 4777; 4090</TreatSpecificWarningsAsErrors>
       <AdditionalOptions>/Wall %(AdditionalOptions)</AdditionalOptions>
       <TreatWarningAsError>false</TreatWarningAsError>
       <DisableSpecificWarnings>4820; 5045;</DisableSpecificWarnings>

@@ -256,28 +256,28 @@ static PLY_INLINE void PlySwapBytes(U8* mem, const enum PlyScalarType t);
 /// @param void* data - Start of data
 /// @param enum PlyScalarType t - Scalar type used to infer size of data to convert
 /// @return unsigned int - Data as an unsigned int */
-PLY_H_FUNCTION_PREFIX uint32_t PlyScaleBytesToU32(void* data, const enum PlyScalarType t);
+PLY_H_FUNCTION_PREFIX uint32_t PlyScaleBytesToU32(const void* data, const enum PlyScalarType t);
 
 /*
 /// PlyScaleBytesToI32() - Converts variable length data to a int
 /// @param void* data - Start of data
 /// @param enum PlyScalarType t - Scalar type used to infer size of data to convert
 /// @return int - Data as a int */
-PLY_H_FUNCTION_PREFIX int32_t PlyScaleBytesToI32(void* data, const enum PlyScalarType t);
+PLY_H_FUNCTION_PREFIX int32_t PlyScaleBytesToI32(const void* data, const enum PlyScalarType t);
 
 /*
 /// PlyScaleBytesToF32() - Converts variable length data to a float
 /// @param void* data - Start of data
 /// @param enum PlyScalarType t - Scalar type used to infer size of data to convert
 /// @return float - Data as a float */
-PLY_H_FUNCTION_PREFIX float PlyScaleBytesToF32(void* data, const enum PlyScalarType t);
+PLY_H_FUNCTION_PREFIX float PlyScaleBytesToF32(const void* data, const enum PlyScalarType t);
 
 /*
 /// PlyScaleBytesToD64() - Converts variable length data to a double
 /// @param void* data - Start of data
 /// @param enum PlyScalarType t - Scalar type used to infer size of data to convert
 /// @return double - Data as a double */
-PLY_H_FUNCTION_PREFIX double PlyScaleBytesToD64(void* data, const enum PlyScalarType t);
+PLY_H_FUNCTION_PREFIX double PlyScaleBytesToD64(const void* data, const enum PlyScalarType t);
 
 /*
 /// Returns the sizeof a Scalar type in bytes

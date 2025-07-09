@@ -124,7 +124,7 @@ restart_test:
         .saveComments = true
     };
 
-    enum PlyResult lres = PlyLoadFromDisk("res/xyzrgb_dragon.ply", &scene, &loadInfo);
+    enum PlyResult lres = PlyLoadFromDisk("res/cube.ply", &scene, &loadInfo);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
@@ -189,7 +189,7 @@ restart_test:
                 for (; lno < element->dataLineCount; ++lno)
                 {
                     printf("\t\t");
-                    U64 pId = 0;
+                    pId = 0;
                     for (; pId < element->propertyCount; ++pId)
                     {
                         struct PlyProperty* property = element->properties + pId;

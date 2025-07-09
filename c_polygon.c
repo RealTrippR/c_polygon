@@ -299,9 +299,9 @@ enum PlyFormat PlyGetSystemEndianness(void)
 }
 
 
-uint32_t PlyScaleBytesToU32(void* data, const enum PlyScalarType t)
+uint32_t PlyScaleBytesToU32(const void* data, const enum PlyScalarType t)
 {
-    U8* f = data;
+    const U8* f = data;
     uint32_t d = 0;
 
     switch (t) {
@@ -367,9 +367,9 @@ uint32_t PlyScaleBytesToU32(void* data, const enum PlyScalarType t)
     return d;
 }
 
-int32_t PlyScaleBytesToI32(void* data, const enum PlyScalarType t)
+int32_t PlyScaleBytesToI32(const void* data, const enum PlyScalarType t)
 {
-    U8* f = data;
+    const U8* f = data;
     int32_t d = 0;
 
     switch (t) {
@@ -435,9 +435,9 @@ int32_t PlyScaleBytesToI32(void* data, const enum PlyScalarType t)
     return d;
 }
 
-float PlyScaleBytesToF32(void* data, const enum PlyScalarType t)
+float PlyScaleBytesToF32(const void* data, const enum PlyScalarType t)
 {
-    U8* f = data;
+    const U8* f = data;
     float d = 0;
 
     switch (t) {
@@ -503,9 +503,9 @@ float PlyScaleBytesToF32(void* data, const enum PlyScalarType t)
     return d;
 }
 
-double PlyScaleBytesToD64(void* data, const enum PlyScalarType t)
+double PlyScaleBytesToD64(const void* data, const enum PlyScalarType t)
 {
-    U8* f = data;
+    const U8* f = data;
     double d = 0;
 
     switch (t) {
@@ -1159,7 +1159,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
                     return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
                 scene->comments = plyReCalloc(scene->comments, scene->commentCount, newCommentCount, sizeof(char*));
 
-                unsigned char* tmp = (char*)plyRealloc(NULL, commentLen + 1);
+                unsigned char* tmp = (unsigned char*)plyRealloc(NULL, commentLen + 1);
                 if (!tmp)
                     return PLY_FAILED_ALLOC_ERROR;
 
@@ -1448,7 +1448,6 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
 
             U32 countedProperties = 0u;
 
-            const U8* dataLineBegin = dataPrev;
             element->dataLineBegins[dli] = dataPrev - dataBegin;
 
             U64 pi;
@@ -1495,8 +1494,6 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
                             return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
                         }
 
-                        U8 sze = PlyGetSizeofScalarType(property->scalarType);
-
                         /*advance data pointer by sizeof(property.scalarType)*/
                         dataPrev += listcountTypeSize;
 
@@ -1506,7 +1503,7 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
                         
 
                         /*copy list count from data into list count var */
-                        listCount = PlyScaleBytesToD64(dataPrev - listcountTypeSize, listcountTypeSize);
+                        listCount = (U64)PlyScaleBytesToD64(dataPrev - listcountTypeSize, listcountTypeSize);
 
                         element->dataSize = newLen;
                     }
@@ -1567,8 +1564,6 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
 
       
         dataBegin = dataPrev; /* reset on every new elemene that is being read to prevent incorrect offset of dataLineBegins */
-
-        U64 curDataOffset = 0;
       
         U64 dli = 0;
         for (; dli < element->dataLineCount; ++dli)
@@ -1590,7 +1585,10 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
 
                     /* set property data line offset */
                     const U64 datalineOffset = dataPrev - dataLineBegin;
-                    property->dataLineOffsets[dli] = datalineOffset;
+                    if (datalineOffset > UINT32_MAX)
+                        return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+
+                    property->dataLineOffsets[dli] = (U32)datalineOffset;
                     
                 
                     const U64 totalOffset = datalineOffset + element->dataLineBegins[dli];
@@ -1617,7 +1615,10 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
 
                         /* set property data line offset */
                         const U64 datalineOffset = dataPrev - dataLineBegin;
-                        property->dataLineOffsets[dli] = datalineOffset;
+                        if (datalineOffset > UINT32_MAX)
+                            return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+
+                        property->dataLineOffsets[dli] = (U32)datalineOffset;
 
                         const U64 totalOffset = datalineOffset + element->dataLineBegins[dli];
                         U8* copyTo = (U8*)(element->data) + totalOffset;
@@ -1628,7 +1629,7 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
                         );
 
                         /*copy list count from data into list count var */
-                        listCount = PlyScaleBytesToD64(dataPrev, listcountTypeSize);
+                        listCount = (U64)PlyScaleBytesToD64(dataPrev, listcountTypeSize);
 
                    
                         if (systemEndianness != scene->format)
@@ -1731,7 +1732,8 @@ enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const 
                             countedProperties++;
 
                             U8 scalarStrLen;
-                            union PlyScalarUnion dataU = PlyStrToScalar(ch, property->scalarType, &scalarStrLen);
+                            PlyStrToScalar(ch, property->scalarType, &scalarStrLen);
+
                             if (scalarStrLen == 0u) {
                                 return PLY_DATA_TYPE_MISMATCH_ERROR;
                             }
@@ -1742,6 +1744,7 @@ enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const 
                                     return PLY_MALFORMED_DATA_ERROR;
                                 }
                             }
+
 
                             const U8 sze = PlyGetSizeofScalarType(element->properties[pi].scalarType);
 
@@ -1820,7 +1823,8 @@ enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const 
                         if (isspace(*ch) == 0)
                         {
                             U8 scalarStrLen;
-                            union PlyScalarUnion dataU = PlyStrToScalar(ch, property->scalarType, &scalarStrLen);
+                            PlyStrToScalar(ch, property->scalarType, &scalarStrLen);
+
                             if (scalarStrLen == 0u) {
                                 return PLY_DATA_TYPE_MISMATCH_ERROR;
                             }
@@ -1931,7 +1935,7 @@ enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const 
 
  
 
-                            const U8* copyTo = (U8*)element->data + curDataOffset;
+                            U8* copyTo = (U8*)element->data + curDataOffset;
                             PlyScalarUnionCpyIntoLocation(copyTo, &dataU, property->scalarType);
 
                             ploffset += sze;
@@ -1969,7 +1973,7 @@ enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const 
 
 
                             /*copy list count into data*/
-                            const U8* copyTo = (U8*)element->data + curDataOffset;
+                            U8* copyTo = (U8*)element->data + curDataOffset;
                             PlyScalarUnionCpyIntoLocation(copyTo, &listCountU, property->listCountType);
 
 
@@ -2004,7 +2008,7 @@ enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const 
                            
 
                             /*copy list element into data*/
-                            const U8* copyTo = (U8*)element->data + curDataOffset;
+                            U8* copyTo = (U8*)element->data + curDataOffset;
                             PlyScalarUnionCpyIntoLocation(
                                 copyTo, &dataU, property->scalarType);
 
