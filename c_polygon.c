@@ -658,6 +658,34 @@ void PlySetCustomDeallocator(PlyDeallocT deA)
 
 
 
+/*
+* returns the index of an element within a property.
+* If the element is not in that property, -1 will be returned.*/
+PLY_H_FUNCTION_PREFIX I64 PlyGetPropertyIndex(const struct PlyElement* element, const struct PlyProperty* property)
+{
+    const I64 calculatedIndex = property - element->properties;
+    if (calculatedIndex < 0 || calculatedIndex > element->propertyCount) {
+        return -1;
+    }
+
+    return calculatedIndex;
+}
+
+/*
+* returns the index of an element within a property from it's name.
+* If the element is not in that property, -1 will be returned. */
+PLY_H_FUNCTION_PREFIX I64 PlyGetPropertyIndexByName(const struct PlyElement* element, const char* propertyName)
+{
+    U32 i = 0;
+    for (; i < element->propertyCount; ++i)
+    {
+        if (streql(element->properties[i].name, propertyName)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 /* adds a PlyProperty to an element.The property will be copied, thus transferring ownership */
 enum PlyResult  PlyElementAddProperty(struct PlyElement* element, struct PlyProperty* property)
 {

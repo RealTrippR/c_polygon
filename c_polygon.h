@@ -304,6 +304,15 @@ PLY_H_FUNCTION_PREFIX void PlySetCustomRecallocator(PlyReCallocT);
 
 PLY_H_FUNCTION_PREFIX void PlySetCustomDeallocator(PlyDeallocT);
 
+/* 
+* returns the index of an element within a property. 
+* If the element is not in that property, -1 will be returned.*/
+PLY_H_FUNCTION_PREFIX I64 PlyGetPropertyIndex(const struct PlyElement* element, const struct PlyProperty* property);
+
+/* 
+* returns the index of an element within a property from it's name.
+* If the element is not in that property, -1 will be returned. */
+PLY_H_FUNCTION_PREFIX I64 PlyGetPropertyIndexByName(const struct PlyElement* element, const char* propertyName);
 
 
 /* adds a PlyProperty to an element. The property will be copied, thus transferring ownership */
