@@ -16,6 +16,8 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 */
 
 #include "../c_polygon.h"
+#include "test_common.h"
+
 #include <stdio.h>
 #include <crtdbg.h>
 #include <stdlib.h>
@@ -101,7 +103,7 @@ int main(void)
 {
 restart_test:
 
-    printf("%s", "C-Polygon, a lightweight .ply (Stanford polygon) file parser written in C89. Copyright (C) 2025 Tripp R., under an MIT License.\n\n\n");
+    printf("%s", "C-Polygon is a lightweight .ply (Stanford polygon) file parser written in C89. Copyright (C) 2025 Tripp R., under an MIT License.\n\n\n");
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
     clock_t t;
@@ -124,7 +126,8 @@ restart_test:
         .saveComments = true
     };
 
-    enum PlyResult lres = PlyLoadFromDisk("res/cube.ply", &scene, &loadInfo);
+#define PLY_FILE "res/xyzrgb_dragon.ply"
+    enum PlyResult lres = PlyLoadFromDisk(PLY_FILE, &scene, &loadInfo);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
@@ -143,7 +146,7 @@ restart_test:
 	}
 
     
-	printf(".ply file parsing successful. Duration, sec: %f\n", parseDurationS);
+	printf(".ply file parsing successful. %s of data were parsed in %f seconds.\n", getReadableSize(getFileSize(PLY_FILE)), parseDurationS);
 
     #define PRINT_SCENE_HEADER 1
     #define PRINT_ELEMENT_DATA 0

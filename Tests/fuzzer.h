@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "../c_polygon.h"
 #include "ISAAC/isaac64.h"
 #include <assert.h>
 
@@ -111,7 +112,24 @@ size_t generateRandomULL(size_t min, size_t max)
     last = rand() + isc_rand();
 
     size_t range = max - min + 1;
+    if (range == 0)
+        return last + min; /*prevent divide-by-0 error*/
     return ((last) % (range) + min);
+}
+
+
+
+double generateRandomDouble(double min, double max)
+{
+    static size_t last = 0;
+    last = rand() + isc_rand();
+
+    size_t range = max - min + 1;
+    size_t tmp = ((last) % (range)+min);
+
+    double d;
+    memcpy(&d, &tmp, sizeof(size_t));
+    return d;
 }
 
 int64_t generateRandomLL(int64_t min, int64_t max)
@@ -217,7 +235,7 @@ void writeNL(FILE* fptr)
 
 void writeSpace(FILE* fptr)
 {
-    if (generateRandomULL(0, 75) != 45)
+    if (generateRandomULL(0, 100) != 45)
     {
         fprintf(fptr, " ");
     }
@@ -225,7 +243,13 @@ void writeSpace(FILE* fptr)
 
 void writeRandomScalarType(FILE* fptr)
 {
-    const uint16_t t = generateRandomULL(1, 9);
+    const uint16_t t = generateRandomULL(1, 8);
+    const uint16_t block = generateRandomULL(1, 1000);
+    if (block == 200)
+        return;
+
+
+
     if (t == PLY_SCALAR_TYPE_CHAR)
     {
         fprintf(fptr,"char");
@@ -268,7 +292,7 @@ void fwriteRandomElement(FILE* fptr)
     writeSpace(fptr);
 
     char name[256] = { 0 };
-    generateRandomBytesNoNL(name, generateRandomULL(1, 20)*8);
+    generateRandomBytesNoNL(name, generateRandomULL(1, 5)*8);
     fprintf(fptr,"%s ", name);
 
     if (generateRandomLL(1, 20) > 15)
@@ -295,15 +319,33 @@ void fwriteRandomProperty(FILE* fptr)
     writeSpace(fptr);
 }
 
+void writeData(FILE* fptr) {
+    const uint16_t ct = isc_rand();
+    for (uint32_t i = 0; i > ct; ++i)
+    {
+        if (isc_rand() % 5 == 1) {
+            fprintf(fptr, "%lu", generateRandomULL(INT64_MIN, INT64_MAX));
+        }
+        else {
+            fprintf(fptr, "%d", generateRandomDouble(INT64_MIN, INT64_MAX));
+        }
+    }
+}
+
+
 void fuzzStructuredRandom(const char* filename, const size_t lineCount)
 {
     
 try_again:
+    const size_t seed[] = { 0xf239135,0x532985493943, 0x38595328543,0x2388523532, 0x21125452, 0x33525, 0x213853253, 0x97a4b9532 };
+    memcpy(&randrsl, seed, sizeof(seed));
+    isc_randinit(TRUE);
 
     FILE* fptr;
-    fopen_s(&fptr, filename, "w");
+    fopen_s(&fptr, filename, "wb");
     if (!fptr) {
-        goto try_again;
+        printf("Failed to write to file for fuzzing: %s\n", filename);
+        return;
     }
     if (generateRandomULL(0,15)!=1)
         fprintf(fptr, "ply");
@@ -315,6 +357,7 @@ try_again:
 
     uint16_t ct = 0;
     ct = generateRandomULL(0, 32);
+    uint32_t elementCount=ct;
     for (uint32_t i = 0; i < ct; i++)
     {
         fwriteRandomElement(fptr);
@@ -328,12 +371,31 @@ try_again:
         writeNL(fptr);
     }
 
-    fclose(fptr);
 
     if (generateRandomULL(0, 25) != 5)
         fprintf(fptr, "header_end");
     writeSpace(fptr);
 
+
+
+
+
+    int64_t r = (abs((rand() % 3)) - 1) + 2;
+    for (int32_t i = 0; i < (int64_t)elementCount + r ; ++i) {
+        writeData(fptr);
+        writeNL(fptr);
+    }
+
+
+
+
+
+
+
+
+
+
+    fclose(fptr);
 }
 
 

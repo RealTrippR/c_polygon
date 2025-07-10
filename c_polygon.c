@@ -731,7 +731,9 @@ static U32 lineLen_s(const char* srcline, const char* mem, U64 memSize)
     if (!srcline || srcline < mem || srcline > mem + memSize - 1)
         return 0x0;
 
-    U32 maxDist = (U32)(mem + (U32)memSize - srcline);
+    U64 maxDist = (U64)((mem + (U64)memSize) - srcline);
+    if (maxDist > UINT32_MAX)
+        return 0x0;
 
     U64 i = 0;
     for (; i < maxDist; ++i) {
@@ -1329,7 +1331,7 @@ static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* 
 
             struct PlyElement element = { 0 };
             
-            if (loadInfo->elementsCount != PLY_LOAD_ALL_ELEMENTS) {
+            if (loadInfo && loadInfo->elementsCount != PLY_LOAD_ALL_ELEMENTS) {
                 bool told = false;
                 U64 i = 0;
                 for (; i < loadInfo->elementsCount; ++i) {
@@ -2088,8 +2090,10 @@ enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* sc
         U32 lineLen;
         char line[C_PLY_MAX_LINE_LENGTH+1];
 
+        if (srclineSize == 0)
+            continue; /*skip empty line*/
 
-        parseLine(srcline, srclineSize, line, sizeof(line), &lineLen);
+        parseLine(srcline, srclineSize, line, C_PLY_MAX_LINE_LENGTH, &lineLen);
         
 
         if (lineLen > 0)

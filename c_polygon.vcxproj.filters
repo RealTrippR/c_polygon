@@ -11,6 +11,9 @@
     <ClInclude Include="Tests\ISAAC\standard.h">
       <Filter>Tests\Isaac</Filter>
     </ClInclude>
+    <ClInclude Include="Tests\test_common.h">
+      <Filter>Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="c_polygon.c" />

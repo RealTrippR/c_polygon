@@ -140,17 +140,18 @@
     <ClInclude Include="Tests\fuzzer.h" />
     <ClInclude Include="Tests\ISAAC\isaac64.h" />
     <ClInclude Include="Tests\ISAAC\standard.h" />
+    <ClInclude Include="Tests\test_common.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="c_polygon.c">
       <StructMemberAlignment Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Default</StructMemberAlignment>
     </ClCompile>
-    <ClCompile Include="Tests\fuzzer.c">
+    <ClCompile Include="Tests\fuzzer.c" />
+    <ClCompile Include="Tests\ISAAC\isaac64.c" />
+    <ClCompile Include="Tests\test.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Tests\ISAAC\isaac64.c" />
-    <ClCompile Include="Tests\test.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="c_polygon.inl" />
