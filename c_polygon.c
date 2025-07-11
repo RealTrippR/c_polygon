@@ -288,7 +288,7 @@ static union PlyScalarUnion PlyStrToScalar(const char* str, const enum PlyScalar
 
 enum PlyFormat PlyGetSystemEndianness(void)
 {
-    unsigned int x = 1;
+    U16 x = 1;
     char* ptr = (char*)&x;
     if (ptr[0] == 1) {
         return PLY_FORMAT_BINARY_LITTLE_ENDIAN;
@@ -854,7 +854,10 @@ static const char* getNextLine(U64* lenOut, const U8* mem, U64 memSize, const ch
 
     /* find lineBegin */
     U64 dist = (mem + memSize - (const U8*)lastLine);
-    const U64 loopLimit1 = dist - 1;;
+    if (dist == 0) {
+        return NULL;
+    }
+    const U64 loopLimit1 = dist - 1;
     U64 i = 0;
     for (; i < loopLimit1; ++i)
     {
@@ -1440,6 +1443,9 @@ static PLY_INLINE enum PlyResult allocateDataLinesForElement(struct PlyElement* 
 
 enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const U8* dataLast)
 {
+    if (scene->elementCount == 0)
+        return PLY_SUCCESS;
+
     const U64 dataSize = (dataLast - dataBegin) + 1;
 
     enum PlyFormat systemEndianness = PlyGetSystemEndianness();
@@ -1573,8 +1579,15 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
     }
 
 
-   
+    if (totalAllocSize == 0) {
+        return PLY_SUCCESS; /*nothing to allocate*/
+    }
+
     scene->sharedElementData = plyRealloc(NULL, totalAllocSize);
+    if (!scene->sharedElementData) {
+        return PLY_FAILED_ALLOC_ERROR;
+    }
+
     /* now that data has been allocated, the actual buffer offsets still need to be updated */
     for (ei = 0; ei < scene->elementCount; ++ei)
     {
@@ -1713,6 +1726,9 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
 
 enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const U8* dataLast)
 {
+    if (scene->elementCount == 0)
+        return PLY_SUCCESS;
+
     const U64 dataSize = (dataLast - dataBegin) + 1;
 
     const char* line = (const char*)dataBegin;
@@ -1906,6 +1922,14 @@ enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const 
     }
 
 
+    if (totalAllocSize == 0) {
+        return PLY_SUCCESS; /*nothing to allocate*/
+    }
+
+    scene->sharedElementData = plyRealloc(NULL, totalAllocSize);
+    if (!scene->sharedElementData) {
+        return PLY_FAILED_ALLOC_ERROR;
+    }
 
     scene->sharedElementData = plyRealloc(NULL, totalAllocSize);
     /* now that data has been allocated, the actual buffer offsets still need to be updated */
@@ -2150,11 +2174,7 @@ enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* sc
                 if (scene->format == PLY_FORMAT_ASCII) {
                     exRes = readDataASCII(scene, (const U8*)srcline, (const U8*)(mem + memSize) - 1);
                 }
-                if (exRes == PLY_SUCCESS) {
-                    return PLY_SUCCESS;
-                } else {
-                    return exRes;
-                }
+                return exRes;
             }
         }
 
@@ -2164,11 +2184,7 @@ enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* sc
 
             enum PlyResult exRes = PLY_GENERIC_ERROR;
             exRes = readDataBinary(scene, (const U8*)srcline, (const U8*)(mem + memSize));
-            if (exRes == PLY_SUCCESS) {
-                return PLY_SUCCESS;
-            } else {
-                return exRes;
-            }
+            return exRes;
         }
         else {
             srcline = getNextLine(&srclineSize, mem, memSize, srcline, srclineSize);
@@ -2182,7 +2198,9 @@ enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* sc
     if (headerFinished==false) {
         return PLY_MALFORMED_HEADER_ERROR;
     }
-
+    if (scene->elementCount > 0) { /*element were expected, but data was never read*/
+        return PLY_MALFORMED_DATA_ERROR;
+    }
     return PLY_SUCCESS;
 }
 
@@ -2204,7 +2222,7 @@ enum PlyResult PlyLoadFromDisk(const char* fileName, struct PlyScene* scene, str
 
     U8* fileData = NULL;
 
-    if (fsze < 0)
+    if (fsze <= 0)
         goto bail;
 
 

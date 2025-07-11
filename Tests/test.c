@@ -166,6 +166,7 @@ restart_test:
 
 
             struct PlyElement* element = scene.elements + eId;
+
             printf("-- Element #%llu \"%s\" --\n", eId, element->name);
             printf("\t\tData Line Count %I32u\n", element->dataLineCount);
             printf("\t\tData Size: %llu\n", element->dataSize);
@@ -175,6 +176,7 @@ restart_test:
             U64 pId = 0;
             for (; pId < element->propertyCount; ++pId)
             {
+
                 printf("\t-- Property #%llu \"%s\" --\n", pId, element->properties[pId].name);
 
                 struct PlyProperty* property = element->properties + pId;

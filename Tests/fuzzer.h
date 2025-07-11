@@ -235,7 +235,7 @@ void writeNL(FILE* fptr)
 
 void writeSpace(FILE* fptr)
 {
-    if (generateRandomULL(0, 100) != 45)
+    if (generateRandomULL(0, 1000) != 555)
     {
         fprintf(fptr, " ");
     }
@@ -307,7 +307,7 @@ void fwriteRandomElement(FILE* fptr)
 
 void fwriteRandomProperty(FILE* fptr)
 {
-    if (generateRandomULL(0, 55) != 35)
+    if (generateRandomULL(0, 1000) != 100)
         fprintf(fptr, "property");
         writeSpace(fptr);
 
@@ -320,14 +320,14 @@ void fwriteRandomProperty(FILE* fptr)
 }
 
 void writeData(FILE* fptr) {
-    const uint16_t ct = isc_rand();
-    for (uint32_t i = 0; i > ct; ++i)
+    const uint16_t ct = isc_rand() % (UINT16_MAX/5);
+    for (uint32_t i = 0; i < ct; ++i)
     {
         if (isc_rand() % 5 == 1) {
-            fprintf(fptr, "%lu", generateRandomULL(INT64_MIN, INT64_MAX));
+            fprintf(fptr, "%d ", generateRandomULL(INT64_MIN, INT64_MAX));
         }
         else {
-            fprintf(fptr, "%d", generateRandomDouble(INT64_MIN, INT64_MAX));
+            fprintf(fptr, "%f ", generateRandomDouble(INT64_MIN, INT64_MAX));
         }
     }
 }
@@ -371,10 +371,11 @@ try_again:
         writeNL(fptr);
     }
 
-
-    if (generateRandomULL(0, 25) != 5)
-        fprintf(fptr, "header_end");
+    writeNL(fptr);
+    if (generateRandomULL(0, 55) != 5)
+        fprintf(fptr, "end_header");
     writeSpace(fptr);
+    writeNL(fptr);
 
 
 

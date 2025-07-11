@@ -7,29 +7,34 @@
 
 int main(void)
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
 	#define FUZZ_FILEPATH "res/rand.ply"
 	printf("-- Begin Fuzzing Checks: --\n");
-	/*
-	for (size_t i = 0; i < 250; ++i) {
+	printf("\t Full Random: \n");
+
+	for (size_t i = 0; i < 25; ++i) {
 		fuzzFullRandom(FUZZ_FILEPATH, 4096);
 
-		_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 		struct PlyScene scene;
-		enum PlyResult res = PlyLoadFromDisk(FUZZ_FILEPATH, &scene);
+		enum PlyResult res = PlyLoadFromDisk(FUZZ_FILEPATH, &scene, NULL);
+		if (res == PLY_SUCCESS) {
+			assert(00 && "sigma");
+		}
 		printf("res: %s\n", dbgPlyResultToString(res));
 		PlyDestroyScene(&scene);
 	}
-	*/
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	for (size_t i = 0; i < 25000; ++i) {
+	printf("\t Structured Random: \n");
+
+	for (size_t i = 0; i < 1000; ++i) {
 		fuzzStructuredRandom(FUZZ_FILEPATH, 4096);
 		struct PlyScene scene;
 		enum PlyResult res = PlyLoadFromDisk(FUZZ_FILEPATH, &scene, NULL);
 		if (res == PLY_SUCCESS) {
 			assert(00 && "sigma");
 		}
-		//printf("res: %s\n", dbgPlyResultToString(res));
+		printf("res: %s\n", dbgPlyResultToString(res));
 		PlyDestroyScene(&scene);
 	}
 
