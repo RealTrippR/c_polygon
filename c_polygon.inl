@@ -518,6 +518,69 @@ PLY_INLINE float PlyScaleBytesToF32(const void* data, const enum PlyScalarType t
     return d;
 }
 
+
+PLY_INLINE U64 PlyScaleBytesToU64(const void* data, const enum PlyScalarType t) {
+    const U8* f = data;
+    U64 d = 0;
+
+    switch (t) {
+    case PLY_SCALAR_TYPE_FLOAT: {
+        float temp = 0x0;
+        memcpy(&temp, f, sizeof(float));
+        d = (U64)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_DOUBLE: {
+        double temp = 0x0;
+        memcpy(&temp, f, sizeof(double));
+        d = (U64)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_CHAR: {
+        int8_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int8_t));
+        d = (U64)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_UCHAR: {
+        uint8_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint8_t));
+        d = (U64)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_SHORT: {
+        int16_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int16_t));
+        d = (U64)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_USHORT: {
+        uint16_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint16_t));
+        d = (U64)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_INT: {
+        int32_t temp = 0x0;
+        memcpy(&temp, f, sizeof(int32_t));
+        d = (U64)temp;
+        break;
+    }
+    case PLY_SCALAR_TYPE_UINT: {
+        uint32_t temp = 0x0;
+        memcpy(&temp, f, sizeof(uint32_t));
+        d = (U64)temp;
+        break;
+    }
+    default:
+        d = 0.0;
+        break;
+    }
+
+
+    return d;
+}
+
 PLY_INLINE double PlyScaleBytesToD64(const void* data, const enum PlyScalarType t)
 {
     const U8* f = data;

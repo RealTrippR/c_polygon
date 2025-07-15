@@ -272,6 +272,15 @@ PLY_INLINE PLY_H_FUNCTION_PREFIX int32_t PlyScaleBytesToI32(const void* data, co
 /// @return float - Data as a float */
 PLY_INLINE PLY_H_FUNCTION_PREFIX float PlyScaleBytesToF32(const void* data, const enum PlyScalarType t);
 
+
+
+/*
+/// PlyScaleBytesToU64() - Converts variable length data to an unsigned long long
+/// @param void* data - Start of data
+/// @param enum PlyScalarType t - Scalar type used to infer size of data to convert
+/// @return U64 - Data as an unsigned long long */
+PLY_INLINE U64 PlyScaleBytesToU64(const void* data, const enum PlyScalarType t);
+
 /*
 /// PlyScaleBytesToD64() - Converts variable length data to a double
 /// @param void* data - Start of data

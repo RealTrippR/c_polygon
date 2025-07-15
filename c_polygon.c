@@ -993,9 +993,10 @@ static enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin
 
                         /*copy list count from data into list count var */
                         listCount = (U64)PlyScaleBytesToD64(dataPrev - listcountTypeSize, listcountTypeSize);
-
+                        
                         if (systemEndianness != scene->format)
-                            PlySwapBytes((U8*)&listCount, property->listCountType);
+                            listCount = PLY_BYTESWAP64(listCount);
+                            //PlySwapBytes((U8*)&listCount, property->listCountType);
 
                         element->dataSize = newLen;
                     }
