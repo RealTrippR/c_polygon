@@ -384,8 +384,7 @@ PLY_INLINE uint32_t PlyScaleBytesToU32(const void* data, const enum PlyScalarTyp
         break;
     }
     default:
-        d = (uint32_t)0.0;
-        break;
+        return 0;
     }
 
 
@@ -447,8 +446,7 @@ PLY_INLINE int32_t PlyScaleBytesToI32(const void* data, const enum PlyScalarType
         break;
     }
     default:
-        d = (int32_t)0.0;
-        break;
+        return 0;
     }
 
 
@@ -510,8 +508,7 @@ PLY_INLINE float PlyScaleBytesToF32(const void* data, const enum PlyScalarType t
         break;
     }
     default:
-        d = 0.0;
-        break;
+        return 0;
     }
 
 
@@ -573,8 +570,7 @@ PLY_INLINE U64 PlyScaleBytesToU64(const void* data, const enum PlyScalarType t) 
         break;
     }
     default:
-        d = 0.0;
-        break;
+        return 0;
     }
 
 
@@ -636,8 +632,7 @@ PLY_INLINE double PlyScaleBytesToD64(const void* data, const enum PlyScalarType 
         break;
     }
     default:
-        d = 0.0;
-        break;
+        return 0;
     }
 
 

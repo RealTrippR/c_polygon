@@ -6,8 +6,9 @@
             "command": "C:\\msys64\\ucrt64\\bin\\gcc.exe",
             "args": [
                 //"-g", // -g enables debugging
-                "-std=c11",
+                "-std=c99",
                 "-O3",
+                "-msse4.2",
                 "-march=native",
                 "-funroll-loops",
                 "-fpeel-loops",
