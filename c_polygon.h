@@ -290,7 +290,7 @@ PLY_INLINE PLY_H_FUNCTION_PREFIX U8 PlyGetSizeofScalarType(const enum PlyScalarT
 /// @param const char* str - c string to read from
 /// @param const U64 strLen - the max length to read
 /// @return PlyScalarType - upon failure PLY_SCALAR_TYPE_UNDEFINED will be returned. */
-PLY_INLINE PLY_H_FUNCTION_PREFIX enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen);
+PLY_INLINE PLY_H_FUNCTION_PREFIX static enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen);
 
 static PLY_INLINE void PlyScalarUnionCpyIntoLocation(void* dst, const union PlyScalarUnion* u, const enum PlyScalarType t)
 {

@@ -104,7 +104,7 @@ int main(void)
 {
 restart_test:
 
-    printf("%s", "C-Polygon is a lightweight .ply (Stanford polygon) file parser written in C89. Copyright (C) 2025 Tripp R., under an MIT License.\n\n\n");
+    printf("%s", "C-Polygon is a lightweight .ply (Stanford polygon) file parser written in C89. Copyright (C) 2025 Tripp R., under an MIT License.\n--------------------------------------------------------------------\n");
 #ifndef NDEBUG
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif /* !NDEBUG */
@@ -130,7 +130,7 @@ restart_test:
         .saveComments = true
     };
 
-#define PLY_FILE "res/xyzrgb_dragon.ply"
+#define PLY_FILE "res/lucy.ply"
     enum PlyResult lres = PlyLoadFromDisk(PLY_FILE, &scene, &loadInfo);
 
     t = clock() - t;

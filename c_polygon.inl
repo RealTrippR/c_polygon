@@ -604,7 +604,7 @@ PLY_INLINE U8 PlyGetSizeofScalarType(const enum PlyScalarType type)
     return tbl[type];
 }
 
-PLY_INLINE enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen)
+PLY_INLINE static enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen)
 {
     if (strneql(str, "char", min(strLen, strlen("char"))) == true)
     {
