@@ -70,5 +70,8 @@
       <Filter>Tests\res</Filter>
     </None>
     <None Include="c_polygon.inl" />
+    <None Include="Tests\res\lucy.ply">
+      <Filter>Tests\res</Filter>
+    </None>
   </ItemGroup>
 </Project>

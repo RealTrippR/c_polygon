@@ -148,11 +148,10 @@
     </ClCompile>
     <ClCompile Include="Tests\fuzzer.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="Tests\ISAAC\isaac64.c" />
-    <ClCompile Include="Tests\test.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Tests\ISAAC\isaac64.c" />
+    <ClCompile Include="Tests\test.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="c_polygon.inl" />
@@ -163,6 +162,7 @@
     <None Include="Tests\res\cube.ply" />
     <None Include="Tests\res\cube_bin.ply" />
     <None Include="Tests\res\cube_blndr.ply" />
+    <None Include="Tests\res\lucy.ply" />
     <None Include="Tests\res\rand.ply" />
     <None Include="Tests\res\test_blndr.ply" />
     <None Include="Tests\res\xyzrgb_dragon.ply" />

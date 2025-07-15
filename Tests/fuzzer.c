@@ -32,7 +32,7 @@ int main(void)
 		struct PlyScene scene;
 		enum PlyResult res = PlyLoadFromDisk(FUZZ_FILEPATH, &scene, NULL);
 		if (res == PLY_SUCCESS) {
-			assert(00 && "sigma");
+			printf("sigma\n");
 		}
 		printf("res: %s\n", dbgPlyResultToString(res));
 		PlyDestroyScene(&scene);

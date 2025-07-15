@@ -3,7 +3,7 @@
 #include <io.h>
 
 const char* getReadableSize(unsigned long long bytes) {
-    static char output[64]; // static buffer (safe if not used concurrently)
+    static char output[64]; /* static buffer (safe if not used concurrently) */
 
     const char* sizes[] = { "Bytes", "KB", "MB", "GB", "TB" };
     int unit = 0;

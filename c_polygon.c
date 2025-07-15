@@ -26,132 +26,6 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 namespace cply
 #endif /*__cplusplus*/
 
-#ifndef TR_STR_EQL_H
-#define TR_STR_EQL_H
-
-#define max(a,b) (((a) > (b)) ? (a) : (b))
-#define min(a,b) (((a) < (b)) ? (a) : (b))
-
-#if defined(_MSC_VER)
-#if defined(_M_X64) || (_M_IX86_FP >= 2)
-#define TRIPP_STREQL_USE_SIMD
-#endif
-#else
-#if defined(__SSE4_2__)
-#define TRIPP_STREQL_USE_SIMD
-#else
-#define TRIPP_STREQL_SIMD_NOT_SUPPORTED
-#endif
-#endif
-
-#ifdef TRIPP_STREQL_USE_SIMD
-#include <immintrin.h>
-#endif /* TRIPP_STREQL_USE_SIMD */
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-/*
-/// streql() - Tests equality between two strings
-/// @name streql
-/// @brief Tests equality between two C strings. It differs from strcmp in 
-/// the fact that it stops once immediately after a mismatch is detected, 
-/// thus it is more efficient for comparison of direct equality. */
-static PLY_INLINE bool streql(const char* str1, const char* str2) 
-{
-#ifdef TRIPP_STREQL_SIMD_NOT_SUPPORTED
-    uint64_t i = 0u;
-    while (true) {
-        if (str1[i] != str2[i]) {
-            return false;
-        }
-        if (str1[i] == '\0' || str2[i] == '\0') {
-            return true;
-        }
-        i++;
-    }
-    return true;
-#elif defined(TRIPP_STREQL_USE_SIMD)
-
-    while (true)
-    {
-        register __m128i va = _mm_loadu_si128((const __m128i*)str1);
-        register __m128i vb = _mm_loadu_si128((const __m128i*)str2);
-        if (_mm_cmpistrc(va, vb, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_EACH | _SIDD_NEGATIVE_POLARITY)) {
-            return false; /* not equal */
-        }
-        if (_mm_cmpistrz(va, vb, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_EACH) == true) {
-            /* a null terminator was hit */
-            return true;
-        }
-
-        str1 += 16;
-        str2 += 16;
-    }
-
-
-#endif
-}
-/*
-/// strneql() - Tests equality between two strings within range n
-/// @name strneql
-/// @brief Tests equality between two C strings within range n. It differs from strncmp in 
-/// the fact that it stops once immediately after a mismatch is detected, 
-/// thus it is more efficient for comparison of direct equality. */
-static PLY_INLINE bool strneql(const char* str1, const char* str2, size_t n)
-{
-#ifdef TRIPP_STREQL_SIMD_NOT_SUPPORTED
-    size_t i = 0;
-    while (i < n) {
-        if (str1[i] != str2[i]) {
-            return false;
-        }
-        if (str1[i] == '\0' || str2[i] == '\0') {
-            return true;
-        }
-        i++;
-    }
-    return true;
-#elif defined(TRIPP_STREQL_USE_SIMD)
-
-    while (n > 0) {
-        const uint8_t buffLen = (n >= 16) ? 16 : (uint8_t)n;
-
-        /* Load next 16 bytes */
-        __m128i va = _mm_loadu_si128((const __m128i*)str1);
-        __m128i vb = _mm_loadu_si128((const __m128i*)str2);
-
-        /* Create / mask to 0 out all characters above bufflen */
-        __m128i indices = _mm_set_epi8(15, 14, 13, 12, 11, 10, 9, 8,
-            7, 6, 5, 4, 3, 2, 1, 0);
-        __m128i limit = _mm_set1_epi8((char)buffLen);
-        __m128i mask = _mm_cmplt_epi8(indices, limit);
-
-        /* Mask out all characters above buffLen */
-        va = _mm_and_si128(va, mask);
-        vb = _mm_and_si128(vb, mask);
-
-        if (_mm_cmpistrc(va, vb,
-            _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_EACH | _SIDD_NEGATIVE_POLARITY)) {
-            return false;
-        }
-
-        if (_mm_cmpistrz(va, vb, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_EACH)) {
-            return true;
-        }
-
-        str1 += buffLen;
-        str2 += buffLen;
-        n -= buffLen;
-    }
-    return true;
-
-#endif
-}
-
-#endif
-
-
 
 
 /*for ASNI C compatability*/
@@ -247,390 +121,6 @@ double     double-precision float    8
 
 
 
-static union PlyScalarUnion PlyStrToScalar(const char* str, const enum PlyScalarType type, U8* strlen)
-{
-    union PlyScalarUnion d;
-    d.d64 = 0.0;
-
-    *strlen = 0;
-    switch (type)
-    {
-    case PLY_SCALAR_TYPE_UCHAR:
-        d.u8 = strtou8(str, strlen);
-        return d;
-    case PLY_SCALAR_TYPE_CHAR:
-        d.i8 = strtoi8(str, strlen);
-        return d;
-    case PLY_SCALAR_TYPE_USHORT:
-        d.u16 = strtou16(str, strlen);
-        return d;
-    case PLY_SCALAR_TYPE_SHORT:
-        d.i16 = strtoi16(str, strlen);
-        return d;
-    case PLY_SCALAR_TYPE_UINT:
-        d.u32 = strtou32(str, strlen);
-        return d;
-    case PLY_SCALAR_TYPE_INT:
-        d.i32 = strtoi32(str, strlen);
-        return d;
-    case PLY_SCALAR_TYPE_FLOAT:
-        d.f32 = strtof32(str, strlen);
-        return d;
-    case PLY_SCALAR_TYPE_DOUBLE:
-        d.d64 = strtod64(str, strlen);
-        return d;
-    case PLY_SCALAR_TYPE_UNDEFINED:
-        return d;
-    default:
-        return d;
-    }
-}
-
-enum PlyFormat PlyGetSystemEndianness(void)
-{
-    U16 x = 1;
-    char* ptr = (char*)&x;
-    if (ptr[0] == 1) {
-        return PLY_FORMAT_BINARY_LITTLE_ENDIAN;
-    }
-    else {
-        return PLY_FORMAT_BINARY_BIG_ENDIAN;
-    }
-}
-
-
-uint32_t PlyScaleBytesToU32(const void* data, const enum PlyScalarType t)
-{
-    const U8* f = data;
-    uint32_t d = 0;
-
-    switch (t) {
-    case PLY_SCALAR_TYPE_UNDEFINED:
-        assert("C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
-        d = 0;
-        break;
-    case PLY_SCALAR_TYPE_FLOAT: {
-        float temp = 0x0;;
-        memcpy(&temp, f, sizeof(float));
-        d = (uint32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_DOUBLE: {
-        double temp = 0x0;
-        memcpy(&temp, f, sizeof(double));
-        d = (uint32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_CHAR: {
-        int8_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int8_t));
-        d = (uint32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_UCHAR: {
-        uint8_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint8_t));
-        d = (uint32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_SHORT: {
-        int16_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int16_t));
-        d = (uint32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_USHORT: {
-        uint16_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint16_t));
-        d = (uint32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_INT: {
-        int32_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int32_t));
-        d = (uint32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_UINT: {
-        uint32_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint32_t));
-        d = (uint32_t)temp;
-        break;
-    }
-    default:
-        assert(0x0 && "C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
-        d = (uint32_t)0.0;
-        break;
-    }
-
-
-    return d;
-}
-
-int32_t PlyScaleBytesToI32(const void* data, const enum PlyScalarType t)
-{
-    const U8* f = data;
-    int32_t d = 0;
-
-    switch (t) {
-    case PLY_SCALAR_TYPE_UNDEFINED:
-        assert("C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
-        d = 0;
-        break;
-    case PLY_SCALAR_TYPE_FLOAT: {
-        float temp = 0x0;;
-        memcpy(&temp, f, sizeof(float));
-        d = (int32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_DOUBLE: {
-        double temp = 0x0;
-        memcpy(&temp, f, sizeof(double));
-        d = (int32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_CHAR: {
-        int8_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int8_t));
-        d = (int32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_UCHAR: {
-        uint8_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint8_t));
-        d = (int32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_SHORT: {
-        int16_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int16_t));
-        d = (int32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_USHORT: {
-        uint16_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint16_t));
-        d = (int32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_INT: {
-        int32_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int32_t));
-        d = (int32_t)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_UINT: {
-        uint32_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint32_t));
-        d = (int32_t)temp;
-        break;
-    }
-    default:
-        assert(0x0 && "C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
-        d = (int32_t)0.0;
-        break;
-    }
-
-
-    return d;
-}
-
-float PlyScaleBytesToF32(const void* data, const enum PlyScalarType t)
-{
-    const U8* f = data;
-    float d = 0;
-
-    switch (t) {
-    case PLY_SCALAR_TYPE_UNDEFINED:
-        assert("C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
-        d = 0;
-        break;
-    case PLY_SCALAR_TYPE_FLOAT: {
-        float temp = 0x0;;
-        memcpy(&temp, f, sizeof(float));
-        d = (float)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_DOUBLE: {
-        double temp = 0x0;
-        memcpy(&temp, f, sizeof(double));
-        d = (float)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_CHAR: {
-        int8_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int8_t));
-        d = (float)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_UCHAR: {
-        uint8_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint8_t));
-        d = (float)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_SHORT: {
-        int16_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int16_t));
-        d = (float)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_USHORT: {
-        uint16_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint16_t));
-        d = (float)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_INT: {
-        int32_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int32_t));
-        d = (float)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_UINT: {
-        uint32_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint32_t));
-        d = (float)temp;
-        break;
-    }
-    default:
-        assert(0x0 && "C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
-        d = 0.0;
-        break;
-    }
-
-
-    return d;
-}
-
-double PlyScaleBytesToD64(const void* data, const enum PlyScalarType t)
-{
-    const U8* f = data;
-    double d = 0;
-
-    switch (t) {
-    case PLY_SCALAR_TYPE_UNDEFINED:
-        assert("C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
-        d = 0;
-        break;
-    case PLY_SCALAR_TYPE_FLOAT: {
-        float temp = 0x0;;
-        memcpy(&temp, f, sizeof(float));
-        d = (double)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_DOUBLE: {
-        double temp = 0x0;
-        memcpy(&temp, f, sizeof(double));
-        d = temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_CHAR: {
-        int8_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int8_t));
-        d = (double)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_UCHAR: {
-        uint8_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint8_t));
-        d = (double)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_SHORT: {
-        int16_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int16_t));
-        d = (double)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_USHORT: {
-        uint16_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint16_t));
-        d = (double)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_INT: {
-        int32_t temp = 0x0;
-        memcpy(&temp, f, sizeof(int32_t));
-        d = (double)temp;
-        break;
-    }
-    case PLY_SCALAR_TYPE_UINT: {
-        uint32_t temp = 0x0;
-        memcpy(&temp, f, sizeof(uint32_t));
-        d = (double)temp;
-        break;
-    }
-    default:
-        assert(0x0 && "C-Polygon: Bad scalar type - this likely indicates memory corruption within the program.");
-        d = 0.0;
-        break;
-    }
-
-
-    return d;
-
-}
-
-U8 PlyGetSizeofScalarType(const enum PlyScalarType type)
-{
-    /*enums can be negative apparently*/
-    if (type < 0 || type > 8) {
-        return 0;
-    }
-    const U8 tbl[] =
-    {
-        0,
-        1,
-        1,
-        2,
-        2,
-        4,
-        4,
-        4,
-        8
-    };
-
-    return tbl[type];
-}
-
-enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen)
-{
-    if (strneql(str, "char", min(strLen, strlen("char"))) == true)
-    {
-        return PLY_SCALAR_TYPE_CHAR;
-    }
-    if (strneql(str, "uchar", min(strLen, strlen("uchar"))) == true)
-    {
-        return PLY_SCALAR_TYPE_UCHAR;
-    }
-    if (strneql(str, "short", min(strLen, strlen("short"))) == true)
-    {
-        return PLY_SCALAR_TYPE_SHORT;
-    }
-    if (strneql(str, "ushort", min(strLen, strlen("ushort"))) == true)
-    {
-        return PLY_SCALAR_TYPE_USHORT;
-    }
-    if (strneql(str, "int", min(strLen, strlen("int"))) == true)
-    {
-        return PLY_SCALAR_TYPE_INT;
-    }
-    if (strneql(str, "uint", min(strLen, strlen("uint"))) == true)
-    {
-        return PLY_SCALAR_TYPE_UINT;
-    }
-    if (strneql(str, "float", min(strLen, strlen("float"))) == true)
-    {
-        return PLY_SCALAR_TYPE_FLOAT;
-    }
-    if (strneql(str, "double", min(strLen, strlen("double"))) == true)
-    {
-        return PLY_SCALAR_TYPE_DOUBLE;
-    }
-
-    return PLY_SCALAR_TYPE_UNDEFINED;
-}
 
 
 
@@ -687,7 +177,7 @@ PLY_H_FUNCTION_PREFIX I64 PlyGetPropertyIndexByName(const struct PlyElement* ele
 }
 
 /* adds a PlyProperty to an element.The property will be copied, thus transferring ownership */
-enum PlyResult  PlyElementAddProperty(struct PlyElement* element, struct PlyProperty* property)
+PLY_INLINE enum PlyResult  PlyElementAddProperty(struct PlyElement* element, struct PlyProperty* property)
 {
     if (element->propertyCount == UINT32_MAX - 1) {
         return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
@@ -706,7 +196,7 @@ enum PlyResult  PlyElementAddProperty(struct PlyElement* element, struct PlyProp
 }
 
 /* adds a PlyObjectInfo to an element.The property will be copied, thus transferring ownership */
-enum PlyResult PlySceneAddObjectInfo(struct PlyScene* scene, struct PlyObjectInfo* objInfo)
+PLY_INLINE enum PlyResult PlySceneAddObjectInfo(struct PlyScene* scene, struct PlyObjectInfo* objInfo)
 {
 #define OBJ_INFOS scene->objectInfos
 #define OBJ_INFO_COUNT scene->objectInfoCount
@@ -735,7 +225,7 @@ enum PlyResult PlySceneAddObjectInfo(struct PlyScene* scene, struct PlyObjectInf
 
 
 /* adds a PlyElement to a scene.The element will be copied, thus transferring ownership */
-enum PlyResult PlySceneAddElement(struct PlyScene* scene, struct PlyElement* element)
+PLY_INLINE enum PlyResult PlySceneAddElement(struct PlyScene* scene, struct PlyElement* element)
 {
     if (scene->elementCount == UINT32_MAX - 1)  {
         return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
@@ -754,7 +244,7 @@ enum PlyResult PlySceneAddElement(struct PlyScene* scene, struct PlyElement* ele
 }
 
 
-static U32 lineLen_s(const char* srcline, const char* mem, U64 memSize)
+PLY_INLINE static U32 lineLen_s(const char* srcline, const char* mem, U64 memSize)
 {
     if (!srcline || srcline < mem || srcline > mem + memSize - 1)
         return 0x0;
@@ -783,55 +273,36 @@ static U32 lineLen_s(const char* srcline, const char* mem, U64 memSize)
 }
 
 
-static void parseLine(const char* lineIn, U64 lineInSize, char* dst, const U32 dstSize, U32* strlenOut)
+PLY_INLINE static void parseLine(const char* lineIn, U64 lineInSize, char* dst, const U32 dstSize, U32* strlenOut)
 {
-    *strlenOut = 0x0;
+    *strlenOut = 0;
 
-    if (dstSize == 0 || lineInSize == 0) {
+    if (!lineIn || !dst || dstSize == 0 || lineInSize == 0)
         return;
-    }
 
-    if (lineInSize >= dstSize) {
+    /* Skip leading whitespace*/
+    U64 start = 0;
+    while (start < lineInSize && isblank((unsigned char)lineIn[start]))
+        ++start;
+
+    if (start == lineInSize)
         return;
-    }
 
-    U64 i = 0;
-    for (; i < lineInSize-1; ++i)
-    {
-        if (isblank((unsigned char)lineIn[i])) {
-            continue;
-        }
-        else {
-           
-            memcpy_s(dst + i, dstSize, lineIn + i, lineInSize);
-            *strlenOut = lineLen_s(lineIn, lineIn, lineInSize+1);
-            /* remove any trailing spaces */
+    /* Remove trailing whitespace */
+    U64 end = lineInSize;
+    while (end > start && isblank((unsigned char)lineIn[end - 1]))
+        --end;
 
-            const U64 len = *strlenOut;
-            U64 j=0;
-            for (; j < len; ++j)
-            {
-                char c = lineIn[len-j-1];
-                if (isblank(c)) {
-                    if (*strlenOut > 0) {
-                        (*strlenOut)--;
-                    }
-                }
-                else {
-                    break;
-                }
-            }
+    U64 cleanLen = end - start;
+    if (cleanLen >= dstSize)
+        cleanLen = dstSize - 1;
 
-
-            if (dst) {
-                dst[*strlenOut] = '\0';
-            }
-            return;
-        }
-    }
+    memcpy(dst, lineIn + start, cleanLen);
+    dst[cleanLen] = '\0';
+    *strlenOut = (U32)cleanLen;
 }
 
-static const char* getNextLine(U64* lenOut, const U8* mem, U64 memSize, const char* lastLine, const U64 lastLineLen)
+PLY_INLINE static const char* getNextLine(U64* lenOut, const U8* mem, U64 memSize, const char* lastLine, const U64 lastLineLen)
 {
     if (lastLineLen > UINT32_MAX) {
         return NULL;
@@ -929,7 +400,7 @@ static const char* getNextLine(U64* lenOut, const U8* mem, U64 memSize, const ch
     return lineBegin;
 }
 
-const char* getNextSpace(const char* srchBegin, const char* srchEnd)
+static PLY_INLINE const char* getNextSpace(const char* srchBegin, const char* srchEnd)
 {
     const char* ch = srchBegin;
     for (; ch <= srchEnd; ++ch)
@@ -942,7 +413,7 @@ const char* getNextSpace(const char* srchBegin, const char* srchEnd)
 }
 
 
-const char* getNextNonSpace(const char* srchBegin, const char* srchEnd)
+static PLY_INLINE const char* getNextNonSpace(const char* srchBegin, const char* srchEnd)
 {
     const char* ch = srchBegin;
     for (; ch <= srchEnd; ++ch)
@@ -954,7 +425,7 @@ const char* getNextNonSpace(const char* srchBegin, const char* srchEnd)
     return NULL;
 }
 
-static enum PlyResult parseProperty(struct PlyElement* owningElement, const char* propRangeFirst, const char* propRangeLast)
+static PLY_INLINE enum PlyResult parseProperty(struct PlyElement* owningElement, const char* propRangeFirst, const char* propRangeLast)
 {
     /* data type */
     enum PlyDataType dtype = PLY_DATA_TYPE_SCALAR;
@@ -1055,7 +526,7 @@ static enum PlyResult parseProperty(struct PlyElement* owningElement, const char
 }
 
 
-static enum PlyResult parseObjectInfo(struct PlyScene* scene, const char* objBegin, const char* objEnd)
+static PLY_INLINE enum PlyResult parseObjectInfo(struct PlyScene* scene, const char* objBegin, const char* objEnd)
 {
     /*get name begin*/
     const char* NameBegin = NULL;
@@ -1135,7 +606,7 @@ static enum PlyResult parseObjectInfo(struct PlyScene* scene, const char* objBeg
     return r;
 }
 
-static enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* readingHeader, struct PlyElement** curElement, struct PlyScene* scene, struct PlyLoadInfo* loadInfo)
+static PLY_INLINE enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* readingHeader, struct PlyElement** curElement, struct PlyScene* scene, struct PlyLoadInfo* loadInfo)
 {
     if (lineLen == 0) {
         return PLY_SUCCESS;
@@ -1441,7 +912,7 @@ static PLY_INLINE enum PlyResult allocateDataLinesForElement(struct PlyElement* 
 
 
 
-enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const U8* dataLast)
+static enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const U8* dataLast)
 {
     if (scene->elementCount == 0)
         return PLY_SUCCESS;
@@ -1685,30 +1156,30 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
                     /* get list data count */
                     const U8 scalarSize = PlyGetSizeofScalarType(property->scalarType);
 
-                    /* copy list elements into data*/
-                    U64 readPropCount;
-                    for (readPropCount=0u; readPropCount < listCount; ++readPropCount)
-                    {
-                        const U64 offsetFromDatalineOffset = dataPrev - dataLineBegin;
 
-                        const U64 totalOffset = offsetFromDatalineOffset + element->dataLineBegins[dli];
-                        U8* copyTo = (U8*)(element->data) + totalOffset;
-                        memcpy(
-                            copyTo, /*copy into data*/
-                            dataPrev, /*from mem*/
-                            scalarSize
-                        );
 
-                        if (systemEndianness != scene->format)
-                            PlySwapBytes(copyTo, property->scalarType);
+                    const U64 offsetFromDatalineOffset = dataPrev - dataLineBegin;
 
-                        /*advance data pointer by sizeof(property.scalarType)*/
-                        dataPrev += scalarSize;
+                    const U64 listSize = scalarSize * listCount; /*in bytes*/
+                    const U64 totalOffset = offsetFromDatalineOffset + element->dataLineBegins[dli];
+                    U8* copyTo = (U8*)(element->data) + totalOffset;
+                    memcpy(
+                        copyTo, /*copy into data*/
+                        dataPrev, /*from mem */
+                        listSize
+                    );
+
+                    /* correct endianness */
+                    if (systemEndianness != scene->format) {
+                        U32 dataOffset;
+                        for (dataOffset = 0; dataOffset < listCount*scalarSize; dataOffset+=scalarSize) {
+                            PlySwapBytes(copyTo + dataOffset, property->scalarType);
+
+                        }
                     }
 
-                    if (readPropCount != listCount) {
-                        return PLY_MALFORMED_DATA_ERROR;
-                    }
+                    /*increment data prev*/
+                    dataPrev += listSize;
                 }
             }
         }
@@ -1724,7 +1195,7 @@ enum PlyResult readDataBinary(struct PlyScene* scene, const U8* dataBegin, const
 
 
 
-enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const U8* dataLast)
+static enum PlyResult readDataASCII(struct PlyScene* scene, const U8* dataBegin, const U8* dataLast)
 {
     if (scene->elementCount == 0)
         return PLY_SUCCESS;

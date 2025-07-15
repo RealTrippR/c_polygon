@@ -16,6 +16,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 */
 
 #include "../c_polygon.h"
+
 #include "test_common.h"
 
 #include <stdio.h>
@@ -104,7 +105,10 @@ int main(void)
 restart_test:
 
     printf("%s", "C-Polygon is a lightweight .ply (Stanford polygon) file parser written in C89. Copyright (C) 2025 Tripp R., under an MIT License.\n\n\n");
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#ifndef NDEBUG
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#endif /* !NDEBUG */
+
 
     clock_t t;
     t = clock();
@@ -121,7 +125,7 @@ restart_test:
     */
     struct PlyLoadInfo loadInfo =
     {
-        .elements = { PLY_LOAD_ALL_ELEMENTS },
+        .elements = PLY_LOAD_ALL_ELEMENTS,
         .elementsCount = PLY_LOAD_ALL_ELEMENTS,
         .saveComments = true
     };
@@ -167,7 +171,7 @@ restart_test:
 
             struct PlyElement* element = scene.elements + eId;
 
-            printf("-- Element #%llu \"%s\" --\n", eId, element->name);
+            printf("-- Element #%llu \"%s\" --\n", eId+1, element->name);
             printf("\t\tData Line Count %I32u\n", element->dataLineCount);
             printf("\t\tData Size: %llu\n", element->dataSize);
             printf("\tProperty Count:%I32u\n\n", element->propertyCount);
@@ -177,7 +181,7 @@ restart_test:
             for (; pId < element->propertyCount; ++pId)
             {
 
-                printf("\t-- Property #%llu \"%s\" --\n", pId, element->properties[pId].name);
+                printf("\t-- Property #%llu \"%s\" --\n", pId+1, element->properties[pId].name);
 
                 struct PlyProperty* property = element->properties + pId;
                 printf("\t\tScalar Type: %s\n", dbgPlyScalarTypeToString(property->scalarType));
