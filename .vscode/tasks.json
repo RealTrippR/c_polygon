@@ -19,6 +19,8 @@
                 "-Wall",
                 "${file}",
                 "${workspaceFolder}/c_polygon.c",
+                "${workspaceFolder}/ASM/streql_x64_win.obj",
+                "${workspaceFolder}/ASM/strneql_x64_win.obj",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe"
             ],

@@ -14,6 +14,9 @@
     <ClInclude Include="Tests\test_common.h">
       <Filter>Tests</Filter>
     </ClInclude>
+    <ClInclude Include="ASM\streqlasm.h">
+      <Filter>ASM</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="c_polygon.c" />
@@ -36,6 +39,9 @@
     </Filter>
     <Filter Include="Tests\res">
       <UniqueIdentifier>{c418aa55-0f8a-4438-b7b0-7b1c6f46ee51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ASM">
+      <UniqueIdentifier>{4d39b68a-e629-45e5-819f-1d0e8dce600c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -73,5 +79,25 @@
     <None Include="Tests\res\lucy.ply">
       <Filter>Tests\res</Filter>
     </None>
+    <None Include="ASM\streql_x64_unix.asm">
+      <Filter>ASM</Filter>
+    </None>
+    <None Include="ASM\streql_x64_win.asm">
+      <Filter>ASM</Filter>
+    </None>
+    <None Include="ASM\strneql_x64_unix.asm">
+      <Filter>ASM</Filter>
+    </None>
+    <None Include="ASM\strneql_x64_win.asm">
+      <Filter>ASM</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="ASM\streql_x64_win.obj">
+      <Filter>ASM</Filter>
+    </Object>
+    <Object Include="ASM\strneql_x64_win.obj">
+      <Filter>ASM</Filter>
+    </Object>
   </ItemGroup>
 </Project>

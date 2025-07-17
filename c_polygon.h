@@ -18,6 +18,15 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #ifndef C_POLYGON_H
 #define C_POLYGON_H
 
+
+
+#ifdef __cplusplus
+namespace cply {
+#endif /* __cplusplus */
+
+#define min(a,b) (a < b ? a : b)
+#define max(a,b) (a > b ? a : b)
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -45,7 +54,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 	#define PLY_STATIC_ASSERT _Static_assert
 #endif
 
-
+#include "ASM/streqlasm.h"
 
 PLY_STATIC_ASSERT(C_PLY_MAX_LINE_LENGTH >= 2, "C_PLY_MAX_LINE_LENGTH must be 2 or greater");
 PLY_STATIC_ASSERT(PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH >= 2, "PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH must be 2 or greater");
@@ -69,10 +78,6 @@ PLY_STATIC_ASSERT(PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH >= 2, "PLY_MAX_ELEMEN
 
 
 
-
-#ifdef __cplusplus
-namespace cply {
-#endif /* __cplusplus */
 
 typedef uint8_t		U8;
 typedef uint16_t	U16;
