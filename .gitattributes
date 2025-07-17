@@ -1,3 +1,4 @@
 *.h linguist-language=C
 *.inl linguist-language=C
+*.c linguist-language=C
 *cpp linguist-detectable=false
