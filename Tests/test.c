@@ -125,7 +125,7 @@ restart_test:
         .saveComments = true
     };
 
-#define PLY_FILE "res/xyzrgb_dragon.ply"
+#define PLY_FILE "res/lucy.ply"
     enum PlyResult lres = PlyLoadFromDisk(PLY_FILE, &scene, &loadInfo);
 
     t = clock() - t;
