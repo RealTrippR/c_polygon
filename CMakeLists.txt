@@ -10,8 +10,6 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/c_polygon ${CMAKE_CURRENT_SOURCE_DIR}/ASM)
 
-set_tests_properties(MyTest PROPERTIES WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/data")
-
 
 add_executable(c_polygon
     c_polygon.c 
