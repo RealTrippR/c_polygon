@@ -18,10 +18,11 @@ C Polygon considers a .ply file as a file with 2 main parts:
 - Data, which should match the description set in the header.
 
 C Polygon expects elements to have a unique name followed it's instance count.
+
 ```element <name> <count>``` 
 
-Directly below the element's declaration are properties which define the type of layout of the data in the instances of that element. 
+Directly below the element's declaration are properties which define the type of layout of the data in the instances of that element.
+
 ```property <scalar_type> <name>```
+
 ```property <list> <list_count_type> <scalar_type> <name>```
-
-
