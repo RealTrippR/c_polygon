@@ -30,6 +30,8 @@ Directly below the element's declaration are properties which define the type of
 
 ```
 
+<ins> **Performance** </ins>
+
 <ins> **Contributing Guidelines** </ins>
 
 **Naming Conventions**
