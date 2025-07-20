@@ -66,7 +66,8 @@ end_header
 ```
 
 <ins> **Scalar Types** </ins>
-**Note: Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, etc..`. C_Polygon will reject this.
+
+**Note:** Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, etc..`. C_Polygon will reject this.
 
 |         Name  |          Type              |         Bytes |
 | ------------- | -------------------------- | ------------- |
