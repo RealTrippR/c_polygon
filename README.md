@@ -77,7 +77,7 @@ end_header
 | int           | integer                    | 4
 | uint          | unsigned integer           | 4
 | float         | floating-point value       | 4
-| double        | double-precision float     | 4
+| double        | double-precision float     | 8
 
 
 <ins> **Example Program**  </ins>
