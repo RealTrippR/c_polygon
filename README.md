@@ -75,6 +75,8 @@ end_header
 
 <ins> **Limitations** </ins>
 
+max line count
+
 <ins> **Performance** </ins>
 
 <ins> **Contributing Guidelines** </ins>
