@@ -142,7 +142,7 @@ restart_test:
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
 	if (lres != PLY_SUCCESS)
 	{
-		printf("res: %s\n", DbgPlyResultToString(lres));
+		printf("Failed to parse file '%s'. PlyResult: %s\n", PLY_FILE, DbgPlyResultToString(lres));
 		PlyDestroyScene(&scene);
 
         if (promptRestartProgram())
