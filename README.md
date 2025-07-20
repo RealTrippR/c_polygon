@@ -5,11 +5,6 @@ C Polygon is a polygon file (.ply) parser written in C89 and x86 assembly. It is
 
 <BR>
 
-**Example**
-```
-
-```
-
 **Ply File Structure**
 
 C Polygon considers a .ply file as a file with 2 main parts:
@@ -26,3 +21,14 @@ Directly below the element's declaration are properties which define the type of
 ```property <scalar_type> <name>```
 
 ```property <list> <list_count_type> <scalar_type> <name>```
+
+
+**Example Program**
+```
+
+```
+
+**Contributing Guidelines**
+
+<ins> Naming Conventions </ins>
+
