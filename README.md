@@ -30,14 +30,15 @@ Directly below the element's declaration are properties which define the type of
 
 Comments begin with the comment keyword, followed by a string.
 
-```Comment <string>``` 
+```comment <string>``` 
 
 Obj_infos begin with the obj_info keyword, followed by a double precision float.
 
 ```obj_info <d64>```
 
-A complete file is structured as such:
+A complete file should have a structure like the one below:
 ```
+
 ply
 format ascii 1.0
 comment created by platoply
@@ -64,12 +65,29 @@ end_header
 4 5 1 0 4 
 ```
 
+<ins> **Scalar Types** </ins>
+
+
+|         Name  |          Type              |         Bytes |
+| ------------- | -------------------------- | ------------- |
+| char          | character                  | 1
+| uchar         | unsigned character         | 1
+| short         | short integer              | 2
+| ushort        | short unsigned integer     | 2
+| int           | integer                    | 4
+| uint          | unsigned integer           | 4
+| float         | floating-point value       | 4
+| double        | double-precision float     | 8
+
+
 <ins> **Example Program**  </ins>
 ```
 
 ```
 
 <ins> **Limitations** </ins>
+
+max line count
 
 <ins> **Performance** </ins>
 
