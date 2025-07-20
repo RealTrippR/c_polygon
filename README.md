@@ -36,8 +36,9 @@ Obj_infos begin with the obj_info keyword, followed by a double precision float.
 
 ```obj_info <d64>```
 
-A complete file is structured as such:
+A complete file should have a structure like the one below:
 ```
+
 ply
 format ascii 1.0
 comment created by platoply
@@ -63,6 +64,9 @@ end_header
 4 7 3 2 6 
 4 5 1 0 4 
 ```
+
+<ins> **Scalar Types** </ins>
+
 
 <ins> **Example Program**  </ins>
 ```
