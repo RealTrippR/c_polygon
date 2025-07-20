@@ -16,7 +16,7 @@ C Polygon considers a .ply file as a file with 2 main parts:
 
 Format and version information is required in the file header. The format keyword must only be defined once and have 1 of the three values:
 ```ascii, binary_little_endian, binary_big_endian```
-Directly after this is the version. Unless specified otherwise in ```PlyLoadInfo``` by ```allowAnyVersion = true```, the only valid version is ```1.0```.
+Directly after this is the version. Unless specified otherwise in ```PlyLoadInfo``` by ```.allowAnyVersion = true```, the only valid version is ```1.0```.
 
 C Polygon expects elements to have a unique name followed it's instance count.
 
