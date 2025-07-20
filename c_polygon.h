@@ -123,7 +123,6 @@ enum PlyResult
 	PLY_UNSUPPORTED_VERSION_ERROR
 };
 
-
 enum PlyDataType
 {
 	PLY_DATA_TYPE_UNDEFINED = 0,
@@ -199,6 +198,7 @@ struct PlyLoadInfo
 	const char** elements; /*don't forget to set elementsCount*/
 	uint32_t elementsCount;
 	char saveComments;
+	char allowAnyVersion;
 };
 
 struct PlyScene

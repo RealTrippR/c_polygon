@@ -726,9 +726,9 @@ PLY_INLINE enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bo
                 if (vbegin == NULL) {
                     return PLY_MALFORMED_HEADER_ERROR;
                 }
-                /*get version number(currently only v 1.0 is supported)*/
+                /*get version number(currently only v 1.0 is considered valid, unless allowAnyVersion is true)*/
                 scene->versionNumber = strtof(vbegin, NULL);
-                if (scene->versionNumber != 1.0)
+                if (loadInfo->allowAnyVersion == false && scene->versionNumber != 1.0)
                 {
                     scene->versionNumber = 0.0;
                     return PLY_UNSUPPORTED_VERSION_ERROR;

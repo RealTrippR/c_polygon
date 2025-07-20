@@ -127,12 +127,15 @@ restart_test:
     * If you want to integrate c_polygon into your software,
     * please take a refer to this paper for more about the .ply standard:
     * https://gamma.cs.unc.edu/POWERPLANT/papers/ply.pdf
+    * The original .ply specification by Greg Turk
+    * https://web.archive.org/web/20161221115231/http://www.cs.virginia.edu/~gfx/Courses/2001/Advanced.spring.01/plylib/Ply.txt
     */
     struct PlyLoadInfo loadInfo =
     {
         .elements = PLY_LOAD_ALL_ELEMENTS,
         .elementsCount = PLY_LOAD_ALL_ELEMENTS,
-        .saveComments = true
+        .saveComments = true,
+        .allowAnyVersion = false
     };
 
 #define PLY_FILE "res/xyzrgb_dragon.ply"
