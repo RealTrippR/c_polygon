@@ -67,6 +67,7 @@ end_header
 
 <ins> **Scalar Types** </ins>
 
+**Note:** Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, etc..`. C_Polygon will reject any files with this naming convention.
 
 |         Name  |          Type              |         Bytes |
 | ------------- | -------------------------- | ------------- |
@@ -87,7 +88,10 @@ end_header
 
 <ins> **Limitations** </ins>
 
-max line count
+**Max File Size:** UINT64_MAX-1
+**Max Line Length:** C_PLY_MAX_LINE_LENGTH (Default: 200000lu)
+**Max Property/Element Name Length:** PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH (Default: 127u)
+
 
 <ins> **Performance** </ins>
 
