@@ -143,6 +143,7 @@ restart_test:
 	if (lres != PLY_SUCCESS)
 	{
 		printf("Failed to parse file '%s'. PlyResult: %s\n", PLY_FILE, DbgPlyResultToString(lres));
+        printf("Hint: ensure that the working directory is /Tests");
 		PlyDestroyScene(&scene);
 
         if (promptRestartProgram())
