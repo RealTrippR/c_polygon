@@ -1,5 +1,6 @@
 # C-Polygon
 <BR>
+ <ins> **Brief**  </ins>
 
 C Polygon is a polygon file (.ply) parser written in C89 and x86 assembly. It is lightweight, portable (tested on MSVC and GCC), and compiles for both C and C++.
 
