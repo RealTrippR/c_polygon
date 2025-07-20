@@ -89,8 +89,11 @@ end_header
 <ins> **Limitations** </ins>
 
 **Max File Size:** UINT64_MAX-1
-**Max Line Length:** C_PLY_MAX_LINE_LENGTH (Default: 200000lu)
-**Max Property/Element Name Length:** PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH (Default: 127u)
+
+**Max Line Length:** C_PLY_MAX_LINE_LENGTH (Default: (uint32_t)200000lu)
+
+**Max Property/Element Name Length:** PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH (Default: (uint16_t)127u)
+
 
 
 <ins> **Performance** </ins>
