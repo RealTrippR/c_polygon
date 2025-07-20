@@ -81,10 +81,9 @@ end_header
 | double        | double-precision float     | 8
 
 
-<ins> **Example Program**  </ins>
-```
+<ins> **Reading PlyScene Data** </ins>
 
-```
+
 
 <ins> **Limitations** </ins>
 
