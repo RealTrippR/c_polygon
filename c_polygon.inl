@@ -51,6 +51,8 @@ PLY_INLINE void PlySwapBytes(U8* mem, const enum PlyScalarType t)
 	case PLY_SCALAR_TYPE_DOUBLE:
 		*(U64*)mem = PLY_BYTESWAP64(*mem);
 		break;
+    default:
+        break;
 	}
 }
 
