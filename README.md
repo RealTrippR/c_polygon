@@ -14,6 +14,10 @@ C Polygon considers a .ply file as a file with 2 main parts:
 - A header, comprised of a beginning, format, comments, obj_infos, elements, properties, and an end.
 - Data, which should match the description set in the header.
 
+Format and version information is required in the file header. The format keyword must only be defined once and have 1 of the three values:
+```ascii, binary_little_endian, binary_big_endian```
+Directly after this is the version. Unless specified otherwise in ```PlyLoadInfo```, the only valid version is ```1.0```.
+
 C Polygon expects elements to have a unique name followed it's instance count.
 
 ```element <name> <count>``` 
@@ -31,6 +35,34 @@ Comments begin with the comment keyword, followed by a string.
 Obj_infos begin with the obj_info keyword, followed by a double precision float.
 
 ```obj_info <d64>```
+
+A complete file is structured as such:
+```
+ply
+format ascii 1.0
+comment created by platoply
+element vertex 8
+property float32 x
+property float32 y
+property float32 z
+element face 6
+property list uint8 int32 vertex_indices
+end_header
+-1 -1 -1 
+1 -1 -1 
+1 1 -1 
+-1 1 -1 
+-1 -1 1 
+1 -1 1 
+1 1 1 
+-1 1 1 
+4 0 1 2 3 
+4 5 4 7 6 
+4 6 2 1 5 
+4 3 7 4 0 
+4 7 3 2 6 
+4 5 1 0 4 
+```
 
 <ins> **Example Program**  </ins>
 ```
