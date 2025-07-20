@@ -20,17 +20,17 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 
 
 #if defined(_MSC_VER)
-#if defined(_M_X64)
-#define STREQL_SIMD_SUPPORTED 1
+    #if defined(_M_X64)
+        #define STREQL_SIMD_SUPPORTED 1
+    #else
+        #define STREQL_SIMD_SUPPORTED 0
+    #endif
 #else
-#define STREQL_SIMD_SUPPORTED 0
-#endif
-#else
-#if defined(__SSE4_2__)
-#define STREQL_SIMD_SUPPORTED 1
-#else
-#define STREQL_SIMD_SUPPORTED 0
-#endif
+    #if defined(__SSE4_2__)
+            #define STREQL_SIMD_SUPPORTED 1
+        #else
+            #define STREQL_SIMD_SUPPORTED 0
+    #endif
 #endif
 
 #if (defined(_M_X64) || defined(__aarch64__))
@@ -38,27 +38,29 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #elif
 #define STREQL_SUPPORTED_ARCHITECHURE 0
 #endif
-#if (defined(_WIN32) || defined(_WIN64)) || (defined(__x86_64__)) && (STREQL_SUPPORTED_ARCHITECHURE) && (STREQL_SIMD_SUPPORTED)
 
-int streql_x64_win(const char*, const char*);
+#if ((STREQL_SUPPORTED_ARCHITECHURE==1) && (STREQL_SIMD_SUPPORTED==1))
+    #if (defined(_WIN32) || defined(_WIN64)) || (defined(__x86_64__))
 
-int strneql_x64_win(const char*, const char*, size_t);
+        int streql_x64_win(const char*, const char*);
 
-#define streql(str1,str2) streql_x64_win(str1,str2)
+        int strneql_x64_win(const char*, const char*, size_t);
 
-#define strneql(str1,str2,n) strneql_x64_win(str1,str2,n)
+        #define streql(str1,str2) streql_x64_win(str1,str2)
 
-/* https://stackoverflow.com/questions/142508/how-do-i-check-os-with-a-preprocessor-directive */
-#elif (defined(__linux__) || defined(__unix) || defined(__APPLE__)) && (STREQL_SUPPORTED_ARCHITECHURE) && (STREQL_SIMD_SUPPORTED)
+        #define strneql(str1,str2,n) strneql_x64_win(str1,str2,n)
 
-int streql_x64_unix(const char*, const char*);
+    /* https://stackoverflow.com/questions/142508/how-do-i-check-os-with-a-preprocessor-directive */
+    #elif (defined(__linux__) || defined(__unix) || defined(__APPLE__))
 
-int strneql_x64_unix(const char*, const char*, size_t);
+        int streql_x64_unix(const char*, const char*);
 
-#define streql(str1,str2) streql_x64_unix(str1,str2)
+        int strneql_x64_unix(const char*, const char*, size_t);
 
-#define strneql(str1,str2,n) strneql_x64_unix(str1,str2,n)
+        #define streql(str1,str2) streql_x64_unix(str1,str2)
 
+        #define strneql(str1,str2,n) strneql_x64_unix(str1,str2,n)
+    #endif
 #else
 /* C fallback */
 static int streql(const char* str1, const char* str2) {

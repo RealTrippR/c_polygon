@@ -142,7 +142,7 @@ restart_test:
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
 	if (lres != PLY_SUCCESS)
 	{
-		printf("res: %s\n", dbgPlyResultToString(lres));
+		printf("res: %s\n", DbgPlyResultToString(lres));
 		PlyDestroyScene(&scene);
 
         if (promptRestartProgram())
@@ -186,9 +186,9 @@ restart_test:
                 printf("\t-- Property #%llu \"%s\" --\n", pId+1, element->properties[pId].name);
 
                 struct PlyProperty* property = element->properties + pId;
-                printf("\t\tScalar Type: %s\n", dbgPlyScalarTypeToString(property->scalarType));
-                printf("\t\tData Type: %s\n", dbgPlyDataTypeToString(property->dataType));
-                printf("\t\tList Count Type: %s\n", dbgPlyScalarTypeToString(property->listCountType));
+                printf("\t\tScalar Type: %s\n", DbgPlyScalarTypeToString(property->scalarType));
+                printf("\t\tData Type: %s\n", DbgPlyDataTypeToString(property->dataType));
+                printf("\t\tList Count Type: %s\n", DbgPlyScalarTypeToString(property->listCountType));
             }
 
 

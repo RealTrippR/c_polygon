@@ -27,16 +27,12 @@ namespace cply
 #endif /*__cplusplus*/
 
 
-
-/*for ASNI C compatability*/
-#if (__STDC_VERSION__ == 0)
 #include "c_polygon.inl"
-#endif
 
 
 
 
-static bool PLY_INLINE checkForElementNameCollision(const struct PlyScene* scene, const char* name)
+bool PLY_INLINE checkForElementNameCollision(const struct PlyScene* scene, const char* name)
 {
     U32 ei = 0;
     for (; ei < scene->elementCount; ++ei)
@@ -49,7 +45,7 @@ static bool PLY_INLINE checkForElementNameCollision(const struct PlyScene* scene
     return false;
 }
 
-static bool PLY_INLINE checkForPropertyNameCollision(const struct PlyElement* element, const char* name)
+bool PLY_INLINE checkForPropertyNameCollision(const struct PlyElement* element, const char* name)
 {
     U32 ei = 0;
     for (; ei < element->propertyCount; ++ei)
@@ -244,7 +240,7 @@ PLY_INLINE enum PlyResult PlySceneAddElement(struct PlyScene* scene, struct PlyE
 }
 
 
-PLY_INLINE static U32 lineLen_s(const char* srcline, const char* mem, U64 memSize)
+PLY_INLINE U32 lineLen_s(const char* srcline, const char* mem, U64 memSize)
 {
     if (!srcline || srcline < mem || srcline > mem + memSize - 1)
         return 0x0;
@@ -268,7 +264,7 @@ PLY_INLINE static U32 lineLen_s(const char* srcline, const char* mem, U64 memSiz
 }
 
 
-PLY_INLINE static void parseLine(const char* lineIn, U64 lineInSize, char* dst, const U32 dstSize, U32* strlenOut)
+PLY_INLINE void parseLine(const char* lineIn, U64 lineInSize, char* dst, const U32 dstSize, U32* strlenOut)
 {
     *strlenOut = 0;
 
@@ -297,7 +293,7 @@ PLY_INLINE static void parseLine(const char* lineIn, U64 lineInSize, char* dst, 
     *strlenOut = (U32)cleanLen;
 }
 
-PLY_INLINE static const char* getNextLine(U64* lenOut, const U8* mem, U64 memSize, const char* lastLine, const U64 lastLineLen)
+PLY_INLINE const char* getNextLine(U64* lenOut, const U8* mem, U64 memSize, const char* lastLine, const U64 lastLineLen)
 {
     if (lastLineLen > UINT32_MAX || memSize > UINT32_MAX) {
         return NULL;
@@ -388,7 +384,7 @@ PLY_INLINE static const char* getNextLine(U64* lenOut, const U8* mem, U64 memSiz
     return lineBegin;
 }
 
-static PLY_INLINE const char* getNextSpace(const char* srchBegin, const char* srchEnd)
+PLY_INLINE const char* getNextSpace(const char* srchBegin, const char* srchEnd)
 {
     const char* ch = srchBegin;
     for (; ch <= srchEnd; ++ch)
@@ -401,7 +397,7 @@ static PLY_INLINE const char* getNextSpace(const char* srchBegin, const char* sr
 }
 
 
-static PLY_INLINE const char* getNextNonSpace(const char* srchBegin, const char* srchEnd)
+PLY_INLINE const char* getNextNonSpace(const char* srchBegin, const char* srchEnd)
 {
     const char* ch = srchBegin;
     for (; ch <= srchEnd; ++ch)
@@ -413,7 +409,7 @@ static PLY_INLINE const char* getNextNonSpace(const char* srchBegin, const char*
     return NULL;
 }
 
-static PLY_INLINE enum PlyResult parseProperty(struct PlyElement* owningElement, const char* propRangeFirst, const char* propRangeLast)
+PLY_INLINE enum PlyResult parseProperty(struct PlyElement* owningElement, const char* propRangeFirst, const char* propRangeLast)
 {
     /* data type */
     enum PlyDataType dtype = PLY_DATA_TYPE_SCALAR;
@@ -514,7 +510,7 @@ static PLY_INLINE enum PlyResult parseProperty(struct PlyElement* owningElement,
 }
 
 
-static PLY_INLINE enum PlyResult parseObjectInfo(struct PlyScene* scene, const char* objBegin, const char* objEnd)
+PLY_INLINE enum PlyResult parseObjectInfo(struct PlyScene* scene, const char* objBegin, const char* objEnd)
 {
     /*get name begin*/
     const char* NameBegin = NULL;
@@ -594,7 +590,7 @@ static PLY_INLINE enum PlyResult parseObjectInfo(struct PlyScene* scene, const c
     return r;
 }
 
-static PLY_INLINE enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* readingHeader, struct PlyElement** curElement, struct PlyScene* scene, struct PlyLoadInfo* loadInfo)
+PLY_INLINE enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* readingHeader, struct PlyElement** curElement, struct PlyScene* scene, struct PlyLoadInfo* loadInfo)
 {
     if (lineLen == 0) {
         return PLY_SUCCESS;
@@ -878,7 +874,7 @@ static PLY_INLINE enum PlyResult readHeaderLine(const char* line, const U32 line
 }
 
 
-static PLY_INLINE enum PlyResult allocateDataLinesForElement(struct PlyElement* element)
+PLY_INLINE enum PlyResult allocateDataLinesForElement(struct PlyElement* element)
 {
 
     element->dataLineBegins = plyReCalloc(element->dataLineBegins, 0, element->dataLineCount, sizeof(U64));

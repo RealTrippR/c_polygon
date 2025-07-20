@@ -7,6 +7,7 @@
         "stdlib.h": "c",
         "c_polygon.h": "c",
         "c_polygon.inl": "c",
-        "assert.h": "c"
+        "assert.h": "c",
+        "errno.h": "c"
     }
 }

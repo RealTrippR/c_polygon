@@ -56,7 +56,7 @@ PLY_INLINE void PlySwapBytes(U8* mem, const enum PlyScalarType t)
 
 
 
-PLY_INLINE const char* dbgPlyDataTypeToString(enum PlyDataType t)
+PLY_INLINE const char* DbgPlyDataTypeToString(enum PlyDataType t)
 {
 	if (t == PLY_DATA_TYPE_LIST)
 	{
@@ -70,7 +70,7 @@ PLY_INLINE const char* dbgPlyDataTypeToString(enum PlyDataType t)
 	return "undefined";
 }
 
-PLY_INLINE const char* dbgPlyScalarTypeToString(enum PlyScalarType t)
+PLY_INLINE const char* DbgPlyScalarTypeToString(enum PlyScalarType t)
 {
 
 	if (t == PLY_SCALAR_TYPE_CHAR)
@@ -108,7 +108,7 @@ PLY_INLINE const char* dbgPlyScalarTypeToString(enum PlyScalarType t)
 	return "undefined";
 
 }
-PLY_INLINE const char* dbgPlyResultToString(enum PlyResult res)
+PLY_INLINE const char* DbgPlyResultToString(enum PlyResult res)
 {
 	if (res == PLY_SUCCESS) {
 		return "PLY_SUCCESS";
@@ -153,7 +153,7 @@ PLY_INLINE const char* dbgPlyResultToString(enum PlyResult res)
 
 
 
-static union PlyScalarUnion PlyStrToScalar(const char* str, const enum PlyScalarType type, U8* strlen)
+PLY_INLINE union PlyScalarUnion PlyStrToScalar(const char* str, const enum PlyScalarType type, U8* strlen)
 {
     union PlyScalarUnion d;
     d.d64 = 0.0;
@@ -190,6 +190,12 @@ static union PlyScalarUnion PlyStrToScalar(const char* str, const enum PlyScalar
     default:
         return d;
     }
+}
+
+PLY_INLINE void PlyScalarUnionCpyIntoLocation(void* dst, const union PlyScalarUnion* u, const enum PlyScalarType t)
+{
+	const U64 copylen = PlyGetSizeofScalarType(t);
+	memcpy(dst, (void*)u, copylen);
 }
 
 PLY_INLINE enum PlyFormat PlyGetSystemEndianness(void)
@@ -538,7 +544,7 @@ PLY_INLINE U8 PlyGetSizeofScalarType(const enum PlyScalarType type)
     return tbl[type];
 }
 
-PLY_INLINE static enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen)
+PLY_INLINE enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen)
 {
     if (strneql(str, "char", min(strLen, strlen("char"))) == true)
     {

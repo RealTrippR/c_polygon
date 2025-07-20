@@ -37,7 +37,7 @@ namespace cply {
 
 /*In C89, the version will not be defined, or it will be equal to 0.*/
 #if defined(_MSC_VER) || defined(__STDC_VERSION__) || (__STDC_VERSION__ != 0)
-#define PLY_INLINE inline
+#define PLY_INLINE static inline
 #else
 #define PLY_INLINE
 #endif
@@ -73,9 +73,6 @@ PLY_STATIC_ASSERT(PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH >= 2, "PLY_MAX_ELEMEN
 #define PLY_BYTESWAP32(x) bswap_32(x)
 #define PLY_BYTESWAP64(x) bswap_64(x)
 #endif /* !_MSC_VER */
-
-
-
 
 
 
@@ -248,7 +245,7 @@ typedef void (*PlyDeallocT)(void*);
 /*
 /// Returns the system endianness as a PLY_FORMAT
 /// @return enum PlyFormat - returns either PLY_FORMAT_BIG_ENDIAN or PLY_FORMAT_LITTLE_ENDIAN */
-PLY_INLINE PLY_H_FUNCTION_PREFIX enum PlyFormat PlyGetSystemEndianness(void);
+PLY_INLINE enum PlyFormat PlyGetSystemEndianness(void);
 
 /*
 /// Swaps bytes in place to invert endianness
@@ -261,21 +258,21 @@ PLY_INLINE void PlySwapBytes(U8* mem, const enum PlyScalarType t);
 /// @param void* data - Start of data
 /// @param enum PlyScalarType t - Scalar type used to infer size of data to convert
 /// @return unsigned int - Data as an unsigned int */
-PLY_INLINE PLY_H_FUNCTION_PREFIX uint32_t PlyScaleBytesToU32(const void* data, const enum PlyScalarType t);
+PLY_INLINE uint32_t PlyScaleBytesToU32(const void* data, const enum PlyScalarType t);
 
 /*
 /// PlyScaleBytesToI32() - Converts variable length data to a int
 /// @param void* data - Start of data
 /// @param enum PlyScalarType t - Scalar type used to infer size of data to convert
 /// @return int - Data as a int */
-PLY_INLINE PLY_H_FUNCTION_PREFIX int32_t PlyScaleBytesToI32(const void* data, const enum PlyScalarType t);
+PLY_INLINE int32_t PlyScaleBytesToI32(const void* data, const enum PlyScalarType t);
 
 /*
 /// PlyScaleBytesToF32() - Converts variable length data to a float
 /// @param void* data - Start of data
 /// @param enum PlyScalarType t - Scalar type used to infer size of data to convert
 /// @return float - Data as a float */
-PLY_INLINE PLY_H_FUNCTION_PREFIX float PlyScaleBytesToF32(const void* data, const enum PlyScalarType t);
+PLY_INLINE float PlyScaleBytesToF32(const void* data, const enum PlyScalarType t);
 
 
 
@@ -291,26 +288,36 @@ PLY_INLINE U64 PlyScaleBytesToU64(const void* data, const enum PlyScalarType t);
 /// @param void* data - Start of data
 /// @param enum PlyScalarType t - Scalar type used to infer size of data to convert
 /// @return double - Data as a double */
-PLY_INLINE PLY_H_FUNCTION_PREFIX double PlyScaleBytesToD64(const void* data, const enum PlyScalarType t);
+PLY_INLINE double PlyScaleBytesToD64(const void* data, const enum PlyScalarType t);
 
 /*
 /// Returns the sizeof a Scalar type in bytes
 /// @param enum PlyScalarType type - Scalar type to get the size of
 /// @return U8 - Size of scalar type (1 . . . 8) */
-PLY_INLINE PLY_H_FUNCTION_PREFIX U8 PlyGetSizeofScalarType(const enum PlyScalarType type);
+PLY_INLINE U8 PlyGetSizeofScalarType(const enum PlyScalarType type);
 
 /*
 /// Converts a str to a scalar type
 /// @param const char* str - c string to read from
 /// @param const U64 strLen - the max length to read
 /// @return PlyScalarType - upon failure PLY_SCALAR_TYPE_UNDEFINED will be returned. */
-PLY_INLINE PLY_H_FUNCTION_PREFIX static enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen);
+PLY_INLINE enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen);
 
-static PLY_INLINE void PlyScalarUnionCpyIntoLocation(void* dst, const union PlyScalarUnion* u, const enum PlyScalarType t)
-{
-	const U64 copylen = PlyGetSizeofScalarType(t);
-	memcpy(dst, (void*)u, copylen);
-}
+
+/*
+/// Converts a str to a scalar value
+/// @param const char* str - c string to read from
+/// @param const PlyScalarType type - the type of the value to read
+/// @param strlen - the length of the substring that was read. Upon failure, it will be set to 0.
+/// @return PlyScalarUnion - the scalar value that was read*/
+PLY_INLINE union PlyScalarUnion PlyStrToScalar(const char* str, const enum PlyScalarType type, U8* strlen);
+
+/*
+/// Copies a scalar union into a given location
+/// @param void* dst - copy destination
+/// @param PlyScalarUnion* u - value to copy
+/// @param PlyScalarType t - scalar type of u*/
+PLY_INLINE void PlyScalarUnionCpyIntoLocation(void* dst, const union PlyScalarUnion* u, const enum PlyScalarType t);
 
 PLY_H_FUNCTION_PREFIX void PlySetCustomReallocator(PlyReallocT);
 
@@ -330,13 +337,13 @@ PLY_H_FUNCTION_PREFIX I64 PlyGetPropertyIndexByName(const struct PlyElement* ele
 
 
 /* adds a PlyProperty to an element. The property will be copied, thus transferring ownership */
-PLY_H_FUNCTION_PREFIX enum PlyResult PlyElementAddProperty(struct PlyElement* element, struct PlyProperty* property);
+PLY_INLINE enum PlyResult PlyElementAddProperty(struct PlyElement* element, struct PlyProperty* property);
 
 /* adds a PlyObjectInfo to an element. The property will be copied, thus transferring ownership */
-PLY_H_FUNCTION_PREFIX enum PlyResult PlySceneAddObjectInfo(struct PlyScene* scene, struct PlyObjectInfo* objInfo);
+PLY_INLINE enum PlyResult PlySceneAddObjectInfo(struct PlyScene* scene, struct PlyObjectInfo* objInfo);
 
 /* adds a PlyElement to a scene. The element will be copied, thus transferring ownership */
-PLY_H_FUNCTION_PREFIX enum PlyResult  PlySceneAddElement(struct PlyScene* scene, struct PlyElement* element);
+PLY_INLINE enum PlyResult  PlySceneAddElement(struct PlyScene* scene, struct PlyElement* element);
 
 /*
 /// Loads a PlyScene from memory.
@@ -367,18 +374,21 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, s
 PLY_H_FUNCTION_PREFIX void PlyDestroyScene(struct PlyScene* scene);
 
 
-PLY_INLINE const char* dbgPlyDataTypeToString(enum PlyDataType t);
+PLY_INLINE const char* DbgPlyDataTypeToString(enum PlyDataType t);
 
-PLY_INLINE const char* dbgPlyScalarTypeToString(enum PlyScalarType t);
+PLY_INLINE const char* DbgPlyScalarTypeToString(enum PlyScalarType t);
 
-PLY_INLINE const char* dbgPlyResultToString(enum PlyResult res);
+PLY_INLINE const char* DbgPlyResultToString(enum PlyResult res);
 
-#if defined(_MSC_VER) || defined(__STDC_VERSION__) || (__STDC_VERSION__ != 0)
-#include "c_polygon.inl"
-#endif
+
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#if defined(_MSC_VER) || defined(__STDC_VERSION__) || (__STDC_VERSION__ != 0)
+//#include "c_polygon.inl"
+#endif
+
 
 #endif /* !C_POLYGON_H */
