@@ -67,6 +67,17 @@ end_header
 
 <ins> **Scalar Types** </ins>
 
+name        type        number of bytes
+---------------------------------------
+char       character                 1
+uchar      unsigned character        1
+short      short integer             2
+ushort     unsigned short integer    2
+int        integer                   4
+uint       unsigned integer          4
+float      single-precision float    4
+double     double-precision float    8
+
 
 <ins> **Example Program**  </ins>
 ```
