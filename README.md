@@ -35,4 +35,8 @@ Directly below the element's declaration are properties which define the type of
 <ins> **Contributing Guidelines** </ins>
 
 **Naming Conventions**
-
+- Preprocessor Macros: UPPER_SNAKE_CASE
+- Function Names: Camel Case
+- Variable names: pascalCase
+- Enum Types: Camel Case
+- Enum Values: UPPER_SNAKE_CASE
