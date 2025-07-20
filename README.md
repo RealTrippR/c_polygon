@@ -100,7 +100,7 @@ end_header
 
 <ins> **Contributing Guidelines** </ins>
 
-**Naming Conventions**
+<ins> **Naming Conventions** </ins>
 - Preprocessor Macros: UPPER_SNAKE_CASE
 - Function Names: Camel Case
 - Variable names: pascalCase
