@@ -4,7 +4,7 @@
             "type": "cppbuild",
             "label": "C/C++: gcc.exe build active file",
             "command": "C:\\msys64\\ucrt64\\bin\\gcc.exe",
-            "args": [
+            /*"args": [
                 //"-g", // -g enables debugging
                 "-std=c99",
                 "-O3",
@@ -16,6 +16,16 @@
                 "-frename-registers",
                 "-ffast-math",
                 "-flto",
+                "-Wall",
+                "${file}",
+                "${workspaceFolder}/c_polygon.c",
+                "${workspaceFolder}/ASM/streql_x64_win.obj",
+                "${workspaceFolder}/ASM/strneql_x64_win.obj",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+            ],*/
+            "args": [
+                "-g",
                 "-Wall",
                 "${file}",
                 "${workspaceFolder}/c_polygon.c",

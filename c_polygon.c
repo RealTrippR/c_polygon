@@ -1619,7 +1619,7 @@ enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* sc
         
         if (headerFinished && (scene->format == PLY_FORMAT_BINARY_BIG_ENDIAN || scene->format == PLY_FORMAT_BINARY_LITTLE_ENDIAN)) {
             srcline = srcline + srclineSize + strlen("\n");
-            if (srcline > mem+memSize) {
+            if (srcline > (const char*)mem+memSize) {
                 return PLY_MALFORMED_FILE_ERROR;
             }
             enum PlyResult exRes = PLY_GENERIC_ERROR;

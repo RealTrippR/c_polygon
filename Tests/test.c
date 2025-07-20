@@ -96,6 +96,16 @@ void printRawDataOfElement(struct PlyElement* ele)
     printf("\n");
 }
 
+
+int promptRestartProgram() {
+    printf("Press any key to exit, or 0 to restart the program.\n");
+    char ch = 0;
+    while ((ch = (char)getchar()) != '\n' && ch != EOF); /*clear stdin*/
+    ch = (char)getchar();
+    if (ch == '0')
+        return 1;
+    return 0;
+}
 int main(void)
 {
 restart_test:
@@ -125,7 +135,7 @@ restart_test:
         .saveComments = true
     };
 
-#define PLY_FILE "res/lucy.ply"
+#define PLY_FILE "res/xyzrgb_dragon.ply"
     enum PlyResult lres = PlyLoadFromDisk(PLY_FILE, &scene, &loadInfo);
 
     t = clock() - t;
@@ -135,17 +145,14 @@ restart_test:
 		printf("res: %s\n", dbgPlyResultToString(lres));
 		PlyDestroyScene(&scene);
 
-        printf("Press any key to exit, or 0 to restart the program.\n");
-        char ch = 0;
-        while ((ch = (char)getchar()) != '\n' && ch != EOF); /*clear stdin*/
-        ch = (char)getchar();
-        if (ch == '0')
+        if (promptRestartProgram())
             goto restart_test;
+
 		return EXIT_FAILURE;
 	}
 
     
-	printf(".ply file parsing successful. %s of data were parsed in %f seconds.\n", getReadableSize(getFileSize(PLY_FILE)), parseDurationS);
+	printf(".ply file parsing successful. File '%s' of size %s of was parsed in %f seconds.\n", getFilename(PLY_FILE), getReadableSize(getFileSize(PLY_FILE)), parseDurationS);
 
     #define PRINT_SCENE_HEADER 1
     #define PRINT_ELEMENT_DATA 0
@@ -240,11 +247,7 @@ restart_test:
 
 	PlyDestroyScene(&scene);
 
-    printf("Press any key to exit, or 0 to restart the program.\n");
-    char ch = 0;
-    while ((ch = (char)getchar()) != '\n' && ch != EOF); /*clear stdin*/
-    ch = (char)getchar();
-    if (ch == '0')
+    if (promptRestartProgram())
         goto restart_test;
     return EXIT_FAILURE;
 }
