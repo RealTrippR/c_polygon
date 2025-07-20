@@ -30,7 +30,7 @@ Directly below the element's declaration are properties which define the type of
 
 Comments begin with the comment keyword, followed by a string.
 
-```Comment <string>``` 
+```comment <string>``` 
 
 Obj_infos begin with the obj_info keyword, followed by a double precision float.
 
