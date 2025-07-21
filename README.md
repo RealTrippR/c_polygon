@@ -14,7 +14,7 @@ C Polygon considers a .ply file as a file with 2 main parts:
 - A header, comprised of a beginning, format, comments, obj_infos, elements, properties, and an end.
 - Data, which should match the description set in the header.
 
-Format and version information is required in the file header. The format keyword must only be defined once and have 1 of the three values:
+Format and version information is required in the file header. The format keyword must only be defined only once and may have 1 of the three values:
 ```ascii, binary_little_endian, binary_big_endian```
 Directly after this is the version. Unless specified otherwise in ```PlyLoadInfo``` by ```.allowAnyVersion = true```, the only valid version is ```1.0```.
 
