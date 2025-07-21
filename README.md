@@ -100,7 +100,7 @@ end_header
 
 <ins> **Naming Conventions** </ins>
 - Preprocessor Macros: UPPER_SNAKE_CASE
-- Function Names: Camel Case
+- Function Names: CamelCase
 - Variable names: pascalCase
-- Enum Types: Camel Case
+- Enum Types: CamelCase
 - Enum Values: UPPER_SNAKE_CASE
