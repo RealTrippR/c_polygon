@@ -14,7 +14,7 @@ C Polygon considers a .ply file as a file with 2 main parts:
 - A header, comprised of a beginning, format, comments, obj_infos, elements, properties, and an end.
 - Data, which should match the description set in the header.
 
-Format and version information is required in the file header. The format keyword must only be defined once and have 1 of the three values:
+Format and version information is required in the file header. The format keyword must only be defined only once and may have one of three values:
 ```ascii, binary_little_endian, binary_big_endian```
 Directly after this is the version. Unless specified otherwise in ```PlyLoadInfo``` by ```.allowAnyVersion = true```, the only valid version is ```1.0```.
 
@@ -36,9 +36,8 @@ Obj_infos begin with the obj_info keyword, followed by a double precision float.
 
 ```obj_info <d64>```
 
-A complete file should have a structure like the one below:
+A complete file should be structured like the one below:
 ```
-
 ply
 format ascii 1.0
 comment created by platoply
@@ -81,25 +80,27 @@ end_header
 | double        | double-precision float     | 8
 
 
-<ins> **Example Program**  </ins>
-```
+<ins> **Reading PlyScene Data** </ins>
 
-```
+
 
 <ins> **Limitations** </ins>
 
 **Max File Size:** UINT64_MAX-1
-**Max Line Length:** C_PLY_MAX_LINE_LENGTH (Default: 200000lu)
-**Max Property/Element Name Length:** PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH (Default: 127u)
+
+**Max Line Length:** C_PLY_MAX_LINE_LENGTH (Default: (uint32_t)200000lu)
+
+**Max Property/Element Name Length:** PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH (Default: (uint16_t)127u)
+
 
 
 <ins> **Performance** </ins>
 
 <ins> **Contributing Guidelines** </ins>
 
-**Naming Conventions**
+<ins> **Naming Conventions** </ins>
 - Preprocessor Macros: UPPER_SNAKE_CASE
-- Function Names: Camel Case
+- Function Names: CamelCase
 - Variable names: pascalCase
-- Enum Types: Camel Case
+- Enum Types: CamelCase
 - Enum Values: UPPER_SNAKE_CASE
