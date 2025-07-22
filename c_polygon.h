@@ -31,8 +31,8 @@ namespace cply {
 #include <stdint.h>
 #include <string.h>
 
-#define C_PLY_MAX_LINE_LENGTH (200000lu)
-#define PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH (127u)
+#define C_PLY_MAX_LINE_LENGTH ((uint32_t)200000lu)
+#define PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH ((uint16_t)127u)
 #define PLY_LOAD_ALL_ELEMENTS 0u
 
 /*In C89, the version will not be defined, or it will be equal to 0.*/
@@ -387,8 +387,7 @@ PLY_INLINE const char* DbgPlyResultToString(enum PlyResult res);
 #endif /* __cplusplus */
 
 #if defined(_MSC_VER) || defined(__STDC_VERSION__) || (__STDC_VERSION__ != 0)
-//#include "c_polygon.inl"
+#include "c_polygon.inl"
 #endif
-
 
 #endif /* !C_POLYGON_H */

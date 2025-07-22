@@ -100,7 +100,7 @@ void printRawDataOfElement(struct PlyElement* ele)
 int promptRestartProgram() {
     printf("Press any key to exit, or 0 to restart the program.\n");
     char ch = 0;
-    while ((ch = (char)getchar()) != '\n' && ch != EOF); /*clear stdin*/
+    while ((ch = (char)getchar()) != '\n' && ch != EOF) {if(ch=='0')return 1;}; /*clear stdin*/
     ch = (char)getchar();
     if (ch == '0')
         return 1;
@@ -110,7 +110,8 @@ int main(void)
 {
 restart_test:
 
-    printf("%s", "C-Polygon is a lightweight .ply (Stanford polygon) file parser written in C89 and x64 assembly. Copyright (C) 2025 Tripp R., under an MIT License.\n--------------------------------------------------------------------\n");
+    printf("%s", "C-Polygon is a lightweight .ply (Stanford polygon) file parser written in C89 and x64 assembly. Copyright (C) 2025 Tripp R., under an MIT License."
+                 "\n----------------------------------------------------------------------------------------------------------------\n");
 #ifndef NDEBUG
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif /* !NDEBUG */
@@ -138,7 +139,7 @@ restart_test:
         .allowAnyVersion = false
     };
 
-#define PLY_FILE "res/xyzrgb_dragon.ply"
+#define PLY_FILE "res/lucy.ply"
     enum PlyResult lres = PlyLoadFromDisk(PLY_FILE, &scene, &loadInfo);
 
     t = clock() - t;
