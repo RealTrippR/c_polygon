@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
+
 # set the project name and version
 project(C_POLYGON VERSION 1.0)
 
@@ -17,6 +18,30 @@ add_executable(c_polygon
     ASM/streql_x64_win.obj
     ASM/strneql_x64_win.obj
 )
+
+# Set warnings to treat as errors
+if (MSVC) 
+    target_compile_options(c_polygon PRIVATE
+        /W4               
+        /we4047           # 'different levels of indirection'
+        /we4715           # 'not all control paths return a value'
+        /we4716           # 'must return a value'
+        /we4098           # 'void value not ignored as it ought to be'
+        /we4777           # 'format string mismatch'
+        /we4090           # 'different qualifiers'
+    )
+else()
+    target_compile_options(c_polygon PRIVATE
+        -Wall -Wextra
+        -Werror=return-type
+        -Werror=incompatible-pointer-types
+        -Werror=ignored-void-return
+        -Werror=format
+        -Werror=format-security
+        -Werror=discarded-qualifiers
+    )
+endif()
+
 
 # Set compiler flags
 target_compile_options(c_polygon PRIVATE

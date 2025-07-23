@@ -115,6 +115,9 @@ restart_test:
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif /* !NDEBUG */
 
+    clock_t t;
+    t = clock();
+
 	struct PlyScene scene;
 
     /*
@@ -136,13 +139,7 @@ restart_test:
     };
 
 #define PLY_FILE "res/lucy.ply"
-    unsigned char* data;
-    size_t dataSize;
-    loadFile(PLY_FILE, &data, &dataSize);
-    
-    clock_t t;
-    t = clock();
-    enum PlyResult lres = PlyLoadFromMemory(data, dataSize, &scene, &loadInfo);
+    enum PlyResult lres = PlyLoadFromDisk(PLY_FILE, &scene, &loadInfo);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
@@ -159,7 +156,7 @@ restart_test:
 	}
 
     
-	printf(".ply file parsing successful. File '%s' of size %s of was parsed in %f seconds.\n", getFilename(PLY_FILE), getReadableSize(getFileSize(PLY_FILE)), parseDurationS);
+	printf(".ply file parsing successful. File '%s' of size %s of was loaded and parsed in %f seconds.\n", getFilename(PLY_FILE), getReadableSize(getFileSize(PLY_FILE)), parseDurationS);
 
     #define PRINT_SCENE_HEADER 1
     #define PRINT_ELEMENT_DATA 0

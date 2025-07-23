@@ -59,3 +59,38 @@ unsigned long long getFileSize(const char* file)
 
     return fsze;
 }
+
+void loadFile(const char* fileName, unsigned char** dataOut, size_t* fileSizeOut) {
+	FILE* fptr = NULL;
+	fopen_s(&fptr, fileName, "rb");
+	if (fptr == NULL) {
+		return;
+	}
+
+    /* get file size */
+    _fseeki64(fptr, 0, SEEK_END);
+    *fileSizeOut= _ftelli64(fptr);
+    rewind(fptr);
+
+    U8* fileData = NULL;
+
+    if (*fileSizeOut <= 0) {
+        return;
+    }
+
+    fileData = malloc(*fileSizeOut + 1);
+
+    if (fileData == NULL) {
+        fclose(fptr);
+        return;
+    }
+
+
+	fread_s(fileData, *fileSizeOut, *fileSizeOut, 1, fptr);
+    if (fptr)
+        fclose(fptr);
+
+    fileData[*fileSizeOut] = '\0';
+
+    *dataOut = fileData;
+}
