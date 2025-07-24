@@ -96,7 +96,7 @@ end_header
 
 <ins> **Performance** </ins>
 
-<ins> **Contributing Guidelines** </ins>
+<ins> **Contribution Guidelines** </ins>
 
 <ins> **Naming Conventions** </ins>
 - Preprocessor Macros: UPPER_SNAKE_CASE
