@@ -214,8 +214,9 @@ struct PlyScene
 	float versionNumber;
 };
 
+
 /*PlyReallocT:
-* - should act as malloc is void* is null
+* - should act as malloc if void* is null
 * - should return NULL is size is 0u
 * - should act as realloc is a valid pointer is passed as the first argument
 */
@@ -345,6 +346,9 @@ PLY_INLINE enum PlyResult PlySceneAddObjectInfo(struct PlyScene* scene, struct P
 /* adds a PlyElement to a scene. The element will be copied, thus transferring ownership */
 PLY_INLINE enum PlyResult  PlySceneAddElement(struct PlyScene* scene, struct PlyElement* element);
 
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyElementSetName(struct PlyElement* element, const char* name); 
+
+
 /*
 /// Loads a PlyScene from memory.
 /// @param const U8* mem - the beginning of the memory to read.
@@ -360,7 +364,6 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSiz
 /// @param struct PlyLoadInfo* loadInfo - optional constraints that can be placed on scene parsing */
 PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDisk(const char* fileName, struct PlyScene* scene, struct PlyLoadInfo* loadInfo);
 
-
 /*
 /// Loads a PlyScene from a given wide filename.
 /// @param const wchar_t* fileName - filename to read, as a wide (UTF-16) string
@@ -374,11 +377,29 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, s
 PLY_H_FUNCTION_PREFIX void PlyDestroyScene(struct PlyScene* scene);
 
 
-PLY_INLINE const char* DbgPlyDataTypeToString(enum PlyDataType t);
 
-PLY_INLINE const char* DbgPlyScalarTypeToString(enum PlyScalarType t);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlySaveToMemory(struct PlyScene* scene, U8* data, U64 dataSize, U64* writeSizeOut);
 
-PLY_INLINE const char* DbgPlyResultToString(enum PlyResult res);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlySaveToDisk(const char* fileName, struct PlyScene* scene);
+
+PLY_H_FUNCTION_PREFIX enum PlyResult PlySaveToDiskW(const wchar_t* fileName, struct PlyScene* scene);
+
+
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyCreateDataLines(struct PlyElement* element);
+
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteElement(struct PlyScene* scene, struct PlyElement* element);
+
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteProperty(struct PlyElement* element, struct PlyProperty* property);
+
+
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataF32(struct PlyElement* element, U32 datalineIdx, float value);
+
+
+PLY_INLINE const char* PlyDataTypeToString(enum PlyDataType t);
+
+PLY_INLINE const char* PlyScalarTypeToString(enum PlyScalarType t);
+
+PLY_INLINE const char* PlyResultToString(enum PlyResult res);
 
 
 

@@ -14,7 +14,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/c_po
 
 add_executable(c_polygon
     c_polygon.c 
-    Tests/test.c
+    Tests/readTest.c
     ASM/streql_x64_win.obj
     ASM/strneql_x64_win.obj
 )

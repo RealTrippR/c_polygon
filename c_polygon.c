@@ -32,6 +32,7 @@ namespace cply
 
 
 
+    /*returns true if collision*/
 bool PLY_INLINE checkForElementNameCollision(const struct PlyScene* scene, const char* name)
 {
     U32 ei = 0;
@@ -45,6 +46,7 @@ bool PLY_INLINE checkForElementNameCollision(const struct PlyScene* scene, const
     return false;
 }
 
+/*returns true if collision*/
 bool PLY_INLINE checkForPropertyNameCollision(const struct PlyElement* element, const char* name)
 {
     U32 ei = 0;
@@ -239,6 +241,16 @@ PLY_INLINE enum PlyResult PlySceneAddElement(struct PlyScene* scene, struct PlyE
     return PLY_SUCCESS;
 }
 
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyElementSetName(struct PlyElement* element, const char* name)
+{
+    const U64 len = strlen(name);
+    if (len >= sizeof(element->name)-1) {
+        return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+    }
+    memcpy(element->name, name, len+1);
+    element->name[len]='\0';
+    return PLY_SUCCESS;
+}
 
 PLY_INLINE U32 lineLen_s(const char* srcline, const char* mem, U64 memSize)
 {
@@ -1684,6 +1696,256 @@ bail:
 	return resCode;
 }
 
+/* memcpy clamped */
+static void memcpy_c(U8* dst, const U8* dstEnd, const U64 cpySize, const U8* src, const U8* srcEnd, U64* totalDataLen)
+{
+    if (cpySize == 0)
+        return;
+
+    const U8* cpyEnd = src + cpySize - 1;
+    if (dst) {
+        while (true)
+        {
+            *dst = *src;
+            if (src == srcEnd || src == cpyEnd || dst == dstEnd) {
+                return;
+            }
+            if (totalDataLen) {
+                *totalDataLen++;
+            }
+            src++;
+            dst++;
+        }
+    }
+    else {
+        while (true)
+        {
+            if (src == srcEnd || src == cpyEnd) {
+                return;
+            }
+            if (totalDataLen) {
+                (*totalDataLen)++;
+            }
+            src++;
+        }
+    }
+    
+}
+/* memcpy clamped advance dest*/
+static void memcpy_ca(U8** dst, const U8* dstEnd, const U64 cpySize, const U8* src, const U8* srcEnd, U64* totalDataLen)
+{
+    if (cpySize == 0)
+        return;
+
+    const U8* cpyEnd = src + cpySize - 1;
+    if (*dst) {
+        while (true)
+        {
+            **dst = *src;
+            if (src == srcEnd || src == cpyEnd || *dst == dstEnd) {
+                return;
+            }
+            if (totalDataLen) {
+                (*totalDataLen)++;
+            }
+            src++;
+            if (*dst) {
+                (*dst)++;
+            }
+        }
+    }
+    else {
+        while (true)
+        {
+            if (src == srcEnd || src == cpyEnd) {
+                return;
+            }
+            if (totalDataLen) {
+                *totalDataLen++;
+            }
+            src++;
+        }
+    }
+
+}
+
+/* non-null-etrimated strcpy clamped */
+static U32 nntstrcpy_c(char* dst, const char* dstEnd, const char* src)
+{
+    const U32 srclen = strlen(src);
+    
+    U32 i = 0;
+    for (; i < srclen; ++i) {
+        if (dst!=NULL&&dst == dstEnd) {
+            break;
+        }
+        if (dst) {
+            *dst = src[i];
+        }
+        dst++;
+    }
+    if (srclen > 0 && dst) {
+        /*dst = '\0'; */
+    }
+
+    return srclen;
+}
+
+/* non-null-etrimated strcpy clamped advance dest*/
+static U32 nntstrcpy_ca(char** dst, const char* dstEnd, const char* src, U64* totalDataLen) {
+    const U32 srclen = strlen(src);
+
+    U32 i = 0;
+    for (; i < srclen; ++i) {
+        if (*dst != NULL && *dst == dstEnd) {
+            break;
+        }
+        if (*dst) {
+            **dst = src[i];
+        }
+        if (*dst) {
+            (*dst)++;
+        }
+    }
+    if (srclen > 0 && *dst) {
+        /* **dst = '\0'; */
+    }
+
+    if (totalDataLen)
+        *totalDataLen += srclen;
+    return srclen;
+}
+
+static enum PlyResult writeHeaderProperty(struct PlyProperty* property, char** dst, const char* dstEnd, U64* totalDataLen)
+{
+    const char* f = *dst;
+    nntstrcpy_ca(dst, dstEnd, "property ", totalDataLen);
+    if (property->dataType = PLY_DATA_TYPE_LIST) 
+    {
+        nntstrcpy_ca(dst, dstEnd, "list ", totalDataLen);
+
+        const char* propListTypeName = PlyScalarTypeToString(property->scalarType);
+        if (propListTypeName == NULL) {
+            return PLY_MALFORMED_HEADER_ERROR;
+        }
+        nntstrcpy_ca(dst, dstEnd, propListTypeName, totalDataLen);
+        nntstrcpy_ca(dst, dstEnd, " ", totalDataLen);
+    }
+
+    const char* propScalarTypeName = PlyScalarTypeToString(property->scalarType);
+    if (propScalarTypeName == NULL) {
+        return PLY_MALFORMED_HEADER_ERROR;
+    }
+    nntstrcpy_ca(dst, dstEnd, propScalarTypeName, totalDataLen);
+    nntstrcpy_ca(dst, dstEnd, " ", totalDataLen);
+    nntstrcpy_ca(dst, dstEnd, property->name, totalDataLen);
+    nntstrcpy_ca(dst, dstEnd, "\n", totalDataLen);
+
+    return PLY_SUCCESS;
+}
+
+static enum PlyResult writeHeaderElement(const struct PlyElement* element, char** dst, const char* dstEnd, U64* totalDataLen)
+{
+    const char* f = *dst;
+    nntstrcpy_ca(dst, dstEnd, "element ", totalDataLen);
+    nntstrcpy_ca(dst, dstEnd, element->name, totalDataLen);
+    nntstrcpy_ca(dst, dstEnd, " ", totalDataLen);
+    int k = element->dataLineCount;
+    char datalineCountAsStr[12];
+    itoa(element->dataLineCount, datalineCountAsStr, 10);
+    nntstrcpy_ca(dst, dstEnd, datalineCountAsStr, totalDataLen);
+    nntstrcpy_ca(dst, dstEnd, "\n", totalDataLen);
+
+    U32 i = 0;
+    for (; i < element->propertyCount; ++i)
+    {
+        struct PlyProperty* property = element->properties + i;
+        writeHeaderProperty(property, dst, dstEnd, totalDataLen);
+    }
+    return PLY_SUCCESS;
+}
+
+enum PlyResult PlySaveToMemory(struct PlyScene* scene, U8* data, U64 dataSize, U64* writeSizeOut)
+{
+    *writeSizeOut = 0;
+    U8* dataLast = data + dataSize - 1;
+    U8* cur = data;
+    /* BEGIN HEADER */
+    nntstrcpy_ca(&cur, dataLast, "ply\n", writeSizeOut);
+    /* WRITE ELEMENTS */
+    U32 i = 0;
+    for (; i < scene->elementCount; ++i) {
+        const struct PlyElement* element = scene->elements + i;
+        enum PlyResult res = writeHeaderElement(element, &cur, dataLast, writeSizeOut);
+        if (res != PLY_SUCCESS) {
+            return res;
+        }
+    }
+    /* END HEADER  */
+    nntstrcpy_ca(&cur, dataLast, "end_header\n", writeSizeOut);
+
+    /* BEGIN WRITING DATA */
+
+
+
+
+
+    /* END WRITING DATA */
+
+    /* NULL TERMINATE */
+    if (data)
+        data[dataSize-1] = 0;
+    writeSizeOut++;
+
+    return PLY_SUCCESS;
+}
+
+enum PlyResult PlySaveToDisk(const char* fileName, struct PlyScene* scene)
+{
+    enum PlyResult resCode;
+    FILE* fptr;
+    fopen_s(&fptr, fileName, "wb");
+
+    U8* data=NULL;
+    U64 dataSize;
+    enum PlyResult r1 = PlySaveToMemory(scene, NULL, 0, &dataSize);
+
+    if (r1 != PLY_SUCCESS) {
+        resCode = r1;
+        goto bail;
+    }
+    if (dataSize == 0)
+        goto bail;
+
+    data = plyRealloc(data, dataSize);
+
+    if (!data) {
+        resCode = PLY_FAILED_ALLOC_ERROR;
+        goto bail;
+    }
+
+    resCode = PlySaveToMemory(scene, data, dataSize, &dataSize);
+
+    if (resCode != PLY_SUCCESS)
+        goto bail;
+
+    fwrite(data, dataSize, 1, fptr);
+bail:
+    if (fptr) {
+        fclose(fptr);
+    }
+
+    return resCode;
+}
+
+enum PlyResult PlySaveToDiskW(const wchar_t* fileName, struct PlyScene* scene)
+{
+    FILE* fptr;
+    _wfopen_s(&fptr, fileName, L"wb");
+
+    return PLY_SUCCESS;
+}
+
 enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, struct PlyScene* scene, struct PlyLoadInfo* loadInfo)
 {
     enum PlyResult resCode = PLY_SUCCESS;
@@ -1783,10 +2045,68 @@ void PlyDestroyScene(struct PlyScene* scene)
     }
 }
 
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyCreateDataLines(struct PlyElement* element)
+{
+    return allocateDataLinesForElement(element);
+}
 
 
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteElement(struct PlyScene* scene, struct PlyElement* element)
+{
+    if (checkForElementNameCollision(scene, element->name))
+        return PLY_GENERIC_ERROR;
 
+    if (scene->elementCount == UINT32_MAX - 1) {
+        return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+    }
+    const U32 newElementCount = scene->elementCount + 1;
+    struct PlyElement* tmp = (struct PlyElement*)plyReCalloc(scene->elements, scene->elementCount, newElementCount, sizeof(*element));
+    if (!tmp) {
+        return PLY_FILE_READ_ERROR;
+    }
+    scene->elements = tmp;
+    scene->elements[scene->elementCount] = *element;
+    scene->elementCount = newElementCount;
+    return PLY_SUCCESS;
+}
 
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteProperty(struct PlyElement* element, struct PlyProperty* property)
+{
+    if (checkForPropertyNameCollision(element, property->name))
+        return PLY_GENERIC_ERROR;
+
+    if (element->propertyCount == UINT32_MAX - 1) {
+        return PLY_EXCEEDS_BOUND_LIMITS_ERROR;
+    }
+    const U32 newPropertyCount = element->propertyCount+1;
+    struct PlyProperty* tmp = (struct PlyProperty*)plyReCalloc(element->properties, element->propertyCount, newPropertyCount, sizeof(*property));
+    if (!tmp) {
+        return PLY_FILE_READ_ERROR;
+    }
+    element->properties = tmp;
+    element->properties[element->propertyCount] = *property;
+    element->propertyCount = newPropertyCount;
+    return PLY_SUCCESS;
+}
+
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataF32(struct PlyElement* element, U32 datalineIdx, float value)
+{
+        
+    const U8 scalarSize = sizeof(value);
+    element->data = realloc(element->data, element->dataSize + scalarSize);
+    element->dataSize = element->dataSize + scalarSize;
+    
+    memcpy((U8*)element->data + element->dataSize - scalarSize, &value, scalarSize);
+    
+    U64 dataLineBegin = element->dataLineBegins[datalineIdx];
+    dataLineBegin += scalarSize;
+    if (datalineIdx < element->dataLineCount-1) {
+        element->dataLineBegins[datalineIdx + 1] = dataLineBegin;
+    }
+    element->dataLineBegins[datalineIdx] = dataLineBegin;
+    
+    return PLY_SUCCESS;
+}
 
 
 

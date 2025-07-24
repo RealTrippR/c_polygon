@@ -58,7 +58,7 @@ PLY_INLINE void PlySwapBytes(U8* mem, const enum PlyScalarType t)
 
 
 
-PLY_INLINE const char* DbgPlyDataTypeToString(enum PlyDataType t)
+PLY_INLINE const char* PlyDataTypeToString(enum PlyDataType t)
 {
 	if (t == PLY_DATA_TYPE_LIST)
 	{
@@ -69,10 +69,10 @@ PLY_INLINE const char* DbgPlyDataTypeToString(enum PlyDataType t)
 		return "scalar";
 	}
 
-	return "undefined";
+	return NULL;
 }
 
-PLY_INLINE const char* DbgPlyScalarTypeToString(enum PlyScalarType t)
+PLY_INLINE const char* PlyScalarTypeToString(enum PlyScalarType t)
 {
 
 	if (t == PLY_SCALAR_TYPE_CHAR)
@@ -107,10 +107,9 @@ PLY_INLINE const char* DbgPlyScalarTypeToString(enum PlyScalarType t)
 	{
 		return "double";
 	}
-	return "undefined";
-
+	return NULL;
 }
-PLY_INLINE const char* DbgPlyResultToString(enum PlyResult res)
+PLY_INLINE const char* PlyResultToString(enum PlyResult res)
 {
 	if (res == PLY_SUCCESS) {
 		return "PLY_SUCCESS";
@@ -150,7 +149,7 @@ PLY_INLINE const char* DbgPlyResultToString(enum PlyResult res)
 	if (res == PLY_FILE_READ_ERROR) {
 		return "PLY_FILE_READ_ERROR";
 	}
-	return "Invalid PlyResult";
+	return NULL;
 }
 
 
