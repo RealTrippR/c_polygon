@@ -66,7 +66,7 @@ end_header
 
 <ins> **Scalar Types** </ins>
 
-**Note:** Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, etc..`. C_Polygon will reject any files with this naming convention.
+**Note:** Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, etc..`. C_Polygon will reject any files that use this naming convention.
 
 |         Name  |          Type              |         Bytes |
 | ------------- | -------------------------- | ------------- |
