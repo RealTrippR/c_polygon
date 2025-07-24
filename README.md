@@ -11,7 +11,7 @@ C Polygon is a polygon file (.ply) parser written in C89 and x64 assembly. It is
 
 C Polygon considers a .ply file as a file comprised of 2 main parts:
 
-- A header, comprised of a beginning, format, comments, obj_infos, elements, properties, and an end.
+- A header, with a beginning, format, comments, obj_infos, elements, properties, and an end.
 - Data, which matches the description set in the header.
 
 Format and version information is required in the file header. The format keyword must only be defined only once and may have one of three values:
