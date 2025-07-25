@@ -62,8 +62,8 @@ restart_test:
     struct PlyProperty indices = { .name = "vertex_indices", .dataType = PLY_DATA_TYPE_LIST, .listCountType = PLY_SCALAR_TYPE_UCHAR, .scalarType = PLY_SCALAR_TYPE_UINT };
     PlyWriteProperty(&faces, &indices);
 
-    PlyCreateDataLines(&vertex, 10);
-    PlyCreateDataLines(&faces, 10);
+    PlyCreateDataLines(&vertex, vertexCount);
+    PlyCreateDataLines(&faces, faceCount);
 
     /*
     Data must be written in a linear order - that is; line by line, and on every line, 
