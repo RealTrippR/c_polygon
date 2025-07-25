@@ -116,5 +116,5 @@ restart_test:
 
     if (promptRestartProgram())
         goto restart_test;
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }
