@@ -3,16 +3,16 @@
 
  <ins> **Brief**  </ins>
 
-C Polygon is a polygon file (.ply) parser written in C89 and x86 assembly. It is lightweight, portable (tested on MSVC and GCC), and compiles for both C and C++.
+C Polygon is a polygon file (.ply) parser written in C89 and x64 assembly. It is lightweight, portable (tested on MSVC and GCC), and compiles for both C and C++.
 
 <BR>
 
  <ins> **Ply File Structure**  </ins>
 
-C Polygon considers a .ply file as a file with 2 main parts:
+C Polygon considers a .ply file as a file comprised of 2 main parts:
 
-- A header, comprised of a beginning, format, comments, obj_infos, elements, properties, and an end.
-- Data, which should match the description set in the header.
+- A header, with a beginning, format, comments, obj_infos, elements, properties, and an end.
+- Data, which matches the description set in the header.
 
 Format and version information is required in the file header. The format keyword must only be defined only once and may have one of three values:
 ```ascii, binary_little_endian, binary_big_endian```
@@ -66,7 +66,7 @@ end_header
 
 <ins> **Scalar Types** </ins>
 
-**Note:** Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, etc..`. C_Polygon will reject any files with this naming convention.
+**Note:** Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, etc..`. C_Polygon will reject any files that use this naming convention.
 
 |         Name  |          Type              |         Bytes |
 | ------------- | -------------------------- | ------------- |
@@ -96,7 +96,7 @@ end_header
 
 <ins> **Performance** </ins>
 
-<ins> **Contributing Guidelines** </ins>
+<ins> **Contribution Guidelines** </ins>
 
 <ins> **Naming Conventions** </ins>
 - Preprocessor Macros: UPPER_SNAKE_CASE
