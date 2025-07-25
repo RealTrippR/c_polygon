@@ -104,7 +104,7 @@ restart_test:
 
     if (res != PLY_SUCCESS) {
         printf("Failed to parse file '%s'. PlyResult: %s\n", PLY_FILE, PlyResultToString(res));
-        printf("Hint: ensure that the working directory is /Tests");
+        printf("Hint: ensure that the working directory is /Tests\n");
         PlyDestroyScene(&scene);
 
         if (promptRestartProgram())
