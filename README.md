@@ -80,10 +80,6 @@ end_header
 | double        | double-precision float     | 8
 
 
-<ins> **Reading PlyScene Data** </ins>
-
-
-
 <ins> **Limitations** </ins>
 
 **Max File Size:** UINT64_MAX-1
@@ -103,8 +99,6 @@ Average time of file parsing over 10 iterations, as measured on an Alienware M18
 | xyzrgb_dragon.ply      | 130.81 MB              | 3609600            | 7219045           | 0.156              |
 | bun000.ply             |    1.9 MB              | 40256              | 204800            | 0.02              |
 
-
-<ins> **Contribution Guidelines** </ins>
 
 <ins> **Naming Conventions** </ins>
 - Preprocessor Macros: UPPER_SNAKE_CASE
