@@ -47,8 +47,7 @@ restart_test:
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif /* !NDEBUG */
 
-	struct PlyScene scene;
-
+    struct PlyScene scene = { 0 };
     /*
     * I would recommend these links for obtaining test .ply files:
     * - Large Geometric Models Archive at Georgia Tech: https://sites.cc.gatech.edu/projects/large_models/
@@ -67,7 +66,7 @@ restart_test:
         .allowAnyVersion = false
     };
 
-#define PLY_FILE "res/bun000.ply"
+#define PLY_FILE "res/lucy.ply"
     unsigned char* data;
     size_t dataSize;
     loadFile(PLY_FILE, &data, &dataSize);
@@ -75,7 +74,8 @@ restart_test:
     clock_t t;
     t = clock();
     enum PlyResult lres = PlyLoadFromMemory(data, dataSize, &scene, &loadInfo);
-
+    free(data);
+    dataSize = 0u;
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
 	if (lres != PLY_SUCCESS)

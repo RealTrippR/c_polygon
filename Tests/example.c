@@ -31,7 +31,7 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 int promptRestartProgram() {
     printf("Press any key to exit, or 0 to restart the program.\n");
     char ch = 0;
-    while ((ch = (char)getchar()) != '\n' && ch != EOF) {if(ch=='0')return 1;}; /*clear stdin*/
+    while ((ch = (char)getchar()) != '\n' && ch != EOF) {if(ch=='0')return 1;if((ch=='\n'||ch=='\0')==0) return 0;}; /*clear stdin*/
     ch = (char)getchar();
     if (ch == '0')
         return 1;
@@ -49,7 +49,7 @@ restart_test:
     clock_t t;
     t = clock();
 
-	struct PlyScene scene;
+    struct PlyScene scene = { 0 };
 
     /*
     * I would recommend these links for obtaining test .ply files:
@@ -91,8 +91,7 @@ restart_test:
       .D64DecimalCount = 17,
       .F32DecimalCount = 8
     };
-#define PLY_FILE "res/writeTest.ply"
-    PlySaveToDisk(PLY_FILE, &scene, &saveInfo);
+    PlySaveToDisk("res/writeTest.ply", &scene, &saveInfo);
 
 #define PRINT_HEADER_DATA 1
 #define PRINT_ELEMENT_DATA 0
