@@ -222,6 +222,8 @@ void loadFile(const char* fileName, unsigned char** dataOut, size_t* fileSizeOut
 	FILE* fptr = NULL;
 	fopen_s(&fptr, fileName, "rb");
 	if (fptr == NULL) {
+        *dataOut = NULL;
+        *fileSizeOut = 0u;
 		return;
 	}
 
