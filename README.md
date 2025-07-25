@@ -101,7 +101,7 @@ Average time of file parsing over 10 iterations, as measured on an Alienware M18
 | --------------------   | ---------------------- | ------------------ | ----------------- | ------------------ |
 | lucy.ply               | 508.36 MB              | 14027872           | 28055742          | 0.563              |
 | xyzrgb_dragon.ply      | 130.81 MB              | 3609600            | 7219045           | 0.156              |
-| bun000.ply             |    1.9 MB              | 40256              | 365824            | 0.02              |
+| bun000.ply             |    1.9 MB              | 40256              | 204800            | 0.02              |
 
 
 <ins> **Contribution Guidelines** </ins>
