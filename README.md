@@ -80,10 +80,6 @@ end_header
 | double        | double-precision float     | 8
 
 
-<ins> **Reading PlyScene Data** </ins>
-
-
-
 <ins> **Limitations** </ins>
 
 **Max File Size:** UINT64_MAX-1
@@ -96,7 +92,13 @@ end_header
 
 <ins> **Performance** </ins>
 
-<ins> **Contribution Guidelines** </ins>
+Average time of file parsing over 10 iterations, as measured on an Alienware M18 with an Intel i9 @ 2.2 GHZ
+|         Name           | File Size              | Vertex Count       | Index Count       |         Time (Sec) |
+| --------------------   | ---------------------- | ------------------ | ----------------- | ------------------ |
+| lucy.ply               | 508.36 MB              | 14027872           | 28055742          | 0.563              |
+| xyzrgb_dragon.ply      | 130.81 MB              | 3609600            | 7219045           | 0.156              |
+| bun000.ply             |    1.9 MB              | 40256              | 204800            | 0.02              |
+
 
 <ins> **Naming Conventions** </ins>
 - Preprocessor Macros: UPPER_SNAKE_CASE
