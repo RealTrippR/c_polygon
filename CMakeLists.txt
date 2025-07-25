@@ -35,7 +35,6 @@ else()
         -Wall -Wextra
         -Werror=return-type
         -Werror=incompatible-pointer-types
-        -Werror=ignored-void-return
         -Werror=format
         -Werror=format-security
         -Werror=discarded-qualifiers
@@ -47,6 +46,7 @@ endif()
 target_compile_options(c_polygon PRIVATE
     -std=c89
     -O3
+    -DNDEBUG
     -msse4.2
     -march=native
     -funroll-loops

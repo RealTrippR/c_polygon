@@ -34,7 +34,7 @@ namespace cply {
 #define C_PLY_MAX_LINE_LENGTH ((uint32_t)200000lu)
 #define PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH ((uint16_t)127u)
 #define PLY_LOAD_ALL_ELEMENTS 0u
-#define PLY_FORMAT_BINARY_MATCH_SYSTEM ~((int)0)
+#define PLY_FORMAT_BINARY_MATCH_SYSTEM ~((uint32_t)0)
 
 /*In C89, the version will not be defined, or it will be equal to 0.*/
 #if defined(_MSC_VER) || defined(__STDC_VERSION__) || (__STDC_VERSION__ != 0)

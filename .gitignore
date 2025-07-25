@@ -7,7 +7,9 @@
 /c_polygon
 /build
 /x64
+/CMakeFiles
 /x32
+CMakeCache.txt
 *sln
 *vcxproj
 *filters

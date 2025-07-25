@@ -67,7 +67,7 @@ restart_test:
         .allowAnyVersion = false
     };
 
-#define PLY_FILE "res/cube_bin.ply"
+#define PLY_FILE "res/bun000.ply"
     unsigned char* data;
     size_t dataSize;
     loadFile(PLY_FILE, &data, &dataSize);

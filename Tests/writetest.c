@@ -60,7 +60,9 @@ restart_test:
 
     struct PlyElement faces = {.name = "face"};
     struct PlyProperty indices = { .name = "vertex_indices", .dataType = PLY_DATA_TYPE_LIST, .listCountType = PLY_SCALAR_TYPE_UCHAR, .scalarType = PLY_SCALAR_TYPE_UINT };
+    struct PlyProperty garbage_val = { .name = "garbage", .dataType = PLY_DATA_TYPE_SCALAR, .scalarType = PLY_SCALAR_TYPE_FLOAT };
     PlyWriteProperty(&faces, &indices);
+    PlyWriteProperty(&faces, &garbage_val);
 
     PlyCreateDataLines(&vertex, vertexCount);
     PlyCreateDataLines(&faces, faceCount);
@@ -78,8 +80,9 @@ restart_test:
     }
 
     for (i=0; i < faces.dataLineCount; ++i) {
-        int values[4] = { 0,1,2,3 };
-        PlyWriteDataList(&faces, i, "vertex_indices", 4, values);
+        int values[4] = { 0+i,1+i,2+i,3+i };
+        PlyWriteDataList(&faces, i, "vertex_indices", i%4, values);
+        PlyWriteData(&faces, i, "garbage", (union PlyScalarUnion) { .f32 = 5 });/*Z*/
     }
 
     printRawDataOfElement(&vertex);
@@ -98,6 +101,7 @@ restart_test:
     };
 #define PLY_FILE "res/writeTest.ply"
     enum PlyResult res = PlySaveToDisk(PLY_FILE, &scene, &saveInfo);
+
     if (res != PLY_SUCCESS) {
         printf("Failed to parse file '%s'. PlyResult: %s\n", PLY_FILE, PlyResultToString(res));
         printf("Hint: ensure that the working directory is /Tests");

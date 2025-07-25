@@ -492,9 +492,9 @@ PLY_INLINE enum PlyResult parseProperty(struct PlyElement* owningElement, const 
     /* data type */
     enum PlyDataType dtype = PLY_DATA_TYPE_SCALAR;
     /* scalar type */
-    enum PlyDataType stype = PLY_SCALAR_TYPE_UNDEFINED;
+    enum PlyScalarType stype = PLY_SCALAR_TYPE_UNDEFINED;
     /* list count type */
-    enum PlyDataType ltype = PLY_SCALAR_TYPE_UNDEFINED;
+    enum PlyScalarType ltype = PLY_SCALAR_TYPE_UNDEFINED;
 
     const char* next = NULL;
     next = getNextNonSpace(propRangeFirst, propRangeLast);
@@ -550,7 +550,7 @@ PLY_INLINE enum PlyResult parseProperty(struct PlyElement* owningElement, const 
         stype = PlyStrToScalarType(next, dist);
     }
 
-    if (stype == PLY_DATA_TYPE_UNDEFINED) {
+    if (stype == PLY_SCALAR_TYPE_UNDEFINED) {
         return PLY_MALFORMED_FILE_ERROR;
     }
 
@@ -2025,7 +2025,9 @@ enum PlyResult PlySaveToMemory(struct PlyScene* scene, U8* data, U64 dataSize, U
                             /*WRITE LIST COUNT*/
                             PlyDataToString(copyFrom, str, sizeof(str), property->listCountType, writeInfo->F32DecimalCount, writeInfo->D64DecimalCount);
                             nntstrcpy_ca((char**)&cur, (const char*)dataLast, str, writeSizeOut);
-                            nntstrcpy_ca((char**)&cur, (const char*)dataLast, " ", writeSizeOut);
+                            if (listCount > 0) { /*prevent double space*/
+                                nntstrcpy_ca((char**)&cur, (const char*)dataLast, " ", writeSizeOut);
+                            }
 
                             U8 scalarSize = PlyGetSizeofScalarType(property->listCountType);
                             copyFrom += scalarSize;
@@ -2036,11 +2038,11 @@ enum PlyResult PlySaveToMemory(struct PlyScene* scene, U8* data, U64 dataSize, U
                             {
                                 PlyDataToString(copyFrom, str, sizeof(str), property->scalarType, writeInfo->F32DecimalCount, writeInfo->D64DecimalCount);
                                 nntstrcpy_ca((char**)&cur, (const char*)dataLast, str, writeSizeOut);
-                                nntstrcpy_ca((char**)&cur, (const char*)dataLast, " ", writeSizeOut);
-
+                                if (lsti != listCount - 1) {
+                                   nntstrcpy_ca((char**)&cur, (const char*)dataLast, " ", writeSizeOut);
+                                }
                                 copyFrom += scalarSize;
                             }
-                            nntstrcpy_ca((char**)&cur, (const char*)dataLast, "\n", writeSizeOut);
                         }
                         else {
                             char str[512];
@@ -2048,12 +2050,12 @@ enum PlyResult PlySaveToMemory(struct PlyScene* scene, U8* data, U64 dataSize, U
                             PlyDataToString(copyFrom, str, sizeof(str), property->scalarType, writeInfo->F32DecimalCount, writeInfo->D64DecimalCount);
 
                             nntstrcpy_ca((char**)&cur, (const char*)dataLast, str, writeSizeOut);
-                            if (pi == element->propertyCount - 1) {
-                                nntstrcpy_ca((char**)&cur, (const char*)dataLast, "\n", writeSizeOut);
-                            }
-                            else {
-                                nntstrcpy_ca((char**)&cur, (const char*)dataLast, " ", writeSizeOut);
-                            }
+                        }
+                        if (pi == element->propertyCount - 1) {
+                            nntstrcpy_ca((char**)&cur, (const char*)dataLast, "\n", writeSizeOut);
+                        }
+                        else {
+                            nntstrcpy_ca((char**)&cur, (const char*)dataLast, " ", writeSizeOut);
                         }
                     }
                     else {
@@ -2085,6 +2087,8 @@ enum PlyResult PlySaveToDisk(const char* fileName, struct PlyScene* scene, const
     enum PlyResult resCode;
     FILE* fptr;
     fopen_s(&fptr, fileName, "wb");
+    if (!fptr)
+        return PLY_FILE_WRITE_ERROR;
 
     U8* data=NULL;
     U64 dataSize;
@@ -2120,10 +2124,42 @@ bail:
 
 enum PlyResult PlySaveToDiskW(const wchar_t* fileName, struct PlyScene* scene, const struct PlySaveInfo* writeInfo)
 {
+    enum PlyResult resCode;
     FILE* fptr;
     _wfopen_s(&fptr, fileName, L"wb");
+    if (!fptr)
+        return PLY_FILE_WRITE_ERROR;
 
-    return PLY_SUCCESS;
+    U8* data=NULL;
+    U64 dataSize;
+    enum PlyResult r1 = PlySaveToMemory(scene, NULL, 0, &dataSize, writeInfo);
+
+    if (r1 != PLY_SUCCESS) {
+        resCode = r1;
+        goto bail;
+    }
+    if (dataSize == 0)
+        goto bail;
+
+    data = plyRealloc(data, dataSize);
+
+    if (!data) {
+        resCode = PLY_FAILED_ALLOC_ERROR;
+        goto bail;
+    }
+
+    resCode = PlySaveToMemory(scene, data, dataSize, &dataSize, writeInfo);
+
+    if (resCode != PLY_SUCCESS)
+        goto bail;
+
+     fwrite(data, dataSize, 1, fptr);
+bail:
+    if (fptr) {
+        fclose(fptr);
+    }
+
+    return resCode;
 }
 
 enum PlyResult PlyLoadFromDiskW(const wchar_t* fileName, struct PlyScene* scene, struct PlyLoadInfo* loadInfo)
@@ -2336,7 +2372,7 @@ enum PlyResult PlyWriteData(struct PlyElement* element, U32 datalineIdx, const c
 {    
     if (element->propertyCount == 0) {
 #ifndef NDEBUG
-        assert("PlyWriteDataListF32: CANNOT WRITE DATA TO ELEMENT WHICH HAS NO PROPERTIES");
+        assert("PlyWriteData: CANNOT WRITE DATA TO ELEMENT WHICH HAS NO PROPERTIES");
 #endif
         return PLY_GENERIC_ERROR;
     }
@@ -2400,7 +2436,7 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataList(struct PlyElement* element
 {
     if (element->propertyCount == 0) {
 #ifndef NDEBUG
-        assert("PlyWriteDataListF32: CANNOT WRITE DATA TO ELEMENT WHICH HAS NO PROPERTIES");
+        assert("PlyWriteDataList: CANNOT WRITE DATA TO ELEMENT WHICH HAS NO PROPERTIES");
 #endif
         return PLY_GENERIC_ERROR;
     }
@@ -2434,7 +2470,10 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataList(struct PlyElement* element
     }
     element->data = tmp;
 
-    U8* cur = element->data;
+    const U32 dlOffset = pr->dataLineOffsets[datalineIdx];
+    const U64 dlBegin = element->dataLineBegins[datalineIdx];
+
+    U8* cur = (U8*)element->data + dlBegin + dlOffset;
     union PlyScalarUnion u = { .u32 = listCount };
     /* COPY LIST COUNT */
     PlyScalarUnionCpyIntoLocation(cur, &u, pr->listCountType);
@@ -2444,6 +2483,19 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataList(struct PlyElement* element
 
     element->dataSize = element->dataSize + totalListSize;
 
+    /*UPDATE DATA LINE OFFSETS*/
+    if (datalineIdx < element->dataLineCount - 1) {
+        U64 nxtDataLineBegin = element->dataLineBegins[datalineIdx + 1];
+        if (nxtDataLineBegin == 0) {
+            nxtDataLineBegin = element->dataLineBegins[datalineIdx];
+        }
+        nxtDataLineBegin += totalListSize;
+        element->dataLineBegins[datalineIdx + 1] = nxtDataLineBegin;
+    }
+    if (pi < element->propertyCount - 1) {
+        struct PlyProperty* prNxt = element->properties + pi + 1;
+        prNxt->dataLineOffsets[datalineIdx] = dlOffset + totalListSize;
+    }
 
     return PLY_SUCCESS;
 }
