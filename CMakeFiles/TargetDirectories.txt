@@ -1,3 +1,0 @@
-C:/Users/TrippR/OneDrive/Documents/REPOS/c_polygon/CMakeFiles/c_polygon.dir
-C:/Users/TrippR/OneDrive/Documents/REPOS/c_polygon/CMakeFiles/ALL_BUILD.dir
-C:/Users/TrippR/OneDrive/Documents/REPOS/c_polygon/CMakeFiles/ZERO_CHECK.dir
