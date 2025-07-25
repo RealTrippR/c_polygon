@@ -34,6 +34,7 @@ namespace cply {
 #define C_PLY_MAX_LINE_LENGTH ((uint32_t)200000lu)
 #define PLY_MAX_ELEMENT_AND_PROPERTY_NAME_LENGTH ((uint16_t)127u)
 #define PLY_LOAD_ALL_ELEMENTS 0u
+#define PLY_FORMAT_BINARY_MATCH_SYSTEM ~((int)0)
 
 /*In C89, the version will not be defined, or it will be equal to 0.*/
 #if defined(_MSC_VER) || defined(__STDC_VERSION__) || (__STDC_VERSION__ != 0)
@@ -196,9 +197,17 @@ struct PlyObjectInfo
 struct PlyLoadInfo
 {
 	const char** elements; /*don't forget to set elementsCount*/
-	uint32_t elementsCount;
+	U32 elementsCount;
 	char saveComments;
 	char allowAnyVersion;
+};
+
+struct PlySaveInfo
+{
+	/*Recommended: 50*/
+	const U16 D64DecimalCount;
+	/*Recommended: 10*/
+	const U8 F32DecimalCount;
 };
 
 struct PlyScene
@@ -378,22 +387,32 @@ PLY_H_FUNCTION_PREFIX void PlyDestroyScene(struct PlyScene* scene);
 
 
 
-PLY_H_FUNCTION_PREFIX enum PlyResult PlySaveToMemory(struct PlyScene* scene, U8* data, U64 dataSize, U64* writeSizeOut);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlySaveToMemory(struct PlyScene* scene, U8* data, U64 dataSize, U64* writeSizeOut, const struct PlySaveInfo* writeInfo);
 
-PLY_H_FUNCTION_PREFIX enum PlyResult PlySaveToDisk(const char* fileName, struct PlyScene* scene);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlySaveToDisk(const char* fileName, struct PlyScene* scene, const struct PlySaveInfo* writeInfo);
 
-PLY_H_FUNCTION_PREFIX enum PlyResult PlySaveToDiskW(const wchar_t* fileName, struct PlyScene* scene);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlySaveToDiskW(const wchar_t* fileName, struct PlyScene* scene, const struct PlySaveInfo* writeInfo);
 
 
-PLY_H_FUNCTION_PREFIX enum PlyResult PlyCreateDataLines(struct PlyElement* element);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyCreateDataLines(struct PlyElement* element, const U32 datalineCount);
 
 PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteElement(struct PlyScene* scene, struct PlyElement* element);
 
 PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteProperty(struct PlyElement* element, struct PlyProperty* property);
 
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteObjectInfo(struct PlyScene* scene, const char* name, double value);
 
-PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataF32(struct PlyElement* element, U32 datalineIdx, float value);
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteComment(struct PlyScene* scene, const char* name);
 
+
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteData(struct PlyElement* element, U32 datalineIdx, const char* propertyName, const union PlyScalarUnion value);
+
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataList(struct PlyElement* element, U32 datalineIdx, const char* propertyName, const U32 listCount, const void* values);
+
+
+PLY_H_FUNCTION_PREFIX void PlyDataToString(const U8* data, char* buff, const U16 buffSize, enum PlyScalarType type, const U8 F32DecimalCount, const U16 D64DecimalCount);
+
+PLY_INLINE const char* PlyFormatToString(enum PlyFormat t);
 
 PLY_INLINE const char* PlyDataTypeToString(enum PlyDataType t);
 

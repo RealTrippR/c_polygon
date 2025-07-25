@@ -48,43 +48,64 @@ restart_test:
     const U32 faceCount = 10;
 
     struct PlyScene scene = {.format = PLY_FORMAT_ASCII };
-    struct PlyElement vertex = { .dataLineCount = vertexCount };
-    PlyElementSetName(&vertex, "vertex");
+    struct PlyElement vertex = { .name = "vertex" };
     
     struct PlyProperty x = {.name = "x", .dataType = PLY_DATA_TYPE_SCALAR, .scalarType = PLY_SCALAR_TYPE_FLOAT};
     struct PlyProperty y = {.name = "y", .dataType = PLY_DATA_TYPE_SCALAR, .scalarType = PLY_SCALAR_TYPE_FLOAT};
     struct PlyProperty z = {.name = "z", .dataType = PLY_DATA_TYPE_SCALAR, .scalarType = PLY_SCALAR_TYPE_FLOAT};
-
     PlyWriteProperty(&vertex, &x);
     PlyWriteProperty(&vertex, &y);
     PlyWriteProperty(&vertex, &z);
 
 
-    struct PlyElement faceList = { .dataLineCount = faceCount };
-    PlyElementSetName(&faceList, "face_list");
-        
-    PlyCreateDataLines(&vertex);
+    struct PlyElement faces = {.name = "face"};
+    struct PlyProperty indices = { .name = "vertex_indices", .dataType = PLY_DATA_TYPE_LIST, .listCountType = PLY_SCALAR_TYPE_UCHAR, .scalarType = PLY_SCALAR_TYPE_UINT };
+    PlyWriteProperty(&faces, &indices);
 
-    U32 i = 0;
-    for (; i < vertex.dataLineCount; ++i) {
-        PlyWriteDataF32(&vertex, i, 0.0);/*X*/
-        PlyWriteDataF32(&vertex, i, 0.0);/*Y*/
-        PlyWriteDataF32(&vertex, i, 0.0);/*Z*/
+    PlyCreateDataLines(&vertex, 10);
+    PlyCreateDataLines(&faces, 10);
+
+    U32 i;
+    for (i=0; i < vertex.dataLineCount; ++i) {
+        PlyWriteData(&vertex, i, "x", (union PlyScalarUnion){ .f32 = (float)i * 3 });/*X*/
+        PlyWriteData(&vertex, i, "y", (union PlyScalarUnion){ .f32 = (float)i * 3 + 1});/*Y*/
+        PlyWriteData(&vertex, i, "z", (union PlyScalarUnion){ .f32 = (float)i * 3 + 2});/*Z*/
     }
 
+    for (i=0; i < faces.dataLineCount; ++i) {
+        int values[4] = { 0,1,2,3 };
+        PlyWriteDataList(&faces, i, "vertex_indices", 4, values);
+    }
+
+    printRawDataOfElement(&vertex);
 
 
 
-
-
-
+    PlyWriteComment(&scene, "C-Polygon is a lightweight.ply(Stanford polygon) file parser written in C89 and x64 assembly. Copyright(C) 2025 Tripp R., under an MIT License.");
+    PlyWriteObjectInfo(&scene, "is_test", 1.0);
 
     PlyWriteElement(&scene, &vertex);
-    PlyWriteElement(&scene, &faceList);
+    PlyWriteElement(&scene, &faces);
 
+    struct PlySaveInfo saveInfo = {
+        .D64DecimalCount = 50,
+        .F32DecimalCount = 15
+    };
 #define PLY_FILE "res/writeTest.ply"
-    PlySaveToDisk(PLY_FILE, &scene);
-    
+    enum PlyResult res = PlySaveToDisk(PLY_FILE, &scene, &saveInfo);
+    if (res != PLY_SUCCESS) {
+        printf("Failed to parse file '%s'. PlyResult: %s\n", PLY_FILE, PlyResultToString(res));
+        printf("Hint: ensure that the working directory is /Tests");
+        PlyDestroyScene(&scene);
+
+        if (promptRestartProgram())
+            goto restart_test;
+
+        return EXIT_FAILURE;
+    }
+#define PRINT_HEADER_DATA 1
+#define PRINT_ELEMENT_DATA 0
+    printSceneData(&scene, PRINT_HEADER_DATA, PRINT_ELEMENT_DATA);
 
 	PlyDestroyScene(&scene);
 

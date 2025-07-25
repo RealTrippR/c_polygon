@@ -56,7 +56,20 @@ PLY_INLINE void PlySwapBytes(U8* mem, const enum PlyScalarType t)
 	}
 }
 
-
+PLY_INLINE const char* PlyFormatToString(enum PlyFormat t)
+{
+    switch (t)
+    {
+    case PLY_FORMAT_ASCII:
+        return "ascii";
+    case PLY_FORMAT_BINARY_BIG_ENDIAN:
+        return "binary_big_endian";
+    case PLY_FORMAT_BINARY_LITTLE_ENDIAN:
+        return "binary_little_endian";
+    default:
+        return "undefined";
+    }
+}
 
 PLY_INLINE const char* PlyDataTypeToString(enum PlyDataType t)
 {

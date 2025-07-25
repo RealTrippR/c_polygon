@@ -27,75 +27,6 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR TH
 #include <stdbool.h>
 
 
-double getDataFromPropertyOfElement(const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx, U8* success)
-{
-    const U64 lineBegin = e->dataLineBegins[dataLineIdx];
-    const U32 dataOffset = prop->dataLineOffsets[dataLineIdx];
-    const U64 offset = lineBegin + dataOffset;
-	if (offset >= e->dataSize || dataLineIdx >= e->dataLineCount) {
-        if (success) 
-            *success = 0;
-        return 0;
-	}
-
-    U8* f = ((U8*)e->data) + offset;
-    if (success) 
-        *success = 1;
-    return PlyScaleBytesToD64(f, prop->scalarType);
-}
-
-
-void getDataFromPropertyOfElementAsList(double* dstBuffer, const size_t dstBufferSize, size_t* elementCountOut,
-    const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx, U8* success)
-{
-
-    U64 offset = e->dataLineBegins[dataLineIdx] + prop->dataLineOffsets[dataLineIdx];
-    if (offset >= e->dataSize) { /* check for out of bounds read */
-        if (success)
-            *success = 0;
-        return;
-    }
-    U8* f = ((U8*)e->data) + offset;
-    U64 count = (U64)PlyScaleBytesToD64(f, prop->listCountType);
-    if (elementCountOut!=NULL) {
-        *elementCountOut = count;
-    }
-    if (!dstBuffer) {
-        return;
-    }
-
-    offset += PlyGetSizeofScalarType(prop->listCountType);
-
-    U64 i = 0;
-    for (; i < min(count,dstBufferSize/sizeof(double)); ++i)
-    {
-        U8* f2 = ((U8*)e->data) + offset;
-        const U64 sze = PlyGetSizeofScalarType(prop->scalarType);
-        if (offset + sze> e->dataSize) { /* check for out of bounds read */
-            if (success)
-                *success = 0;
-            return;
-        }
-        dstBuffer[i] = PlyScaleBytesToD64(f2, prop->scalarType);
-
-        offset += sze;
-    }
-    if (success)
-        *success = 1;
-}
-
-
-void printRawDataOfElement(struct PlyElement* ele)
-{
-    printf("\n Raw element data: ");
-    U64 i = 0;
-    for (; i < ele->dataSize; ++i)
-    { 
-        printf("%02x ", ((U8*)(ele->data))[i]);
-    }
-    printf("\n");
-}
-
 
 int promptRestartProgram() {
     printf("Press any key to exit, or 0 to restart the program.\n");
@@ -138,14 +69,14 @@ restart_test:
         .allowAnyVersion = false
     };
 
-#define PLY_FILE "res/lucy.ply"
+#define PLY_FILE "res/cube.ply"
     enum PlyResult lres = PlyLoadFromDisk(PLY_FILE, &scene, &loadInfo);
 
     t = clock() - t;
     double parseDurationS = ((double)t) / CLOCKS_PER_SEC;
 	if (lres != PLY_SUCCESS)
 	{
-		printf("Failed to parse file '%s'. PlyResult: %s\n", PLY_FILE, DbgPlyResultToString(lres));
+		printf("Failed to parse file '%s'. PlyResult: %s\n", PLY_FILE, PlyResultToString(lres));
         printf("Hint: ensure that the working directory is /Tests");
 		PlyDestroyScene(&scene);
 
@@ -154,99 +85,18 @@ restart_test:
 
 		return EXIT_FAILURE;
 	}
-
-    
 	printf(".ply file parsing successful. File '%s' of size %s of was loaded and parsed in %f seconds.\n", getFilename(PLY_FILE), getReadableSize(getFileSize(PLY_FILE)), parseDurationS);
 
-    #define PRINT_SCENE_HEADER 1
-    #define PRINT_ELEMENT_DATA 0
+    struct PlySaveInfo saveInfo = {
+      .D64DecimalCount = 17,
+      .F32DecimalCount = 8
+    };
+#define PLY_FILE "res/writeTest.ply"
+    PlySaveToDisk(PLY_FILE, &scene, &saveInfo);
 
-    if (PRINT_SCENE_HEADER) {
-        U64 eId = 0;
-        for (; eId < scene.elementCount; ++eId)
-        {
-            U64 oId = 0;
-            for (; oId < scene.objectInfoCount; ++oId)
-            {
-                struct PlyObjectInfo* objInfo = scene.objectInfos + oId;
-                printf("-- Object Info %llu --\n", oId);
-                printf("\tName: %s\n", objInfo->name);
-                printf("\tValue: %f\n\n", objInfo->value);
-            }
-
-
-            struct PlyElement* element = scene.elements + eId;
-
-            printf("-- Element #%llu \"%s\" --\n", eId+1, element->name);
-            printf("\t\tData Line Count %I32u\n", element->dataLineCount);
-            printf("\t\tData Size: %llu\n", element->dataSize);
-            printf("\tProperty Count:%I32u\n\n", element->propertyCount);
-
-
-            U64 pId = 0;
-            for (; pId < element->propertyCount; ++pId)
-            {
-
-                printf("\t-- Property #%llu \"%s\" --\n", pId+1, element->properties[pId].name);
-
-                struct PlyProperty* property = element->properties + pId;
-                printf("\t\tScalar Type: %s\n", DbgPlyScalarTypeToString(property->scalarType));
-                printf("\t\tData Type: %s\n", DbgPlyDataTypeToString(property->dataType));
-                printf("\t\tList Count Type: %s\n", DbgPlyScalarTypeToString(property->listCountType));
-            }
-
-
-            if (PRINT_ELEMENT_DATA) {
-                U8 success = 0;
-                
-                printf("\tElement data (upscaled to double 64):\n");
-                U64 lno = 0;
-                for (; lno < element->dataLineCount; ++lno)
-                {
-                    printf("\t\t");
-                    pId = 0;
-                    for (; pId < element->propertyCount; ++pId)
-                    {
-                        struct PlyProperty* property = element->properties + pId;
-                        if (property->dataType == PLY_DATA_TYPE_LIST) {
-                            double d[512];
-                            U64 dcount;
-                            getDataFromPropertyOfElementAsList(d, sizeof(d), &dcount, element, property, lno, &success);
-                            if (!success) {
-                                assert(00&&"Bad data read.");
-                            }
-                            printf("<%llu>{", dcount);
-                            U64 a = 0;
-                            for (; a < dcount; ++a)
-                            {
-                                if (a + 1 != dcount) {
-                                    printf("%0.2f,", d[a]);
-                                }
-                                else {
-                                    printf("%0.2f", d[a]);
-                                }
-                            }
-                            if (pId + 1 != element->propertyCount) {
-                                printf("}, ");
-                            }
-                            else {
-                                printf("}");
-                            }
-                        }
-                        else {
-                            double d = getDataFromPropertyOfElement(element, property, lno, &success);
-                            if (!success) {
-                                assert(00&&"Bad data read.");
-                            }
-                            printf("%0.2f ", d);
-                        }
-                    }
-                    printf("\n");
-                }
-            }
-        }
-    }
-
+#define PRINT_HEADER_DATA 1
+#define PRINT_ELEMENT_DATA 0
+    printSceneData(&scene, PRINT_HEADER_DATA, PRINT_ELEMENT_DATA);
 
 
 	PlyDestroyScene(&scene);
