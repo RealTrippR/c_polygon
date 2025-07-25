@@ -65,6 +65,11 @@ restart_test:
     PlyCreateDataLines(&vertex, 10);
     PlyCreateDataLines(&faces, 10);
 
+    /*
+    Data must be written in a linear order - that is; line by line, and on every line, 
+    property by property, in the order that they were added to the element.
+    Writing data in any other manner may result in undefined behavior.
+    */
     U32 i;
     for (i=0; i < vertex.dataLineCount; ++i) {
         PlyWriteData(&vertex, i, "x", (union PlyScalarUnion){ .f32 = (float)i * 3 });/*X*/
