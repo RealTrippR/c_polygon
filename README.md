@@ -92,7 +92,7 @@ end_header
 
 <ins> **Performance** </ins>
 
-Average time of file parsing over 10 iterations, as measured on an Alienware M18 with an Intel I9 @ 2.2 GHZ
+Average time of file parsing over 10 iterations, as measured on an Alienware M18 with an Intel i9 @ 2.2 GHZ
 |         Name           | File Size              | Vertex Count       | Index Count       |         Time (Sec) |
 | --------------------   | ---------------------- | ------------------ | ----------------- | ------------------ |
 | lucy.ply               | 508.36 MB              | 14027872           | 28055742          | 0.563              |
