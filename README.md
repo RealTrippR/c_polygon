@@ -40,13 +40,12 @@ A complete file should be structured like the one below:
 ```
 ply
 format ascii 1.0
-comment created by platoply
 element vertex 8
 property float x
 property float y
 property float z
 element face 6
-property list uint int vertex_indices
+property list uchar int vertex_indices
 end_header
 -1 -1 -1 
 1 -1 -1 
