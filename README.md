@@ -40,13 +40,12 @@ A complete file should be structured like the one below:
 ```
 ply
 format ascii 1.0
-comment created by platoply
 element vertex 8
-property float32 x
-property float32 y
-property float32 z
+property float x
+property float y
+property float z
 element face 6
-property list uint8 int32 vertex_indices
+property list uchar int vertex_indices
 end_header
 -1 -1 -1 
 1 -1 -1 
@@ -66,7 +65,7 @@ end_header
 
 <ins> **Scalar Types** </ins>
 
-**Note:** Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, etc..`. C_Polygon will reject any files that use this naming convention.
+**Note:** Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, etc..`. C_Polygon can load files that use this naming convention, but will not respect the bitcount at the end of the name. By this, I mean that `uint8` will be read as `uint`, which is 32 bits, not 8.
 
 |         Name  |          Type              |         Bytes |
 | ------------- | -------------------------- | ------------- |

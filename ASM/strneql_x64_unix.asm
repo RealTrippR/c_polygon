@@ -41,9 +41,10 @@ strneql_x64_unix:
     MOVDQU     XMM0, [STR1 + STR_OFFSET]
     MOVDQU     XMM1, [STR2 + STR_OFFSET]
 
-    ; find null terminator
+    ; find null terminator for str1, store it in rdx
     pcmpistri XMM0, XMM3, 0x0A
     mov RDX, RCX
+    ; find null terminator for str2, store it in r12
     pcmpistri XMM1, XMM3, 0x0A
     mov R12, RCX
 
