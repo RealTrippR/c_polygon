@@ -46,7 +46,7 @@ property float x
 property float y
 property float z
 element face 6
-property list uint8 int32 vertex_indices
+property list uint int vertex_indices
 end_header
 -1 -1 -1 
 1 -1 -1 
