@@ -2368,21 +2368,13 @@ enum PlyResult PlyWriteComment(struct PlyScene* scene, const char* comment)
 
 
 
-enum PlyResult PlyWriteData(struct PlyElement* element, U32 datalineIdx, const char* propertyName, const union PlyScalarUnion value)
+enum PlyResult PlyWriteData(struct PlyElement* element, const U32 datalineIdx, const U32 pi, const union PlyScalarUnion value)
 {    
     if (element->propertyCount == 0) {
 #ifndef NDEBUG
         assert("PlyWriteData: CANNOT WRITE DATA TO ELEMENT WHICH HAS NO PROPERTIES");
 #endif
         return PLY_GENERIC_ERROR;
-    }
-
-    U32 pi = 0;
-    for (; pi < element->propertyCount; pi++) {
-        struct PlyProperty* pr = element->properties + pi;
-        if (streql(pr->name, propertyName)) {
-            break;
-        }
     }
 
     struct PlyProperty* pr = element->properties + pi;
@@ -2432,21 +2424,13 @@ enum PlyResult PlyWriteData(struct PlyElement* element, U32 datalineIdx, const c
 }
 
 
-PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataList(struct PlyElement* element, U32 datalineIdx, const char* propertyName, const U32 listCount, const void* values)
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataList(struct PlyElement* element, const U32 datalineIdx, const U32 pi, const U32 listCount, const void* values)
 {
     if (element->propertyCount == 0) {
 #ifndef NDEBUG
         assert("PlyWriteDataList: CANNOT WRITE DATA TO ELEMENT WHICH HAS NO PROPERTIES");
 #endif
         return PLY_GENERIC_ERROR;
-    }
-
-    U32 pi = 0;
-    for (; pi < element->propertyCount; pi++) {
-        struct PlyProperty* pr = element->properties + pi;
-        if (streql(pr->name, propertyName)) {
-            break;
-        }
     }
 
     struct PlyProperty* pr = element->properties + pi;
@@ -2498,6 +2482,36 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataList(struct PlyElement* element
     }
 
     return PLY_SUCCESS;
+}
+
+
+
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataByName(struct PlyElement* element, const U32 datalineIdx, const char* propertyName, const union PlyScalarUnion value)
+{
+    
+    U32 pi = 0;
+    for (; pi < element->propertyCount; pi++) {
+        struct PlyProperty* pr = element->properties + pi;
+        if (streql(pr->name, propertyName)) {
+            break;
+        }
+    }
+
+    return PlyWriteData(element,datalineIdx,pi,value);
+}
+
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataListByName(struct PlyElement* element, const U32 datalineIdx, const char* propertyName, const U32 listCount, const void* values)
+{
+    
+    U32 pi = 0;
+    for (; pi < element->propertyCount; pi++) {
+        struct PlyProperty* pr = element->properties + pi;
+        if (streql(pr->name, propertyName)) {
+            break;
+        }
+    }
+
+    return PlyWriteDataList(element,datalineIdx,pi,listCount,values);
 }
 
 void PlyDataToString(const U8* data, char* dst, const U16 dstSize, enum PlyScalarType type, const U8 F32DecimalCount, const U16 D64DecimalCount)

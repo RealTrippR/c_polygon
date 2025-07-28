@@ -404,10 +404,43 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteObjectInfo(struct PlyScene* scene, 
 
 PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteComment(struct PlyScene* scene, const char* name);
 
+/*
+/// Writes data to the property of an element.
+/// @param PlyElement* element - parent element of property
+/// @param const U32 datalineIdx - data line to write to
+/// @param const U32 propertyIdx - index of the property to write to
+/// @param const PlyScalarUnion - value to write to 
+/// @return PlyResult - return code*/
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteData(struct PlyElement* element, const U32 datalineIdx, const U32 propertyIdx, const union PlyScalarUnion value);
 
-PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteData(struct PlyElement* element, U32 datalineIdx, const char* propertyName, const union PlyScalarUnion value);
+/*
+/// Writes data as a list to the property of an element.
+/// @param PlyElement* element - parent element of property
+/// @param const U32 datalineIdx - data line to write to
+/// @param const U32 propertyIdx - index of the property to write to
+/// @praram const U32 listCount - number of values to write. Must equal the count of the values array.
+/// @param const void* values - values to write, must be a pointer to an array with the same scalar type as the property and a count of listCount.
+/// @return PlyResult - return code*/
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataList(struct PlyElement* element, const U32 datalineIdx, const U32 propertyIdx, const U32 listCount, const void* values);
 
-PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataList(struct PlyElement* element, U32 datalineIdx, const char* propertyName, const U32 listCount, const void* values);
+/*
+/// Writes data to the property of an element by the property's name.
+/// @param PlyElement* element - parent element of property
+/// @param const U32 datalineIdx - data line to write to
+/// @param const U32 propertyIdx - index of the property to write to
+/// @param const PlyScalarUnion - value to write to 
+/// @return PlyResult - return code*/
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataByName(struct PlyElement* element, const U32 datalineIdx, const char* propertyName, const union PlyScalarUnion value);
+
+/*
+/// Writes data as a list to the property of an element by the property's name.
+/// @param PlyElement* element - parent element of property
+/// @param const U32 datalineIdx - data line to write to
+/// @param const U32 propertyIdx - index of the property to write to
+/// @praram const U32 listCount - number of values to write. Must equal the count of the values array.
+/// @param const void* values - values to write, must be a pointer to an array with the same scalar type as the property and a count of listCount.
+/// @return PlyResult - return code*/
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteDataListByName(struct PlyElement* element, const U32 datalineIdx, const char* propertyName, const U32 listCount, const void* values);
 
 
 PLY_H_FUNCTION_PREFIX void PlyDataToString(const U8* data, char* buff, const U16 buffSize, enum PlyScalarType type, const U8 F32DecimalCount, const U16 D64DecimalCount);

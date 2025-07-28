@@ -32,7 +32,7 @@ if (MSVC)
     )
 else()
     target_compile_options(c_polygon PRIVATE
-        -Wall -Wextra
+        -Wall
         -Werror=return-type
         -Werror=incompatible-pointer-types
         -Werror=format

@@ -74,15 +74,15 @@ restart_test:
     */
     U32 i;
     for (i=0; i < vertex.dataLineCount; ++i) {
-        PlyWriteData(&vertex, i, "x", (union PlyScalarUnion){ .f32 = (float)i * 3 });/*X*/
-        PlyWriteData(&vertex, i, "y", (union PlyScalarUnion){ .f32 = (float)i * 3 + 1});/*Y*/
-        PlyWriteData(&vertex, i, "z", (union PlyScalarUnion){ .f32 = (float)i * 3 + 2});/*Z*/
+        PlyWriteData(&vertex, i, /*x*/0, (union PlyScalarUnion){ .f32 = (float)i * 3 });
+        PlyWriteData(&vertex, i, /*y*/1, (union PlyScalarUnion){ .f32 = (float)i * 3 + 1});
+        PlyWriteData(&vertex, i, /*z*/2, (union PlyScalarUnion){ .f32 = (float)i * 3 + 2});
     }
 
     for (i=0; i < faces.dataLineCount; ++i) {
         int values[4] = { 0+i,1+i,2+i,3+i };
-        PlyWriteDataList(&faces, i, "vertex_indices", i%4, values);
-        PlyWriteData(&faces, i, "garbage", (union PlyScalarUnion) { .f32 = 5 });/*Z*/
+        PlyWriteDataList(&faces, i, /*vertex_indices*/0, i%4, values);
+        PlyWriteData(&faces, i, /*garbage*/1, (union PlyScalarUnion) { .f32 = 5 });
     }
 
     printRawDataOfElement(&vertex);
