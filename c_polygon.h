@@ -394,15 +394,41 @@ PLY_H_FUNCTION_PREFIX enum PlyResult PlySaveToDisk(const char* fileName, struct 
 PLY_H_FUNCTION_PREFIX enum PlyResult PlySaveToDiskW(const wchar_t* fileName, struct PlyScene* scene, const struct PlySaveInfo* writeInfo);
 
 
+/*
+/// Allocates the data lines the given element. This must be called before data can be written to an element.
+/// @param PlyElement* element - element to allocate data lines for.
+/// @param const U32 - number of data lines to allocate 
+/// @return PlyResult - return code*/
 PLY_H_FUNCTION_PREFIX enum PlyResult PlyCreateDataLines(struct PlyElement* element, const U32 datalineCount);
 
+/*
+/// Writes an element to an scene. Upon doing so, the given element is invalidated and ownership is transferred to the scene.
+/// @param PlyScene* scene - parent scene
+/// @param PlyElement* Element - element to write
+/// @return PlyResult - return code*/
 PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteElement(struct PlyScene* scene, struct PlyElement* element);
 
+/*
+/// Writes a property to an element. Upon doing so, the given property is invalidated and ownership is transferred to the element.
+/// @param PlyElement* element - parent element
+/// @param PlyProperty* property - property to write
+/// @return PlyResult - return code*/
 PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteProperty(struct PlyElement* element, struct PlyProperty* property);
 
+/*
+/// Writes obj_info to the given scene.
+/// @param PlyScene* scene - scene to write the obj_info to
+/// @param const char name - name of the obj_info
+/// @param double value - value of the obj_info
+/// @return PlyResult - return code*/
 PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteObjectInfo(struct PlyScene* scene, const char* name, double value);
 
-PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteComment(struct PlyScene* scene, const char* name);
+/*
+/// Writes comment to the given scene.
+/// @param PlyScene* scene - scene to write the comment to
+/// @param const char comment - comment to write
+/// @return PlyResult - return code*/
+PLY_H_FUNCTION_PREFIX enum PlyResult PlyWriteComment(struct PlyScene* scene, const char* comment);
 
 /*
 /// Writes data to the property of an element.
