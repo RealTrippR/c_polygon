@@ -42,9 +42,9 @@ ply
 format ascii 1.0
 comment created by platoply
 element vertex 8
-property float32 x
-property float32 y
-property float32 z
+property float x
+property float y
+property float z
 element face 6
 property list uint8 int32 vertex_indices
 end_header
