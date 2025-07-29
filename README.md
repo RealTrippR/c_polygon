@@ -83,7 +83,7 @@ end_header
 
 C Polygon allocates a buffer for every element which holds the data for every instance of that element.
 A corresponding `dataLineBegins` buffer with a count of `element.dataLineCount` provides the offsets to access the data for a given instance. 
-To access a property at a given index, every property has a `dataLineOffsets` buffer with a count of `element.dataLineCount` which contains the offset to the property from the beginning of that line.
+To access a property at a given index, every property has a `dataLineOffsets` buffer with a count of `element.dataLineCount` which contains the offset to the property from the beginning of a data line.
 
 For example, to access the data of a scalar property:
 ```
