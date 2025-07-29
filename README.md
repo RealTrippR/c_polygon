@@ -79,7 +79,7 @@ end_header
 | double        | double-precision float     | 8
 
 
-<ins> **Data_Structure** </ins>
+<ins> **Data Structure** </ins>
 
 C Polygon allocates a buffer for every element which holds the data for every instance of that element.
 A corresponding `dataLineBegins` buffer with a count of `element.dataLineCount` provides the offsets to access the data for a given instance. 
