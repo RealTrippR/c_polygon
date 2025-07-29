@@ -85,7 +85,7 @@ C Polygon allocates a buffer for every element which holds the data for every in
 A corresponding `dataLineBegins` buffer with a count of `element.dataLineCount` provides the offsets to access the data for a given instance. 
 To access a property at a given index, every property has a `dataLineOffsets` buffer with a count of `element.dataLineCount` which contains the offset to the property from the beginning of that line.
 
-For example, to access the 2nd property on the 1st data line:
+For example, to access the data of a scalar property:
 ```
 double getDataFromPropertyOfElement(const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx, U8* success)
 {
