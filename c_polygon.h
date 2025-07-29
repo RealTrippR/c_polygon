@@ -197,7 +197,7 @@ struct PlyObjectInfo
 struct PlyLoadInfo
 {
 	const char** elements; /*don't forget to set elementsCount*/
-	U32 elementsCount;
+	U32 elementCount;
 	char saveComments;
 	char allowAnyVersion;
 };
@@ -311,7 +311,7 @@ PLY_INLINE U8 PlyGetSizeofScalarType(const enum PlyScalarType type);
 /// @param const char* str - c string to read from
 /// @param const U64 strLen - the max length to read
 /// @return PlyScalarType - upon failure PLY_SCALAR_TYPE_UNDEFINED will be returned. */
-PLY_INLINE enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen);
+PLY_H_FUNCTION_PREFIX enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen);
 
 
 /*

@@ -212,6 +212,73 @@ void PlySetCustomDeallocator(PlyDeallocT deA)
 
 
 
+PLY_H_FUNCTION_PREFIX enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen)
+{
+    if (strneql(str, "int8", min(strLen, strlen("int8"))) == true)
+    {
+        return PLY_SCALAR_TYPE_CHAR;
+    }
+    if (strneql(str, "uint8", min(strLen, strlen("uint8"))) == true)
+    {
+        return PLY_SCALAR_TYPE_UCHAR;
+    }
+    if (strneql(str, "int16", min(strLen, strlen("int16"))) == true)
+    {
+        return PLY_SCALAR_TYPE_SHORT;
+    }
+    if (strneql(str, "uint16", min(strLen, strlen("uint16"))) == true)
+    {
+        return PLY_SCALAR_TYPE_USHORT;
+    }
+    if (strneql(str, "int32", min(strLen, strlen("int32"))) == true)
+    {
+        return PLY_SCALAR_TYPE_INT;
+    }
+    if (strneql(str, "uint32", min(strLen, strlen("uint32"))) == true)
+    {
+        return PLY_SCALAR_TYPE_UINT;
+    }
+    
+
+    /* - - - - - - - - - - - - - - - - - - */
+
+    if (strneql(str, "char", min(strLen, strlen("char"))) == true)
+    {
+        return PLY_SCALAR_TYPE_CHAR;
+    }
+    if (strneql(str, "uchar", min(strLen, strlen("uchar"))) == true)
+    {
+        return PLY_SCALAR_TYPE_UCHAR;
+    }
+    if (strneql(str, "short", min(strLen, strlen("short"))) == true)
+    {
+        return PLY_SCALAR_TYPE_SHORT;
+    }
+    if (strneql(str, "ushort", min(strLen, strlen("ushort"))) == true)
+    {
+        return PLY_SCALAR_TYPE_USHORT;
+    }
+    if (strneql(str, "int", min(strLen, strlen("int"))) == true)
+    {
+        return PLY_SCALAR_TYPE_INT;
+    }
+    if (strneql(str, "uint", min(strLen, strlen("uint"))) == true)
+    {
+        return PLY_SCALAR_TYPE_UINT;
+    }
+    if (strneql(str, "float", min(strLen, strlen("float"))) == true)
+    {
+        return PLY_SCALAR_TYPE_FLOAT;
+    }
+    if (strneql(str, "double", min(strLen, strlen("double"))) == true)
+    {
+        return PLY_SCALAR_TYPE_DOUBLE;
+    }
+    return PLY_SCALAR_TYPE_UNDEFINED;
+}
+
+
+
 /*
 * returns the index of an element within a property.
 * If the element is not in that property, -1 will be returned.*/
@@ -670,10 +737,8 @@ PLY_INLINE enum PlyResult parseObjectInfo(struct PlyScene* scene, const char* ob
 
 PLY_INLINE enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bool* readingHeader, struct PlyElement** curElement, struct PlyScene* scene, struct PlyLoadInfo* loadInfo)
 {
-    if (lineLen == 0) {
+    if (lineLen == 0)
         return PLY_SUCCESS;
-    }
-
 
     /* the last character in the line.*/
     const char* lineLast = line + lineLen - 1;
@@ -806,7 +871,7 @@ PLY_INLINE enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bo
                 }
                 /*get version number(currently only v 1.0 is considered valid, unless allowAnyVersion is true)*/
                 scene->versionNumber = strtof(vbegin, NULL);
-                if (loadInfo->allowAnyVersion == false && scene->versionNumber != 1.0)
+                if ((!loadInfo || loadInfo->allowAnyVersion == false) && scene->versionNumber != 1.0)
                 {
                     scene->versionNumber = 0.0;
                     return PLY_UNSUPPORTED_VERSION_ERROR;
@@ -895,10 +960,10 @@ PLY_INLINE enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bo
 
             struct PlyElement element = { 0 };
             
-            if (loadInfo && loadInfo->elementsCount != PLY_LOAD_ALL_ELEMENTS) {
+            if (loadInfo && loadInfo->elementCount != PLY_LOAD_ALL_ELEMENTS) {
                 bool told = false;
                 U64 i = 0;
-                for (; i < loadInfo->elementsCount; ++i) {
+                for (; i < loadInfo->elementCount; ++i) {
                     if (strneql(elementNameBegin,loadInfo->elements[i],elementNameLast-elementNameBegin+1)) {
                         told = true;
                         break;
@@ -931,7 +996,6 @@ PLY_INLINE enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bo
             /* check for proerty declaration */
             if (strneql(line, c, min(strlen(c), lineLen)) == true)
             {
-                
                 enum PlyResult r = parseProperty(*curElement, line+strlen(c), lineLast);
                 return r;
             }
@@ -1682,7 +1746,7 @@ enum PlyResult PlyLoadFromMemory(const U8* mem, U64 memSize, struct PlyScene* sc
                 }
             }
             else {
-                /* the header has ended, read data(the line no.will stop incrementing, */
+                /* the header has ended, read data(the line no. will stop incrementing, */
                 /* control over data traversal is handed to readData) */
 
                 enum PlyResult exRes = PLY_GENERIC_ERROR;

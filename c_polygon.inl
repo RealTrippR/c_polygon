@@ -558,43 +558,4 @@ PLY_INLINE U8 PlyGetSizeofScalarType(const enum PlyScalarType type)
     return tbl[type];
 }
 
-PLY_INLINE enum PlyScalarType PlyStrToScalarType(const char* str, const U64 strLen)
-{
-    if (strneql(str, "char", min(strLen, strlen("char"))) == true)
-    {
-        return PLY_SCALAR_TYPE_CHAR;
-    }
-    if (strneql(str, "uchar", min(strLen, strlen("uchar"))) == true)
-    {
-        return PLY_SCALAR_TYPE_UCHAR;
-    }
-    if (strneql(str, "short", min(strLen, strlen("short"))) == true)
-    {
-        return PLY_SCALAR_TYPE_SHORT;
-    }
-    if (strneql(str, "ushort", min(strLen, strlen("ushort"))) == true)
-    {
-        return PLY_SCALAR_TYPE_USHORT;
-    }
-    if (strneql(str, "int", min(strLen, strlen("int"))) == true)
-    {
-        return PLY_SCALAR_TYPE_INT;
-    }
-    if (strneql(str, "uint", min(strLen, strlen("uint"))) == true)
-    {
-        return PLY_SCALAR_TYPE_UINT;
-    }
-    if (strneql(str, "float", min(strLen, strlen("float"))) == true)
-    {
-        return PLY_SCALAR_TYPE_FLOAT;
-    }
-    if (strneql(str, "double", min(strLen, strlen("double"))) == true)
-    {
-        return PLY_SCALAR_TYPE_DOUBLE;
-    }
-
-    return PLY_SCALAR_TYPE_UNDEFINED;
-}
-
-
 #endif /* !C_POLYGON_INLINE */

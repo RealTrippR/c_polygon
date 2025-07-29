@@ -61,13 +61,15 @@ restart_test:
     const char* c="vertex";
     struct PlyLoadInfo loadInfo =
     {
-        .elements = PLY_LOAD_ALL_ELEMENTS,
-        .elementsCount = 1,
+        .elements = &c,
+        .elementCount = 1,
         .saveComments = true,
         .allowAnyVersion = false
     };
-
-#define PLY_FILE "res/lucy.ply"
+    loadInfo.elements = PLY_LOAD_ALL_ELEMENTS;
+    loadInfo.elementCount = PLY_LOAD_ALL_ELEMENTS;
+    
+#define PLY_FILE "res/cube.ply"
     unsigned char* data;
     size_t dataSize;
     loadFile(PLY_FILE, &data, &dataSize);

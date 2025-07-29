@@ -46,7 +46,7 @@ enum PlyResult readAndTime(const char* filepath, double* timeOut)
     struct PlyLoadInfo loadInfo =
     {
         .elements = PLY_LOAD_ALL_ELEMENTS,
-        .elementsCount = PLY_LOAD_ALL_ELEMENTS,
+        .elementCount = PLY_LOAD_ALL_ELEMENTS,
         .saveComments = true,
         .allowAnyVersion = false
     };
