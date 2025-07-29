@@ -86,7 +86,7 @@ A corresponding `dataLineBegins` buffer with a count of `element.dataLineCount` 
 To access a property at a given index, every property has a `dataLineOffsets` buffer with a count of `element.dataLineCount` which contains the offset to the property from the beginning of that line.
 
 For example, to access the 2nd property on the 1st data line:
-`
+```
 double getDataFromPropertyOfElement(const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx, U8* success)
 {
     const U64 lineBegin = e->dataLineBegins[dataLineIdx];
@@ -103,7 +103,7 @@ double getDataFromPropertyOfElement(const struct PlyElement* e, const struct Ply
         *success = 1;
     return PlyScaleBytesToD64(f, prop->scalarType);
 }
-`
+```
 
 
 <ins> **Limitations** </ins>
