@@ -3,7 +3,7 @@
 
  <ins> **Brief**  </ins>
 
-C Polygon is a polygon file (.ply) parser written in C89 and x64 assembly. It is lightweight, portable (tested on MSVC and GCC), and compiles for both C and C++.
+C Polygon is a polygon file (.ply) parser written in C89 and x64 assembly. It is lightweight, fast (~1 GB/s parse speed) portable (tested on MSVC and GCC), and compiles for both C and C++.
 
 <BR>
 
@@ -65,7 +65,7 @@ end_header
 
 <ins> **Scalar Types** </ins>
 
-**Note:** Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, etc..`. C_Polygon can load files that use this naming convention, but will not respect the bitcount at the end of the name. By this, I mean that `uint8` will be read as `uint`, which is 32 bits, not 8.
+**Note:** Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, uint8, int16, etc..`. C_Polygon can load files that use this naming convention, but will not respect the bitcount at the end of the name. By this, I mean that `uint8` will be read as `uint`, which is 32 bits, not 8.
 
 |         Name  |          Type              |         Bytes |
 | ------------- | -------------------------- | ------------- |
@@ -77,6 +77,33 @@ end_header
 | uint          | unsigned integer           | 4
 | float         | floating-point value       | 4
 | double        | double-precision float     | 8
+
+
+<ins> **Data Structure** </ins>
+
+C Polygon allocates a buffer for every element which holds the data for every instance of that element.
+A corresponding `dataLineBegins` buffer with a count of `element.dataLineCount` provides the offsets to access the data for a given instance. 
+To access a property at a given index, every property has a `dataLineOffsets` buffer with a count of `element.dataLineCount` which contains the offset to the property from the beginning of a data line.
+
+For example, to access the data of a scalar property:
+```
+double getDataFromPropertyOfElement(const struct PlyElement* e, const struct PlyProperty* prop, const U64 dataLineIdx, U8* success)
+{
+    const U64 lineBegin = e->dataLineBegins[dataLineIdx];
+    const U32 dataOffset = prop->dataLineOffsets[dataLineIdx];
+    const U64 offset = lineBegin + dataOffset;
+    if (offset >= e->dataSize || dataLineIdx >= e->dataLineCount) {
+        if (success)
+            *success = 0;
+        return 0;
+    }
+
+    U8* f = ((U8*)e->data) + offset;
+    if (success)
+        *success = 1;
+    return PlyScaleBytesToD64(f, prop->scalarType);
+}
+```
 
 
 <ins> **Limitations** </ins>
