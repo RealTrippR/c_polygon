@@ -79,6 +79,12 @@ end_header
 | double        | double-precision float     | 8
 
 
+<ins> **Data Structure ** </ins>
+C Polygon allocates a buffer for every element which holds the data for every instance of that element.
+A corresponding `dataLineBegins` buffer with a count of `element.dataLineCount` provides the offsets to access the data for a given instance. 
+To access a property at a given index, every property has a `dataLineOffsets` buffer with a count of `element.dataLineCount` which contains the offset to the property from the beginning of that line.
+
+
 <ins> **Limitations** </ins>
 
 **Max File Size:** UINT64_MAX-1
