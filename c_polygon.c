@@ -899,7 +899,7 @@ PLY_INLINE enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bo
                 bool told = false;
                 U64 i = 0;
                 for (; i < loadInfo->elementsCount; ++i) {
-                    if (streql(elementNameBegin, loadInfo->elements[i])) {
+                    if (strneql(elementNameBegin,loadInfo->elements[i],elementNameLast-elementNameBegin+1)) {
                         told = true;
                         break;
                     }
@@ -926,18 +926,16 @@ PLY_INLINE enum PlyResult readHeaderLine(const char* line, const U32 lineLen, bo
             return PLY_SUCCESS;
         } /* end get element */
         
-        c = "property ";
-        /* check for proerty declaration */
-        if (strneql(line, c, min(strlen(c), lineLen)) == true)
-        {
-            if (*curElement == NULL)
+        if (*curElement != NULL) {
+            c = "property ";
+            /* check for proerty declaration */
+            if (strneql(line, c, min(strlen(c), lineLen)) == true)
             {
-                return PLY_MALFORMED_HEADER_ERROR;
+                
+                enum PlyResult r = parseProperty(*curElement, line+strlen(c), lineLast);
+                return r;
             }
-            enum PlyResult r = parseProperty(*curElement, line+strlen(c), lineLast);
-            return r;
         }
-
         c = "obj_info";
         if (strneql(line, c, min(strlen(c), lineLen)) == true)
         {

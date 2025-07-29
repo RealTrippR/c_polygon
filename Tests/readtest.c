@@ -58,10 +58,11 @@ restart_test:
     * The original .ply specification by Greg Turk
     * https://web.archive.org/web/20161221115231/http://www.cs.virginia.edu/~gfx/Courses/2001/Advanced.spring.01/plylib/Ply.txt
     */
+    const char* c="vertex";
     struct PlyLoadInfo loadInfo =
     {
         .elements = PLY_LOAD_ALL_ELEMENTS,
-        .elementsCount = PLY_LOAD_ALL_ELEMENTS,
+        .elementsCount = 1,
         .saveComments = true,
         .allowAnyVersion = false
     };
