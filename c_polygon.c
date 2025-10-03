@@ -2629,7 +2629,7 @@ void PlyDataToString(const U8* data, char* dst, const U16 dstSize, enum PlyScala
 
 U8 strtou8(const char* str, U8* strLenOut)
 {
-    if (*strLenOut) /* 0-init */
+    if (strLenOut) /* 0-init */
         *strLenOut = 0;
     U8 num = 0;
     const U8 max_digits = 3;
@@ -2665,7 +2665,7 @@ U8 strtou8(const char* str, U8* strLenOut)
 
 U16 strtou16(const char* str, U8* strLenOut)
 {
-    if (*strLenOut) /* 0 - init */
+    if (strLenOut) /* 0 - init */
         *strLenOut = 0;
     U16 num = 0;
     const U8 max_digits = 5;
@@ -2699,7 +2699,7 @@ U16 strtou16(const char* str, U8* strLenOut)
 
 U32 strtou32(const char* str, U8* strLenOut)
 {
-    if (*strLenOut) /* 0-init */
+    if (strLenOut) /* 0-init */
         *strLenOut = 0;
     U32 num = 0;
 
@@ -2734,7 +2734,7 @@ U32 strtou32(const char* str, U8* strLenOut)
 
 U64 strtou64(const char* str, U8* strLenOut)
 {
-    if (*strLenOut) /* 0-init */
+    if (strLenOut) /* 0-init */
         *strLenOut = 0;
     U32 num = 0;
     const U8 max_digits = 20;
@@ -2769,7 +2769,7 @@ U64 strtou64(const char* str, U8* strLenOut)
 
 I8 strtoi8(const char* str, U8* strLenOut)
 {
-    if (*strLenOut) /* 0-init */
+    if (strLenOut) /* 0-init */
         *strLenOut = 0;
     I8 num = 0;
     char negative = 0u;
@@ -2819,7 +2819,7 @@ I8 strtoi8(const char* str, U8* strLenOut)
 
 I16 strtoi16(const char* str, U8* strLenOut)
 {
-    if (*strLenOut) /* 0-init */
+    if (strLenOut) /* 0-init */
         *strLenOut = 0;
     I16 num = 0;
     char negative = 0u;
@@ -2869,7 +2869,7 @@ I16 strtoi16(const char* str, U8* strLenOut)
 
 I32 strtoi32(const char* str, U8* strLenOut)
 {
-    if (*strLenOut) /* 0-init */
+    if (strLenOut) /* 0-init */
         *strLenOut = 0;
     I32 num = 0;
     char negative = 0u;
@@ -2921,7 +2921,7 @@ I32 strtoi32(const char* str, U8* strLenOut)
 
 I64 strtoi64(const char* str, U8* strLenOut)
 {
-    if (*strLenOut) /* 0-init */
+    if (strLenOut) /* 0-init */
         *strLenOut = 0;
     I64 num = 0;
     char negative = 0u;
