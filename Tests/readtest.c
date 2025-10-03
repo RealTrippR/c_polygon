@@ -52,30 +52,27 @@ restart_test:
     * I would recommend these links for obtaining test .ply files:
     * - Large Geometric Models Archive at Georgia Tech: https://sites.cc.gatech.edu/projects/large_models/
     * - The Stanford 3D Scanning Repository: https://graphics.stanford.edu/data/3Dscanrep/
-    * If you want to integrate c_polygon into your software,
+    * If you want to integrate c_polygon into existing software,
     * please take a refer to this paper for more about the .ply standard:
     * https://gamma.cs.unc.edu/POWERPLANT/papers/ply.pdf
-    * The original .ply specification by Greg Turk
+    * The original .ply specification by Greg Turk:
     * https://web.archive.org/web/20161221115231/http://www.cs.virginia.edu/~gfx/Courses/2001/Advanced.spring.01/plylib/Ply.txt
     */
-    const char* c="vertex";
     struct PlyLoadInfo loadInfo =
     {
-        .elements = &c,
-        .elementCount = 1,
+        .elements = PLY_LOAD_ALL_ELEMENTS,
+        .elementCount = PLY_LOAD_ALL_ELEMENTS,
         .saveComments = true,
         .allowAnyVersion = false
     };
-    loadInfo.elements = PLY_LOAD_ALL_ELEMENTS;
-    loadInfo.elementCount = PLY_LOAD_ALL_ELEMENTS;
-    
-#define PLY_FILE "res/cube.ply"
+   
+#define PLY_FILE "res/lucy.ply"
     unsigned char* data;
     size_t dataSize;
     loadFile(PLY_FILE, &data, &dataSize);
     
     clock_t t;
-    t = clock();
+     t = clock();
     enum PlyResult lres = PlyLoadFromMemory(data, dataSize, &scene, &loadInfo);
     free(data);
     dataSize = 0u;
@@ -99,8 +96,6 @@ restart_test:
 #define PRINT_HEADER_DATA 1
 #define PRINT_ELEMENT_DATA 0
     printSceneData(&scene, PRINT_HEADER_DATA, PRINT_ELEMENT_DATA);
-
-
 
 	PlyDestroyScene(&scene);
 

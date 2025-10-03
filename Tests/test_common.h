@@ -79,7 +79,7 @@ void printSceneData(struct PlyScene* scene, char printSceneHeader, char printEle
             struct PlyElement* element = scene->elements + eId;
 
             printf("-- Element #%llu \"%s\" --\n", eId + 1, element->name);
-            printf("\t\tData Line Count %I32u\n", element->dataLineCount);
+            printf("\t\tData Line Count: %I32u\n", element->dataLineCount);
             printf("\t\tData Size: %llu\n", element->dataSize);
             printf("\tProperty Count: %I32u\n\n", element->propertyCount);
 
