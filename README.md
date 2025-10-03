@@ -16,7 +16,7 @@ C Polygon considers a .ply file as a file comprised of 2 main parts:
 
 Format and version information is required in the file header. The format keyword must only be defined only once and may have one of three values:
 ```ascii, binary_little_endian, binary_big_endian```
-Directly after this is the version. Unless specified otherwise in ```PlyLoadInfo``` by ```.allowAnyVersion = true```, the only valid version is ```1.0```.
+Immediately after this is the version. Unless specified otherwise in ```PlyLoadInfo``` by ```.allowAnyVersion = true```, the only valid version is ```1.0```.
 
 C Polygon expects elements to have a unique name followed it's instance count.
 
@@ -64,8 +64,6 @@ end_header
 ```
 
 <ins> **Scalar Types** </ins>
-
-**Note:** Some .ply parsers allow for the bitcount to follow the name of a scalar type e.g. `char8, short16, uint8, int16, etc..`. C_Polygon can load files that use this naming convention, but will not respect the bitcount at the end of the name. By this, I mean that `uint8` will be read as `uint`, which is 32 bits, not 8.
 
 |         Name  |          Type              |         Bytes |
 | ------------- | -------------------------- | ------------- |
@@ -118,7 +116,7 @@ double getDataFromPropertyOfElement(const struct PlyElement* e, const struct Ply
 
 <ins> **Performance** </ins>
 
-Average time of file parsing over 10 iterations, as measured on an Alienware M18 with an Intel i9 @ 2.2 GHZ
+Average time of parsing ply files from the Stanford Graphics Library over 10 iterations, as measured on an Alienware M18 with an Intel i9 @ 2.2 GHZ.
 |         Name           | File Size              | Vertex Count       | Index Count       |         Time (Sec) |
 | --------------------   | ---------------------- | ------------------ | ----------------- | ------------------ |
 | lucy.ply               | 508.36 MB              | 14027872           | 28055742          | 0.563              |
